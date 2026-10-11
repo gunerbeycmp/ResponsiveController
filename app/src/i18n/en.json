@@ -42,5 +42,8 @@
     "upload.error.noHtml": "No HTML file to open was found in this project.",
     "upload.error.previewUnavailable": "This browser isn't allowing uploaded projects to be previewed. If you're using a private window, try again in a normal window.",
     "upload.chooseEntry": "Which page should open first?",
-    "upload.cancel": "Cancel"
+    "upload.cancel": "Cancel",
+    "project.summary": "{name} · {count} files",
+    "project.close": "Close project",
+    "project.pathLabel": "Page in the project"
 }

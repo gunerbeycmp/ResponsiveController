@@ -84,3 +84,28 @@ describe("resolveRequest (Teknik Tasarım 7.3)", () => {
         ).toEqual({ type: "notFound" });
     });
 });
+
+describe("injectHelper (R-40, R-44)", () => {
+    const tag = '<script src="/__rc/helper.js"></script>';
+
+    it("betiği <head> etiketinin hemen arkasına ekler", () => {
+        expect(
+            core.injectHelper(
+                '<html><head lang="tr"><title>a</title></head></html>',
+            ),
+        ).toBe(`<html><head lang="tr">${tag}<title>a</title></head></html>`);
+    });
+
+    it("<head> yoksa doctype'tan sonra, o da yoksa en başa ekler", () => {
+        expect(core.injectHelper("<!doctype html><h1>a</h1>")).toBe(
+            `<!doctype html>${tag}<h1>a</h1>`,
+        );
+        expect(core.injectHelper("<h1>a</h1>")).toBe(`${tag}<h1>a</h1>`);
+    });
+
+    it("<header> etiketini <head> sanmaz", () => {
+        expect(core.injectHelper("<header>x</header>")).toBe(
+            `${tag}<header>x</header>`,
+        );
+    });
+});

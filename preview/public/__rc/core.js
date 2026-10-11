@@ -77,7 +77,23 @@
         return { type: "notFound" };
     }
 
+    const HELPER_TAG = '<script src="/__rc/helper.js"></script>';
+
+    // Yardımcı betiği HTML sayfalarına ekler (R-40, R-44). Betik sayfaya görsel
+    // hiçbir şey eklemez; <head> varsa onun başına, yoksa en başa konur.
+    function injectHelper(html) {
+        const head = /<head(\s[^>]*)?>/i.exec(html);
+        if (head) {
+            const at = head.index + head[0].length;
+            return html.slice(0, at) + HELPER_TAG + html.slice(at);
+        }
+        const doctype = /^\s*<!doctype[^>]*>/i.exec(html);
+        const at = doctype ? doctype[0].length : 0;
+        return html.slice(0, at) + HELPER_TAG + html.slice(at);
+    }
+
     root.RCCore = {
+        injectHelper,
         CACHE_NAME,
         META_PATH,
         RESERVED_PREFIX,

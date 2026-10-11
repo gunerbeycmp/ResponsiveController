@@ -13,6 +13,7 @@ import { createPreviewBridge } from "./upload/bridge.js";
 import { createUploadDialog } from "./upload/dialog.js";
 import { createTheme } from "./ui/theme.js";
 import { normalizeUrl } from "./url/normalize.js";
+import { PREVIEW_ORIGIN } from "./config.js";
 import { openSizedWindow } from "./url/popup.js";
 
 const $ = (id) => document.getElementById(id);
@@ -59,6 +60,10 @@ const elements = {
     helpToggle: $("help-toggle"),
     helpPanel: $("help-panel"),
     openWindow: $("open-window"),
+    urlLabel: $("url-label"),
+    projectChip: $("project-chip"),
+    projectName: $("project-name"),
+    projectClose: $("project-close"),
 };
 
 const sheet = createSheet({
@@ -143,7 +148,28 @@ function layoutFrame() {
     elements.browserBarsEstimated.title = i18n.t("frame.browserBarsEstimated");
 }
 
+// Proje yüklüyken URL alanı proje içindeki sayfanın yolunu gösterir
+function renderProject() {
+    const { project } = state;
+    elements.projectChip.hidden = !project;
+    elements.urlLabel.dataset.i18n = project
+        ? "project.pathLabel"
+        : "header.urlLabel";
+    elements.urlLabel.textContent = i18n.t(elements.urlLabel.dataset.i18n);
+    elements.input.placeholder = project
+        ? "/index.html"
+        : i18n.t("header.urlPlaceholder");
+    if (project) {
+        elements.projectName.textContent = i18n.t("project.summary", {
+            name: project.name,
+            count: project.fileCount,
+        });
+        elements.projectChip.title = elements.projectName.textContent;
+    }
+}
+
 function render() {
+    renderProject();
     const hasUrl = Boolean(state.url);
     elements.emptyState.hidden = hasUrl;
     elements.frame.hidden = !hasUrl;
@@ -201,7 +227,7 @@ const upload = createUploadDialog({
         await bridge.loadProject(files, entry);
         state.project = { name, entry, fileCount: files.length };
         state.url = bridge.previewUrl(entry);
-        elements.input.value = state.url;
+        elements.input.value = entry;
         showError(null);
         // Aynı adres yeniden yüklense de iframe tazelenir
         elements.iframe.src = "about:blank";
@@ -210,8 +236,47 @@ const upload = createUploadDialog({
     },
 });
 
+function openProjectPath(value) {
+    const path = `/${value.trim().replace(/^\/+/, "")}`;
+    elements.input.value = path;
+    state.url = bridge.previewUrl(path);
+    elements.iframe.src = state.url;
+    render();
+}
+
+function closeProject() {
+    state.project = null;
+    state.url = null;
+    elements.input.value = "";
+    elements.iframe.src = "about:blank";
+    bridge.clearProject();
+    render();
+    elements.input.focus();
+}
+
+elements.projectClose.addEventListener("click", closeProject);
+
+// Önizlemede sayfa değişince yardımcı betik yeni yolu bildirir (R-40)
+window.addEventListener("message", (event) => {
+    if (
+        !state.project ||
+        event.origin !== PREVIEW_ORIGIN ||
+        event.source !== elements.iframe.contentWindow ||
+        event.data?.type !== "rc:navigate"
+    ) {
+        return;
+    }
+    if (document.activeElement !== elements.input) {
+        elements.input.value = event.data.path;
+    }
+});
+
 elements.form.addEventListener("submit", (event) => {
     event.preventDefault();
+    if (state.project) {
+        openProjectPath(elements.input.value);
+        return;
+    }
     const result = normalizeUrl(elements.input.value);
     if (!result.ok) {
         showError(result.reason);

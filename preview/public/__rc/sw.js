@@ -3,7 +3,7 @@
 // (Teknik Tasarım 3). Proje dosyaları köprü tarafından Cache Storage'a yazılır.
 importScripts("/__rc/core.js");
 
-const { CACHE_NAME, META_PATH, resolveRequest } = RCCore;
+const { CACHE_NAME, META_PATH, injectHelper, resolveRequest } = RCCore;
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {
@@ -34,12 +34,20 @@ async function respond(request) {
     if (decision.type === "network") return fetch(request);
     if (decision.type === "file") {
         const cached = await cache.match(decision.path);
-        if (cached) return cached;
+        if (cached) return withHelper(cached);
     }
     return new Response("Not found", {
         status: 404,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
+}
+
+// HTML sayfalarına, sayfa değişimini araca bildiren yardımcı betik eklenir
+async function withHelper(response) {
+    const type = response.headers.get("Content-Type") ?? "";
+    if (!type.startsWith("text/html")) return response;
+    const html = injectHelper(await response.text());
+    return new Response(html, { headers: { "Content-Type": type } });
 }
 
 self.addEventListener("fetch", (event) => {

@@ -42,5 +42,8 @@
     "upload.error.noHtml": "Bu projede açılacak bir HTML dosyası bulunamadı.",
     "upload.error.previewUnavailable": "Bu tarayıcı yüklenen projeleri önizlemeye izin vermiyor. Gizli pencere kullanıyorsan normal bir pencerede tekrar dene.",
     "upload.chooseEntry": "Hangi sayfayla başlansın?",
-    "upload.cancel": "Vazgeç"
+    "upload.cancel": "Vazgeç",
+    "project.summary": "{name} · {count} dosya",
+    "project.close": "Projeyi kapat",
+    "project.pathLabel": "Proje içindeki sayfa"
 }

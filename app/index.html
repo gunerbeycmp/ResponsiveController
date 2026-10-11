@@ -19,10 +19,23 @@
             <a class="logo" href="/">
                 Responsive<span class="logo-accent">Controller</span>
             </a>
+            <span class="project-chip" id="project-chip" hidden>
+                <span aria-hidden="true">📦</span>
+                <span class="project-name" id="project-name"></span>
+                <button
+                    class="project-close"
+                    id="project-close"
+                    type="button"
+                    data-i18n-label="project.close"
+                >
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </span>
             <form class="url-form" id="url-form" novalidate>
                 <label
                     class="visually-hidden"
                     for="url-input"
+                    id="url-label"
                     data-i18n="header.urlLabel"
                     >Test edilecek sitenin adresi</label
                 >

@@ -549,7 +549,7 @@ input {
 }
 
 /* Dar ekranda Yükle, URL satırında Aç düğmesinin yanında durur; URL alanı
-   kalan yere göre daralır (Aşama 2 Tasarım Kararları, v0.2.4) */
+   kalan yere göre daralır (Aşama 2 Tasarım Kararları, v0.2.4, v0.2.5) */
 @media (max-width: 767px) {
     .topbar {
         gap: 8px;
@@ -568,11 +568,56 @@ input {
     }
 
     .url-form {
-        order: 3;
+        order: 4;
         flex: 1;
     }
 
     .upload-button {
-        order: 4;
+        order: 5;
+    }
+}
+
+/* Yüklü proje etiketi (Aşama 2 Tasarım Kararları: etiket + proje içi adres) */
+.project-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 320px;
+    min-width: 0;
+    height: 38px;
+    padding: 0 4px 0 10px;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 13px;
+}
+
+.project-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-close {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.project-close:hover {
+    background: var(--surface);
+}
+
+/* Telefonda proje yüklüyken etiket kendi satırında, tam genişlikte durur.
+   Genel .project-chip kuralından sonra gelmeli. */
+@media (max-width: 767px) {
+    .project-chip {
+        order: 3;
+        flex: 0 0 100%;
+        max-width: none;
     }
 }
