@@ -11,6 +11,7 @@ import { createI18n } from "./i18n/i18n.js";
 import { createSheet } from "./ui/sheet.js";
 import { createTheme } from "./ui/theme.js";
 import { normalizeUrl } from "./url/normalize.js";
+import { popupFeatures } from "./url/popup.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,6 +52,10 @@ const elements = {
     browserBars: $("browser-bars"),
     browserBarsEstimated: $("browser-bars-estimated"),
     stage: $("stage"),
+    help: $("frame-help"),
+    helpToggle: $("help-toggle"),
+    helpPanel: $("help-panel"),
+    openWindow: $("open-window"),
 };
 
 const sheet = createSheet({
@@ -106,7 +111,8 @@ function layoutFrame() {
             parseFloat(styles.paddingTop) -
             parseFloat(styles.paddingBottom) -
             header.offsetHeight -
-            10,
+            elements.help.offsetHeight -
+            20,
     };
     const scale = fitScale(size, available);
 
@@ -193,6 +199,20 @@ elements.deviceList.addEventListener("click", (event) => {
 elements.browserBars.addEventListener("change", () => {
     state.browserBars = elements.browserBars.checked;
     layoutFrame();
+});
+
+// FR-2.2: engel otomatik algılanamadığı için yardım her zaman erişilebilir
+elements.helpToggle.addEventListener("click", () => {
+    const open = elements.helpToggle.getAttribute("aria-expanded") !== "true";
+    elements.helpToggle.setAttribute("aria-expanded", String(open));
+    elements.helpPanel.hidden = !open;
+    layoutFrame();
+});
+
+// FR-2.3: siteyi seçili cihaz boyutunda yeni pencerede açar
+elements.openWindow.addEventListener("click", () => {
+    const size = deviceSize(findDevice(state.deviceId), state.browserBars);
+    window.open(state.url, "_blank", popupFeatures(size));
 });
 
 elements.languageToggle.addEventListener("click", () => {

@@ -94,3 +94,41 @@ test.describe("dar ekran", () => {
         await expect(toggle).toBeFocused();
     });
 });
+
+test("'Site açılmıyor mu?' yardımı açılıp kapanır (FR-2.2)", async ({
+    page,
+}) => {
+    await openTarget(page);
+    const toggle = page.getByRole("button", { name: "Site açılmıyor mu?" });
+    const panel = page.locator("#help-panel");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect(panel).toBeHidden();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(panel).toContainText("bağlanmayı reddetti");
+
+    // Yardım açıkken önizleme yine alana sığmalı
+    const stage = await page.locator("#stage").boundingBox();
+    const help = await page.locator("#frame-help").boundingBox();
+    expect(help.y + help.height).toBeLessThanOrEqual(stage.y + stage.height);
+
+    await toggle.click();
+    await expect(panel).toBeHidden();
+});
+
+test("site seçili cihaz boyutunda yeni pencerede açılır (FR-2.3)", async ({
+    page,
+    context,
+}) => {
+    await openTarget(page);
+    await page.getByRole("button", { name: "Site açılmıyor mu?" }).click();
+    const [popup] = await Promise.all([
+        context.waitForEvent("page"),
+        page
+            .getByRole("button", { name: "Bu boyutta yeni pencerede aç" })
+            .click(),
+    ]);
+    await popup.waitForLoadState();
+    expect(popup.url()).toBe("http://localhost:5174/");
+});

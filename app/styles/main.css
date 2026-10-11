@@ -382,3 +382,47 @@ input {
         clip: rect(0 0 0 0);
     }
 }
+
+/* "Site açılmıyor mu?" yardımı (FR-2.2, FR-2.3) */
+.frame-help {
+    align-self: center;
+    width: min(100%, 480px);
+    font-size: 13px;
+}
+
+.help-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 auto;
+    padding: 4px 8px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius);
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.help-toggle[aria-expanded="true"] .help-chevron {
+    transform: rotate(180deg);
+}
+
+.help-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 6px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.help-panel p {
+    margin: 0;
+}
+
+.help-note {
+    color: var(--text-secondary);
+}

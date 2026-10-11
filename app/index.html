@@ -107,6 +107,35 @@
                     <div class="frame-viewport" id="frame-viewport">
                         <iframe id="preview-iframe"></iframe>
                     </div>
+                    <div class="frame-help" id="frame-help">
+                        <button
+                            class="help-toggle"
+                            id="help-toggle"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="help-panel"
+                        >
+                            <span aria-hidden="true">ⓘ</span>
+                            <span data-i18n="help.toggle"
+                                >Site açılmıyor mu?</span
+                            >
+                            <span class="help-chevron" aria-hidden="true"
+                                >▾</span
+                            >
+                        </button>
+                        <div class="help-panel" id="help-panel" hidden>
+                            <p data-i18n="help.body"></p>
+                            <button
+                                class="button-ghost"
+                                id="open-window"
+                                type="button"
+                                data-i18n="help.openWindow"
+                            >
+                                Bu boyutta yeni pencerede aç
+                            </button>
+                            <p class="help-note" data-i18n="help.note"></p>
+                        </div>
+                    </div>
                 </section>
             </main>
         </div>

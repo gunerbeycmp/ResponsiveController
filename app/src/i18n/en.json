@@ -23,5 +23,9 @@
     "frame.scale": "{scale}%",
     "frame.title": "{device} preview",
     "frame.browserBars": "Include browser bars",
-    "frame.browserBarsEstimated": "The visible height for this device is estimated."
+    "frame.browserBarsEstimated": "The visible height for this device is estimated.",
+    "help.toggle": "Site not loading?",
+    "help.body": "Some sites (like Google, GitHub and many news sites) block being shown inside another site for security reasons. When that happens, the preview shows an error such as \"refused to connect\". This is the site's own setting, not a problem with ResponsiveController.",
+    "help.openWindow": "Open in a new window at this size",
+    "help.note": "The window size may differ by a few pixels depending on your browser."
 }

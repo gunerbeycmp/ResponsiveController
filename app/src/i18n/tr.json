@@ -23,5 +23,9 @@
     "frame.scale": "%{scale}",
     "frame.title": "{device} önizlemesi",
     "frame.browserBars": "Tarayıcı çubukları dahil",
-    "frame.browserBarsEstimated": "Bu cihazın görünür alan yüksekliği tahminidir."
+    "frame.browserBarsEstimated": "Bu cihazın görünür alan yüksekliği tahminidir.",
+    "help.toggle": "Site açılmıyor mu?",
+    "help.body": "Bazı siteler (Google, GitHub ve birçok haber sitesi gibi) güvenlik nedeniyle başka bir sitenin içinde gösterilmeyi engeller. Bu durumda önizlemede \"bağlanmayı reddetti\" gibi bir hata görürsün. Bu, sitenin kendi ayarıdır, ResponsiveController'dan kaynaklanmaz.",
+    "help.openWindow": "Bu boyutta yeni pencerede aç",
+    "help.note": "Pencere boyutu tarayıcıya göre birkaç piksel farklı olabilir."
 }

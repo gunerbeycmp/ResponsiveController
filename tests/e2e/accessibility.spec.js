@@ -31,6 +31,10 @@ for (const locale of ["tr-TR", "en-US"]) {
                 await page.locator("#url-form button[type=submit]").click();
                 await expect(page.locator("#device-frame")).toBeVisible();
                 await expectNoViolations(page);
+
+                await page.locator("#help-toggle").click();
+                await expect(page.locator("#help-panel")).toBeVisible();
+                await expectNoViolations(page);
             });
         });
     }
