@@ -1,4 +1,27 @@
 {
     "app.title": "ResponsiveController",
-    "app.status": "ResponsiveController: araç sitesi çalışıyor."
+    "header.urlLabel": "Test edilecek sitenin adresi",
+    "header.urlPlaceholder": "https://ornek.com",
+    "header.open": "Aç",
+    "header.language": "Dil",
+    "header.switchLanguage": "Switch to English",
+    "header.themeToDark": "Koyu temaya geç",
+    "header.themeToLight": "Açık temaya geç",
+    "url.error.empty": "Bir adres yaz. Örneğin: https://ornek.com",
+    "url.error.invalid": "Bu adres geçerli görünmüyor. Örneğin: https://ornek.com",
+    "url.error.unsupportedProtocol": "Yalnızca http ve https adresleri test edilebilir.",
+    "url.error.localNetwork": "Yerel ağ adresleri (ör. 192.168.x.x) bu sürümde desteklenmiyor. localhost kullanabilirsin.",
+    "sidebar.title": "Cihazlar",
+    "sheet.show": "Cihazları göster",
+    "sheet.hide": "Cihazları gizle",
+    "device.laptop": "Laptop",
+    "device.desktop": "Masaüstü",
+    "device.estimated": "tahmini",
+    "empty.title": "Sitenin responsive görünümünü test et",
+    "empty.body": "Yukarıya bir adres yaz ve Aç'a bas.",
+    "frame.size": "{width} × {height}",
+    "frame.scale": "%{scale}",
+    "frame.title": "{device} önizlemesi",
+    "frame.browserBars": "Tarayıcı çubukları dahil",
+    "frame.browserBarsEstimated": "Bu cihazın görünür alan yüksekliği tahminidir."
 }

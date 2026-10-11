@@ -100,6 +100,15 @@ describe("createI18n", () => {
         expect(i18n.t("missing.key")).toBe("missing.key");
     });
 
+    it("yer tutucuları doldurur", () => {
+        const i18n = createI18n({
+            browserLanguages: ["tr-TR"],
+            messages: { tr: { size: "{width} × {height}" }, en: {} },
+        });
+        expect(i18n.t("size", { width: 402, height: 874 })).toBe("402 × 874");
+        expect(i18n.t("size", { width: 402 })).toBe("402 × {height}");
+    });
+
     it("tr.json ve en.json aynı anahtarlara sahip", async () => {
         const tr = (await import("../../app/src/i18n/tr.json")).default;
         const en = (await import("../../app/src/i18n/en.json")).default;

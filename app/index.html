@@ -4,11 +4,113 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>ResponsiveController</title>
+        <link rel="stylesheet" href="/styles/main.css" />
     </head>
     <body>
-        <p data-i18n="app.status">
-            ResponsiveController: araç sitesi çalışıyor.
-        </p>
+        <header class="topbar">
+            <a class="logo" href="/">
+                Responsive<span class="logo-accent">Controller</span>
+            </a>
+            <form class="url-form" id="url-form" novalidate>
+                <label
+                    class="visually-hidden"
+                    for="url-input"
+                    data-i18n="header.urlLabel"
+                    >Test edilecek sitenin adresi</label
+                >
+                <input
+                    id="url-input"
+                    type="text"
+                    inputmode="url"
+                    autocomplete="url"
+                    spellcheck="false"
+                    aria-describedby="url-error"
+                    data-i18n-placeholder="header.urlPlaceholder"
+                />
+                <button
+                    class="button-primary"
+                    type="submit"
+                    data-i18n="header.open"
+                >
+                    Aç
+                </button>
+                <p class="url-error" id="url-error" aria-live="polite"></p>
+            </form>
+            <div class="topbar-actions">
+                <button
+                    class="button-ghost"
+                    id="language-toggle"
+                    type="button"
+                    data-i18n-label="header.switchLanguage"
+                >
+                    EN
+                </button>
+                <button class="button-ghost" id="theme-toggle" type="button">
+                    <span aria-hidden="true">◐</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="workspace">
+            <aside class="sidebar" id="sidebar" aria-labelledby="sidebar-title">
+                <button
+                    class="sheet-toggle"
+                    id="sheet-toggle"
+                    type="button"
+                    aria-controls="device-list"
+                >
+                    <span class="sheet-handle" aria-hidden="true"></span>
+                    <span id="sheet-toggle-label" data-i18n="sheet.show"
+                        >Cihazları göster</span
+                    >
+                </button>
+                <div class="sidebar-panel" id="sidebar-panel">
+                    <h2
+                        class="sidebar-title"
+                        id="sidebar-title"
+                        data-i18n="sidebar.title"
+                    >
+                        Cihazlar
+                    </h2>
+                    <ul class="device-list" id="device-list"></ul>
+                </div>
+            </aside>
+
+            <main class="stage" id="stage">
+                <section class="empty-state" id="empty-state">
+                    <h1 data-i18n="empty.title">
+                        Sitenin responsive görünümünü test et
+                    </h1>
+                    <p data-i18n="empty.body">
+                        Yukarıya bir adres yaz ve Aç'a bas.
+                    </p>
+                </section>
+                <section class="device-frame" id="device-frame" hidden>
+                    <div class="frame-header">
+                        <p class="frame-info">
+                            <strong id="frame-name"></strong>
+                            <span id="frame-size"></span>
+                            <span class="frame-scale" id="frame-scale"></span>
+                        </p>
+                        <label class="frame-option" id="browser-bars-option">
+                            <input type="checkbox" id="browser-bars" />
+                            <span data-i18n="frame.browserBars"
+                                >Tarayıcı çubukları dahil</span
+                            >
+                            <span
+                                class="badge"
+                                id="browser-bars-estimated"
+                                hidden
+                            ></span>
+                        </label>
+                    </div>
+                    <div class="frame-viewport" id="frame-viewport">
+                        <iframe id="preview-iframe"></iframe>
+                    </div>
+                </section>
+            </main>
+        </div>
+
         <script type="module" src="/src/main.js"></script>
     </body>
 </html>

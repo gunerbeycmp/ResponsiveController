@@ -1,4 +1,27 @@
 {
     "app.title": "ResponsiveController",
-    "app.status": "ResponsiveController: the app site is running."
+    "header.urlLabel": "Address of the site to test",
+    "header.urlPlaceholder": "https://example.com",
+    "header.open": "Open",
+    "header.language": "Language",
+    "header.switchLanguage": "Türkçeye geç",
+    "header.themeToDark": "Switch to dark theme",
+    "header.themeToLight": "Switch to light theme",
+    "url.error.empty": "Enter an address, for example https://example.com",
+    "url.error.invalid": "That address doesn't look valid. Try https://example.com",
+    "url.error.unsupportedProtocol": "Only http and https addresses can be tested.",
+    "url.error.localNetwork": "Local network addresses (like 192.168.x.x) aren't supported in this version. You can use localhost.",
+    "sidebar.title": "Devices",
+    "sheet.show": "Show devices",
+    "sheet.hide": "Hide devices",
+    "device.laptop": "Laptop",
+    "device.desktop": "Desktop",
+    "device.estimated": "estimated",
+    "empty.title": "Test how your site looks on any screen",
+    "empty.body": "Enter an address above and select Open.",
+    "frame.size": "{width} × {height}",
+    "frame.scale": "{scale}%",
+    "frame.title": "{device} preview",
+    "frame.browserBars": "Include browser bars",
+    "frame.browserBarsEstimated": "The visible height for this device is estimated."
 }

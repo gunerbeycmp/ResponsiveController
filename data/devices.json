@@ -1,0 +1,74 @@
+[
+    {
+        "id": "iphone-17",
+        "name": "iPhone 17",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": { "width": 402, "height": 874 },
+        "visibleArea": { "width": 402, "height": 681 },
+        "dpr": 3,
+        "popular": true,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi (screen ve viewport)"
+    },
+    {
+        "id": "pixel-9",
+        "name": "Google Pixel 9",
+        "brand": "Google",
+        "category": "phone",
+        "screen": { "width": 360, "height": 808 },
+        "visibleArea": { "width": 360, "height": 732 },
+        "dpr": 3,
+        "popular": true,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi (screen ve viewport)"
+    },
+    {
+        "id": "galaxy-s24",
+        "name": "Samsung Galaxy S24",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": { "width": 360, "height": 780 },
+        "visibleArea": { "width": 360, "height": 704 },
+        "dpr": 3,
+        "popular": true,
+        "year": 2024,
+        "estimated": true,
+        "source": "Tam ekran: Playwright + yesviz.com. Görünür alan tahmini (D-07)."
+    },
+    {
+        "id": "ipad-11",
+        "name": "iPad (11. nesil)",
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": { "width": 820, "height": 1180 },
+        "visibleArea": { "width": 820, "height": 1106 },
+        "dpr": 2,
+        "popular": true,
+        "year": 2025,
+        "estimated": true,
+        "source": "Tam ekran: yesviz.com + Wikipedia. Görünür alan tahmini (D-07)."
+    },
+    {
+        "id": "laptop",
+        "nameKey": "device.laptop",
+        "category": "computer",
+        "screen": { "width": 1440, "height": 900 },
+        "dpr": 1,
+        "popular": true,
+        "estimated": false,
+        "source": "Genel boyut"
+    },
+    {
+        "id": "desktop",
+        "nameKey": "device.desktop",
+        "category": "computer",
+        "screen": { "width": 1920, "height": 1080 },
+        "dpr": 1,
+        "popular": true,
+        "estimated": false,
+        "source": "Genel boyut (Full HD)"
+    }
+]

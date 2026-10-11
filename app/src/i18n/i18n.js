@@ -46,11 +46,14 @@ export function createI18n({
         if (root) root.lang = language;
     }
 
-    function t(key) {
-        return (
+    // {ad} biçimindeki yer tutucular params içindeki değerlerle doldurulur
+    function t(key, params = {}) {
+        const text =
             messages[language]?.[key] ??
             messages[DEFAULT_LANGUAGE]?.[key] ??
-            key
+            key;
+        return text.replace(/\{(\w+)\}/g, (match, name) =>
+            name in params ? String(params[name]) : match,
         );
     }
 
@@ -61,10 +64,19 @@ export function createI18n({
         applyLanguage();
     }
 
-    // data-i18n="anahtar" özelliği taşıyan öğelerin metnini günceller
+    // data-i18n="anahtar" metni, data-i18n-placeholder ve data-i18n-label
+    // ise placeholder ve aria-label özelliklerini günceller
     function translatePage(container) {
         container.querySelectorAll("[data-i18n]").forEach((element) => {
             element.textContent = t(element.dataset.i18n);
+        });
+        container
+            .querySelectorAll("[data-i18n-placeholder]")
+            .forEach((element) => {
+                element.placeholder = t(element.dataset.i18nPlaceholder);
+            });
+        container.querySelectorAll("[data-i18n-label]").forEach((element) => {
+            element.setAttribute("aria-label", t(element.dataset.i18nLabel));
         });
     }
 
