@@ -131,4 +131,26 @@ test("site seçili cihaz boyutunda yeni pencerede açılır (FR-2.3)", async ({
     ]);
     await popup.waitForLoadState();
     expect(popup.url()).toBe("http://localhost:5174/");
+    // Genişlik cihazla aynı olmalı; yükseklik ekrana sığacak kadar kısalabilir
+    const size = await popup.evaluate(() => ({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        opener: window.opener,
+    }));
+    expect(size.width).toBe(402);
+    expect(size.height).toBeLessThanOrEqual(874);
+    expect(size.opener).toBeNull();
+});
+
+test("favicon yükleniyor", async ({ page, request }) => {
+    await page.goto(APP_URL);
+    for (const href of [
+        "/favicon.svg",
+        "/favicon-32.png",
+        "/apple-touch-icon.png",
+    ]) {
+        await expect(page.locator(`link[href="${href}"]`)).toHaveCount(1);
+        const response = await request.get(`http://localhost:5173${href}`);
+        expect(response.ok()).toBe(true);
+    }
 });

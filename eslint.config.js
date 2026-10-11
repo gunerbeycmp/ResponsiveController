@@ -20,4 +20,9 @@ export default [
         files: ["*.config.js", "tests/**/*.js"],
         languageOptions: { globals: globals.node },
     },
+    {
+        // Tarayıcı testleri page.evaluate içinde tarayıcı kodu da çalıştırır
+        files: ["tests/e2e/**/*.js"],
+        languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    },
 ];

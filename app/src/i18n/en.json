@@ -27,5 +27,5 @@
     "help.toggle": "Site not loading?",
     "help.body": "Some sites (like Google, GitHub and many news sites) block being shown inside another site for security reasons. When that happens, the preview shows an error such as \"refused to connect\". This is the site's own setting, not a problem with ResponsiveController.",
     "help.openWindow": "Open in a new window at this size",
-    "help.note": "The window size may differ by a few pixels depending on your browser."
+    "help.note": "The window matches the selected device's width. If the device is taller than your screen, the window's height is reduced to fit. Some environments, like Claude's browser panel, open a new tab instead of a window."
 }

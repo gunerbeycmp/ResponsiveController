@@ -11,7 +11,7 @@ import { createI18n } from "./i18n/i18n.js";
 import { createSheet } from "./ui/sheet.js";
 import { createTheme } from "./ui/theme.js";
 import { normalizeUrl } from "./url/normalize.js";
-import { popupFeatures } from "./url/popup.js";
+import { openSizedWindow } from "./url/popup.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -212,7 +212,7 @@ elements.helpToggle.addEventListener("click", () => {
 // FR-2.3: siteyi seçili cihaz boyutunda yeni pencerede açar
 elements.openWindow.addEventListener("click", () => {
     const size = deviceSize(findDevice(state.deviceId), state.browserBars);
-    window.open(state.url, "_blank", popupFeatures(size));
+    openSizedWindow(state.url, size);
 });
 
 elements.languageToggle.addEventListener("click", () => {

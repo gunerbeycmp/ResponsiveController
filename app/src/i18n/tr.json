@@ -27,5 +27,5 @@
     "help.toggle": "Site açılmıyor mu?",
     "help.body": "Bazı siteler (Google, GitHub ve birçok haber sitesi gibi) güvenlik nedeniyle başka bir sitenin içinde gösterilmeyi engeller. Bu durumda önizlemede \"bağlanmayı reddetti\" gibi bir hata görürsün. Bu, sitenin kendi ayarıdır, ResponsiveController'dan kaynaklanmaz.",
     "help.openWindow": "Bu boyutta yeni pencerede aç",
-    "help.note": "Pencere boyutu tarayıcıya göre birkaç piksel farklı olabilir."
+    "help.note": "Pencerenin genişliği seçili cihazla aynı olur. Cihaz ekranından uzunsa pencerenin yüksekliği ekrana sığacak kadar kısalır. Claude'un tarayıcı paneli gibi bazı ortamlar pencere yerine yeni sekme açar."
 }
