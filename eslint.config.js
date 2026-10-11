@@ -16,8 +16,8 @@ export default [
         languageOptions: { globals: globals.serviceworker },
     },
     {
-        // Vite ve ESLint ayar dosyaları Node'da çalışır
-        files: ["*.config.js"],
+        // Ayar dosyaları ve testler Node'da çalışır
+        files: ["*.config.js", "tests/**/*.js"],
         languageOptions: { globals: globals.node },
     },
 ];
