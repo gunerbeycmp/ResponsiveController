@@ -24,8 +24,9 @@
     "frame.title": "{device} önizlemesi",
     "frame.browserBars": "Tarayıcı çubukları dahil",
     "frame.browserBarsEstimated": "Bu cihazın görünür alan yüksekliği tahminidir.",
-    "help.toggle": "Site açılmıyor mu?",
+    "help.toggle": "Site açılmıyor ya da mobilde görünmüyor mu?",
     "help.body": "Bazı siteler (Google, GitHub ve birçok haber sitesi gibi) güvenlik nedeniyle başka bir sitenin içinde gösterilmeyi engeller. Bu durumda önizlemede \"bağlanmayı reddetti\" gibi bir hata görürsün. Bu, sitenin kendi ayarıdır, ResponsiveController'dan kaynaklanmaz.",
     "help.openWindow": "Bu boyutta yeni pencerede aç",
-    "help.note": "Pencerenin genişliği seçili cihazla aynı olur. Cihaz ekranından uzunsa pencerenin yüksekliği ekrana sığacak kadar kısalır. Claude'un tarayıcı paneli gibi bazı ortamlar pencere yerine yeni sekme açar."
+    "help.note": "Pencerenin genişliği seçili cihazla aynı olur. Cihaz ekranından uzunsa pencerenin yüksekliği ekrana sığacak kadar kısalır. macOS'ta Chrome tam ekrandaysa pencere yerine yeni sekme açılır, tam ekrandan çıkıp tekrar dene. Claude'un tarayıcı paneli gibi bazı ortamlar da pencere yerine yeni sekme açar.",
+    "help.bodyUserAgent": "Bazı siteler (mackolik.com gibi) mobil sürümü ekran genişliğine göre değil, tarayıcının kimliğine göre seçer. Bu siteler burada ve yeni pencerede masaüstü görünümünde açılır. Mobil sürümlerini görmek için Chrome'da Geliştirici Araçları'nı açıp (macOS'ta Cmd + Option + I, Windows'ta F12) cihaz araç çubuğunu kullanabilirsin."
 }

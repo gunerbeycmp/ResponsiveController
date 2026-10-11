@@ -24,8 +24,9 @@
     "frame.title": "{device} preview",
     "frame.browserBars": "Include browser bars",
     "frame.browserBarsEstimated": "The visible height for this device is estimated.",
-    "help.toggle": "Site not loading?",
+    "help.toggle": "Site not loading or not showing its mobile version?",
     "help.body": "Some sites (like Google, GitHub and many news sites) block being shown inside another site for security reasons. When that happens, the preview shows an error such as \"refused to connect\". This is the site's own setting, not a problem with ResponsiveController.",
     "help.openWindow": "Open in a new window at this size",
-    "help.note": "The window matches the selected device's width. If the device is taller than your screen, the window's height is reduced to fit. Some environments, like Claude's browser panel, open a new tab instead of a window."
+    "help.note": "The window matches the selected device's width. If the device is taller than your screen, the window's height is reduced to fit. If Chrome is in full screen on macOS, a new tab opens instead of a window. Exit full screen and try again. Some environments, like Claude's browser panel, also open a new tab instead of a window.",
+    "help.bodyUserAgent": "Some sites (like mackolik.com) choose their mobile version based on the browser's identity rather than the screen width. These sites open in their desktop version here and in the new window. To see their mobile version, open Chrome's Developer Tools (Cmd + Option + I on macOS, F12 on Windows) and use the device toolbar."
 }

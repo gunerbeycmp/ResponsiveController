@@ -332,6 +332,11 @@ input {
         padding: 16px 12px 72px;
     }
 
+    /* Kaydırınca yardım paneli alttaki cihaz panelinin arkasında kalmasın */
+    .help-panel {
+        scroll-margin-bottom: 72px;
+    }
+
     .sidebar {
         position: fixed;
         right: 0;

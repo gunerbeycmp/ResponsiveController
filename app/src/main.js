@@ -207,6 +207,16 @@ elements.helpToggle.addEventListener("click", () => {
     elements.helpToggle.setAttribute("aria-expanded", String(open));
     elements.helpPanel.hidden = !open;
     layoutFrame();
+    // Dar ekranda panel önizlemenin altında, görünür alanın dışında kalabilir
+    if (open) {
+        const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+        elements.helpPanel.scrollIntoView({
+            block: "nearest",
+            behavior: reduceMotion ? "auto" : "smooth",
+        });
+    }
 });
 
 // FR-2.3: siteyi seçili cihaz boyutunda yeni pencerede açar

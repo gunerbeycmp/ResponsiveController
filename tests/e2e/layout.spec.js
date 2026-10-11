@@ -73,6 +73,18 @@ test("tema düğmesi temayı değiştirir ve seçim hatırlanır (NFR-6.2)", asy
 test.describe("dar ekran", () => {
     test.use({ viewport: { width: 375, height: 812 } });
 
+    test("yardım açılınca panel görünür alana gelir", async ({ page }) => {
+        await openTarget(page);
+        await page.locator("#help-toggle").click();
+        await expect(page.locator("#help-panel")).toBeInViewport({
+            ratio: 1,
+        });
+        // Panel alttaki cihaz panelinin arkasında kalmamalı
+        const help = await page.locator("#help-panel").boundingBox();
+        const sheet = await page.locator("#sidebar").boundingBox();
+        expect(help.y + help.height).toBeLessThanOrEqual(sheet.y);
+    });
+
     test("cihazlar alttan açılan panelde, klavyeyle kapanır (R-51)", async ({
         page,
     }) => {
@@ -99,7 +111,9 @@ test("'Site açılmıyor mu?' yardımı açılıp kapanır (FR-2.2)", async ({
     page,
 }) => {
     await openTarget(page);
-    const toggle = page.getByRole("button", { name: "Site açılmıyor mu?" });
+    const toggle = page.getByRole("button", {
+        name: "Site açılmıyor ya da mobilde görünmüyor mu?",
+    });
     const panel = page.locator("#help-panel");
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(panel).toBeHidden();
@@ -107,6 +121,8 @@ test("'Site açılmıyor mu?' yardımı açılıp kapanır (FR-2.2)", async ({
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
     await expect(panel).toContainText("bağlanmayı reddetti");
+    await expect(panel).toContainText("tarayıcının kimliğine göre");
+    await expect(panel).toContainText("Windows'ta F12");
 
     // Yardım açıkken önizleme yine alana sığmalı
     const stage = await page.locator("#stage").boundingBox();
@@ -122,7 +138,11 @@ test("site seçili cihaz boyutunda yeni pencerede açılır (FR-2.3)", async ({
     context,
 }) => {
     await openTarget(page);
-    await page.getByRole("button", { name: "Site açılmıyor mu?" }).click();
+    await page
+        .getByRole("button", {
+            name: "Site açılmıyor ya da mobilde görünmüyor mu?",
+        })
+        .click();
     const [popup] = await Promise.all([
         context.waitForEvent("page"),
         page
