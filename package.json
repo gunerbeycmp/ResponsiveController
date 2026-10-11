@@ -1,0 +1,24 @@
+{
+  "name": "responsive-controller",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently -n app,preview -c blue,green \"npm:dev:app\" \"npm:dev:preview\"",
+    "dev:app": "vite --config vite.app.config.js",
+    "dev:preview": "vite --config vite.preview.config.js",
+    "build": "vite build --config vite.app.config.js && vite build --config vite.preview.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gunerbeycmp/ResponsiveController.git"
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/gunerbeycmp/ResponsiveController/issues"
+  },
+  "homepage": "https://github.com/gunerbeycmp/ResponsiveController#readme",
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^10.0.6",
+    "vite": "^8.3.4"
+  }
+}
