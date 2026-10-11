@@ -24,6 +24,7 @@
     "homepage": "https://github.com/gunerbeycmp/ResponsiveController#readme",
     "private": true,
     "devDependencies": {
+        "@axe-core/playwright": "^4.13.0",
         "@eslint/js": "^10.0.1",
         "@playwright/test": "^1.64.0",
         "concurrently": "^10.0.6",
