@@ -12,7 +12,7 @@ export default [
     },
     {
         // Service Worker kendi ortamında çalışır (Teknik Tasarım 3)
-        files: ["preview/sw.js"],
+        files: ["preview/**/sw.js"],
         languageOptions: { globals: globals.serviceworker },
     },
     {
