@@ -197,21 +197,25 @@ test("dosya sürükleyip bırakılarak yüklenir", async ({ page }) => {
 test.describe("dar ekran", () => {
     test.use({ viewport: { width: 375, height: 812 } });
 
-    test("Yükle düğmesi simge olarak ilk satırda, erişilebilir adıyla", async ({
+    test("Yükle düğmesi URL satırında, Aç düğmesinin yanında", async ({
         page,
     }) => {
         await page.goto(APP_URL);
         const upload = page.getByRole("button", { name: "Yükle" });
         await expect(upload).toBeVisible();
-        const logo = await page.locator(".logo").boundingBox();
+        await expect(upload).toContainText("Yükle");
         const button = await upload.boundingBox();
-        const url = await page.locator("#url-input").boundingBox();
-        // Logo ile aynı satırda, URL alanının üstünde
-        expect(
-            Math.abs(button.y + button.height / 2 - (logo.y + logo.height / 2)),
-        ).toBeLessThan(10);
-        expect(button.y).toBeLessThan(url.y);
-        expect(button.width).toBeLessThanOrEqual(40);
+        const open = await page
+            .getByRole("button", { name: "Aç" })
+            .boundingBox();
+        const input = await page.locator("#url-input").boundingBox();
+        const logo = await page.locator(".logo").boundingBox();
+        const middle = (box) => box.y + box.height / 2;
+        // URL alanı, Aç ve Yükle aynı satırda; logo üst satırda
+        expect(Math.abs(middle(button) - middle(open))).toBeLessThan(4);
+        expect(Math.abs(middle(input) - middle(open))).toBeLessThan(4);
+        expect(button.x).toBeGreaterThan(open.x);
+        expect(middle(logo)).toBeLessThan(input.y);
         const scrollWidth = await page.evaluate(
             () => document.documentElement.scrollWidth,
         );

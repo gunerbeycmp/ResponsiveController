@@ -319,11 +319,6 @@ input {
         flex: 1;
     }
 
-    .url-form {
-        order: 3;
-        flex-basis: 100%;
-    }
-
     .workspace {
         flex-direction: column;
     }
@@ -553,30 +548,31 @@ input {
     font-size: 13px;
 }
 
-/* Dar ekranda Yükle yalnızca simge olarak ilk satırda durur; metin ekran
-   okuyucular için erişilebilir ad olarak kalır (Aşama 2 Tasarım Kararları) */
+/* Dar ekranda Yükle, URL satırında Aç düğmesinin yanında durur; URL alanı
+   kalan yere göre daralır (Aşama 2 Tasarım Kararları, v0.2.4) */
 @media (max-width: 767px) {
     .topbar {
         gap: 8px;
     }
 
-    .upload-button {
-        order: 1;
-        width: 38px;
-        justify-content: center;
-        padding: 0;
-    }
-
-    .upload-label {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        white-space: nowrap;
+    /* Logo ve dil/tema düğmelerinden sonra satırı kırar */
+    .topbar::after {
+        content: "";
+        order: 2;
+        flex-basis: 100%;
+        height: 0;
     }
 
     .topbar-actions {
-        order: 2;
+        order: 1;
+    }
+
+    .url-form {
+        order: 3;
+        flex: 1;
+    }
+
+    .upload-button {
+        order: 4;
     }
 }
