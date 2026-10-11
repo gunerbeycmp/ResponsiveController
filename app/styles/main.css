@@ -431,3 +431,130 @@ input {
 .help-note {
     color: var(--text-secondary);
 }
+
+/* Yükleme penceresi (FR-1, Aşama 2 Tasarım Kararları) */
+.upload-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.upload-dialog {
+    width: min(100% - 32px, 480px);
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.upload-dialog::backdrop {
+    background: rgb(15 17 23 / 60%);
+}
+
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.dialog-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.button-icon {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.button-icon:hover {
+    border-color: var(--border);
+}
+
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--text-secondary);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.dropzone[data-active="true"] {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--surface);
+}
+
+.dropzone p {
+    margin: 0;
+}
+
+.upload-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.upload-note {
+    margin: 12px 0 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.upload-status {
+    margin: 12px 0 0;
+    font-size: 14px;
+}
+
+.upload-status:empty {
+    display: none;
+}
+
+.upload-status[data-error="true"] {
+    color: var(--error);
+}
+
+.entry-choice h3 {
+    margin: 16px 0 8px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.entry-choice ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.entry-choice button {
+    width: 100%;
+    padding: 8px 10px;
+    text-align: left;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+}
+
+@media (max-width: 767px) {
+    .upload-button {
+        order: 2;
+    }
+}

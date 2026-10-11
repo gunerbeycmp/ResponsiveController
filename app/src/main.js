@@ -9,6 +9,8 @@ import {
 } from "./devices/devices.js";
 import { createI18n } from "./i18n/i18n.js";
 import { createSheet } from "./ui/sheet.js";
+import { createPreviewBridge } from "./upload/bridge.js";
+import { createUploadDialog } from "./upload/dialog.js";
 import { createTheme } from "./ui/theme.js";
 import { normalizeUrl } from "./url/normalize.js";
 import { openSizedWindow } from "./url/popup.js";
@@ -28,6 +30,7 @@ const theme = createTheme({
 
 const state = {
     url: null,
+    project: null,
     deviceId: DEFAULT_DEVICE_ID,
     browserBars: false,
 };
@@ -165,6 +168,7 @@ function renderChrome() {
         sheet.isOpen() ? "sheet.hide" : "sheet.show",
     );
     showError(elements.error.dataset.reason);
+    upload?.retranslate();
     render();
 }
 
@@ -173,6 +177,38 @@ function showError(reason) {
     elements.error.textContent = reason ? i18n.t(`url.error.${reason}`) : "";
     elements.input.setAttribute("aria-invalid", String(Boolean(reason)));
 }
+
+// Proje yükleme (FR-1). Köprü uygulama açılırken kurulur; böylece önceki
+// oturumdan kalan proje her açılışta silinir (NFR-3.2, R-20)
+const bridge = createPreviewBridge();
+const upload = createUploadDialog({
+    t: i18n.t,
+    elements: {
+        dialog: $("upload-dialog"),
+        openButton: $("upload-button"),
+        closeButton: $("upload-close"),
+        dropzone: $("dropzone"),
+        chooseFile: $("choose-file"),
+        chooseFolder: $("choose-folder"),
+        folderUnsupported: $("folder-unsupported"),
+        fileInput: $("file-input"),
+        folderInput: $("folder-input"),
+        status: $("upload-status"),
+        entryChoice: $("entry-choice"),
+        entryList: $("entry-list"),
+    },
+    onProject: async ({ name, files, entry }) => {
+        await bridge.loadProject(files, entry);
+        state.project = { name, entry, fileCount: files.length };
+        state.url = bridge.previewUrl(entry);
+        elements.input.value = state.url;
+        showError(null);
+        // Aynı adres yeniden yüklense de iframe tazelenir
+        elements.iframe.src = "about:blank";
+        elements.iframe.src = state.url;
+        render();
+    },
+});
 
 elements.form.addEventListener("submit", (event) => {
     event.preventDefault();

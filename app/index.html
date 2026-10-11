@@ -44,6 +44,14 @@
                 </button>
                 <p class="url-error" id="url-error" aria-live="polite"></p>
             </form>
+            <button
+                class="button-ghost upload-button"
+                id="upload-button"
+                type="button"
+            >
+                <span aria-hidden="true">↑</span>
+                <span data-i18n="header.upload">Yükle</span>
+            </button>
             <div class="topbar-actions">
                 <button
                     class="button-ghost"
@@ -148,6 +156,85 @@
                 </section>
             </main>
         </div>
+
+        <dialog
+            class="upload-dialog"
+            id="upload-dialog"
+            aria-labelledby="upload-title"
+        >
+            <div class="dialog-header">
+                <h2 id="upload-title" data-i18n="upload.title">
+                    Projeni yükle
+                </h2>
+                <button
+                    class="button-icon"
+                    id="upload-close"
+                    type="button"
+                    data-i18n-label="upload.cancel"
+                >
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </div>
+            <div class="dropzone" id="dropzone">
+                <span aria-hidden="true">↑</span>
+                <p data-i18n="upload.dropzone"></p>
+            </div>
+            <div class="upload-actions">
+                <button
+                    class="button-primary"
+                    id="choose-file"
+                    type="button"
+                    data-i18n="upload.chooseFile"
+                >
+                    ZIP veya HTML seç
+                </button>
+                <button
+                    class="button-ghost"
+                    id="choose-folder"
+                    type="button"
+                    data-i18n="upload.chooseFolder"
+                >
+                    Klasör seç
+                </button>
+            </div>
+            <p
+                class="upload-note"
+                id="folder-unsupported"
+                data-i18n="upload.folderUnsupported"
+                hidden
+            ></p>
+            <p class="upload-note" data-i18n="upload.limit"></p>
+            <p
+                class="upload-status"
+                id="upload-status"
+                role="status"
+                aria-live="polite"
+            ></p>
+            <section
+                class="entry-choice"
+                id="entry-choice"
+                aria-labelledby="entry-title"
+                hidden
+            >
+                <h3 id="entry-title" data-i18n="upload.chooseEntry">
+                    Hangi sayfayla başlansın?
+                </h3>
+                <ul id="entry-list"></ul>
+            </section>
+            <input
+                id="file-input"
+                type="file"
+                accept=".zip,.html,.htm"
+                hidden
+            />
+            <input
+                id="folder-input"
+                type="file"
+                webkitdirectory
+                multiple
+                hidden
+            />
+        </dialog>
 
         <script type="module" src="/src/main.js"></script>
     </body>
