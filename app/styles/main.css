@@ -553,8 +553,30 @@ input {
     font-size: 13px;
 }
 
+/* Dar ekranda Yükle yalnızca simge olarak ilk satırda durur; metin ekran
+   okuyucular için erişilebilir ad olarak kalır (Aşama 2 Tasarım Kararları) */
 @media (max-width: 767px) {
+    .topbar {
+        gap: 8px;
+    }
+
     .upload-button {
+        order: 1;
+        width: 38px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .upload-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .topbar-actions {
         order: 2;
     }
 }

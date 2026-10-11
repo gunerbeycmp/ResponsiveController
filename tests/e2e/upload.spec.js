@@ -193,3 +193,28 @@ test("dosya sürükleyip bırakılarak yüklenir", async ({ page }) => {
     });
     await expect(preview(page).locator("h1")).toHaveText("Bırakıldı");
 });
+
+test.describe("dar ekran", () => {
+    test.use({ viewport: { width: 375, height: 812 } });
+
+    test("Yükle düğmesi simge olarak ilk satırda, erişilebilir adıyla", async ({
+        page,
+    }) => {
+        await page.goto(APP_URL);
+        const upload = page.getByRole("button", { name: "Yükle" });
+        await expect(upload).toBeVisible();
+        const logo = await page.locator(".logo").boundingBox();
+        const button = await upload.boundingBox();
+        const url = await page.locator("#url-input").boundingBox();
+        // Logo ile aynı satırda, URL alanının üstünde
+        expect(
+            Math.abs(button.y + button.height / 2 - (logo.y + logo.height / 2)),
+        ).toBeLessThan(10);
+        expect(button.y).toBeLessThan(url.y);
+        expect(button.width).toBeLessThanOrEqual(40);
+        const scrollWidth = await page.evaluate(
+            () => document.documentElement.scrollWidth,
+        );
+        expect(scrollWidth).toBe(375);
+    });
+});
