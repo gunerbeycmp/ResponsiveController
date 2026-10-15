@@ -7,9 +7,14 @@ import {
     fitScale,
     renderSize,
 } from "./devices/devices.js";
+import Sortable from "sortablejs";
 import { createFavorites } from "./devices/favorites.js";
 import { createSidebar } from "./devices/sidebar.js";
+import { createFpsMonitor } from "./grid/fps.js";
+import { createGridStore } from "./grid/store.js";
+import { createGridView } from "./grid/view.js";
 import { createI18n } from "./i18n/i18n.js";
+import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
 import { createPreviewBridge } from "./upload/bridge.js";
 import { createUploadDialog } from "./upload/dialog.js";
@@ -70,7 +75,25 @@ const elements = {
     warningsLabel: $("warnings-label"),
     warningsPanel: $("warnings-panel"),
     helpUpload: $("help-upload"),
+    frameHeader: $("device-frame").querySelector(".frame-header"),
+    toolbar: $("view-toolbar"),
+    viewButtons: [...document.querySelectorAll("[data-view]")],
+    sizeGroup: $("size-group"),
+    sizeButtons: [...document.querySelectorAll("[data-size]")],
+    slowWarning: $("slow-warning"),
+    slowDismiss: $("slow-dismiss"),
+    gridSection: $("grid-section"),
+    gridEmpty: $("grid-empty"),
+    gridList: $("device-grid"),
+    gridDrop: $("grid-drop"),
 };
+
+const announce = createAnnouncer($("app-status"));
+const gridStore = createGridStore({
+    storage: window.localStorage,
+    isKnown: (id) => findDevice(id).id === id,
+});
+const isGridActive = () => Boolean(state.url) && gridStore.getMode() === "grid";
 
 const sheet = createSheet({
     toggle: elements.sheetToggle,
@@ -86,7 +109,7 @@ const sheet = createSheet({
 const MIN_FRAME_HEIGHT = 240;
 
 function layoutFrame() {
-    if (!state.url) return;
+    if (!state.url || isGridActive()) return;
     const device = findDevice(state.deviceId);
     const size = deviceSize(device, state.browserBars);
     const header = elements.frame.firstElementChild;
@@ -98,11 +121,20 @@ function layoutFrame() {
         (elements.warningsPanel.hidden
             ? 0
             : elements.warningsPanel.offsetHeight) +
+        // Görünüm araç çubuğu çerçevenin üstünde yer kaplar (v0.3.4)
+        (elements.toolbar.hidden
+            ? 0
+            : elements.toolbar.offsetHeight +
+              parseFloat(getComputedStyle(elements.toolbar).marginBottom)) +
         20;
     // Pencere yüksekliğinden hesaplanır: dar ekranda önizleme alanı içeriğe
     // göre uzadığı için kendi yüksekliği kullanılırsa çerçeve ile alan
     // birbirini büyüterek döngüye girer
-    const height = window.innerHeight - elements.stage.offsetTop - reserved;
+    // offsetTop kullanılmaz: çalışma alanı konumlandırıldığı için (v0.3.4)
+    // üst çubuğu hesaba katmaz
+    const stageTop =
+        elements.stage.getBoundingClientRect().top + window.scrollY;
+    const height = window.innerHeight - stageTop - reserved;
     // Açık yardım paneli çerçeveye çok az yer bırakıyorsa (dar ekranlar) yalnızca
     // bağlantı hesaba katılır; panel altta kalır ve görünür alana kaydırılır
     const withHelp = height - elements.help.offsetHeight;
@@ -190,25 +222,177 @@ function renderWarnings() {
     );
 }
 
+// Uyarılar ve yardım iki modda da kullanılır; bulundukları mod alanına taşınır
+function placeShared(isGrid) {
+    const { warningsToggle, warningsPanel, help } = elements;
+    if (isGrid) {
+        if (warningsToggle.parentElement !== elements.toolbar) {
+            elements.toolbar.append(warningsToggle);
+            elements.gridSection.prepend(warningsPanel);
+            elements.gridSection.append(help);
+        }
+    } else if (warningsToggle.parentElement !== elements.frameHeader) {
+        elements.frameHeader.append(warningsToggle);
+        elements.viewport.before(warningsPanel);
+        elements.viewport.after(help);
+    }
+}
+
+function renderToolbar(isGrid) {
+    for (const button of elements.viewButtons)
+        button.setAttribute(
+            "aria-pressed",
+            String(button.dataset.view === gridStore.getMode()),
+        );
+    elements.sizeGroup.hidden = !isGrid;
+    for (const button of elements.sizeButtons)
+        button.setAttribute(
+            "aria-pressed",
+            String(button.dataset.size === gridStore.getSize()),
+        );
+}
+
 function render() {
     renderProject();
     renderWarnings();
     const hasUrl = Boolean(state.url);
+    const isGrid = isGridActive();
     elements.emptyState.hidden = hasUrl;
-    elements.frame.hidden = !hasUrl;
+    elements.toolbar.hidden = !hasUrl;
+    elements.frame.hidden = !hasUrl || isGrid;
+    elements.gridSection.hidden = !isGrid;
+    renderToolbar(isGrid);
+    placeShared(isGrid);
     sidebar.render();
+    if (isGrid) {
+        elements.gridEmpty.hidden = gridStore.list().length > 0;
+        gridView.render();
+    } else {
+        gridView.clear();
+        elements.slowWarning.hidden = true;
+    }
     layoutFrame();
+    updateMonitor();
+}
+
+// FR-3.6: ızgaraya ekleme. Tek cihaz modunda ızgaraya geçilir; o an açık
+// cihaz ile eklenen cihaz yan yana görünür (Aşama 3 Tasarım Kararları)
+function addToGrid(id) {
+    if (!isGridActive()) {
+        if (!gridStore.has(state.deviceId)) gridStore.add(state.deviceId);
+        gridStore.setMode("grid");
+    }
+    if (!gridStore.has(id)) {
+        gridStore.add(id);
+        announce(
+            i18n.t("grid.added", {
+                device: deviceName(findDevice(id), i18n.getLanguage()),
+            }),
+        );
+        // Yeni cihazla yavaşlama tekrar olursa uyarı yeniden gösterilir
+        monitor.reset();
+    }
+    render();
+}
+
+function removeFromGrid(id) {
+    gridStore.remove(id);
+    announce(
+        i18n.t("grid.removed", {
+            device: deviceName(findDevice(id), i18n.getLanguage()),
+        }),
+    );
+    render();
+}
+
+function setView(mode) {
+    // Boş ızgaraya geçilince açık cihaz ızgaraya eklenir
+    if (mode === "grid" && gridStore.list().length === 0)
+        gridStore.add(state.deviceId);
+    gridStore.setMode(mode);
+    render();
+}
+
+// Büyütülen kutu önizleme alanının tamamını kaplar
+function expandedArea() {
+    const styles = getComputedStyle(elements.stage);
+    const header =
+        elements.gridList.querySelector(".is-expanded .box-header")
+            ?.offsetHeight ?? 72;
+    const top =
+        elements.gridList.getBoundingClientRect().top +
+        elements.stage.scrollTop +
+        window.scrollY;
+    return {
+        width:
+            elements.stage.clientWidth -
+            parseFloat(styles.paddingLeft) -
+            parseFloat(styles.paddingRight) -
+            2,
+        height: Math.max(
+            MIN_FRAME_HEIGHT,
+            window.innerHeight -
+                top -
+                header -
+                parseFloat(styles.paddingBottom) -
+                elements.helpToggle.offsetHeight -
+                24,
+        ),
+    };
+}
+
+const gridView = createGridView({
+    list: elements.gridList,
+    i18n,
+    store: gridStore,
+    announce,
+    getUrl: () => state.url,
+    getExpandedArea: expandedArea,
+    onEmpty: (_empty, next) => {
+        render();
+        const target = next
+            ? gridView.boxFor(next)?.remove
+            : elements.viewButtons.find((b) => b.dataset.view === "grid");
+        target?.focus();
+    },
+});
+
+// FR-3.8: ızgarada yavaşlama uyarısı (Teknik Tasarım 7.2)
+const monitor = createFpsMonitor({
+    onSlow: () => {
+        if (!isGridActive()) return;
+        elements.slowWarning.hidden = false;
+        announce(i18n.t("slow.warning"));
+        layoutFrame();
+    },
+});
+
+function updateMonitor() {
+    if (isGridActive() && gridStore.list().length > 0) monitor.start();
+    else monitor.stop();
 }
 
 const sidebar = createSidebar({
     search: $("device-search"),
     tabList: $("device-tabs"),
     panel: $("device-list"),
-    status: $("sidebar-status"),
+    announce: createAnnouncer($("sidebar-status")),
     i18n,
+    grid: {
+        isActive: isGridActive,
+        has: (id) => gridStore.has(id),
+        onToggle: (id) => {
+            if (isGridActive() && gridStore.has(id)) removeFromGrid(id);
+            else addToGrid(id);
+        },
+    },
+    onDeviceDrag: (active) => {
+        document.body.classList.toggle("is-dragging", active);
+        document.body.classList.toggle("is-dragging-device", active);
+    },
     favorites: createFavorites({
         storage: window.localStorage,
-        isKnown: (id) => Boolean(findDevice(id)),
+        isKnown: (id) => findDevice(id).id === id,
     }),
     getSelectedId: () => state.deviceId,
     onSelect: (id) => {
@@ -277,6 +461,7 @@ const upload = createUploadDialog({
         // Aynı adres yeniden yüklense de iframe tazelenir
         elements.iframe.src = "about:blank";
         elements.iframe.src = state.url;
+        gridView.clear();
         render();
     },
 });
@@ -300,6 +485,34 @@ function closeProject() {
 }
 
 elements.projectClose.addEventListener("click", closeProject);
+
+for (const button of elements.viewButtons)
+    button.addEventListener("click", () => setView(button.dataset.view));
+
+for (const button of elements.sizeButtons)
+    button.addEventListener("click", () => {
+        gridStore.setSize(button.dataset.size);
+        render();
+    });
+
+elements.slowDismiss.addEventListener("click", () => {
+    elements.slowWarning.hidden = true;
+});
+
+// Menüden önizleme alanına bırakılan cihaz ızgaraya eklenir (FR-3.7)
+Sortable.create(elements.gridDrop, {
+    group: { name: "grid-drop", put: ["menu", "favorites"] },
+    onAdd: ({ item }) => {
+        const id = item.querySelector(".device-row [data-device-id]")?.dataset
+            .deviceId;
+        item.remove();
+        // Menü yeniden çizilince kaynak listenin sürükleme bitişi gelmeyebilir;
+        // sürükleme durumu burada da kapatılır ve ekleme Sortable işini
+        // bitirdikten sonra yapılır
+        document.body.classList.remove("is-dragging", "is-dragging-device");
+        if (id) setTimeout(() => addToGrid(id));
+    },
+});
 
 elements.warningsToggle.addEventListener("click", () => {
     const open =
@@ -388,7 +601,10 @@ theme.onChange(renderChrome);
 let layoutRequest = 0;
 new ResizeObserver(() => {
     cancelAnimationFrame(layoutRequest);
-    layoutRequest = requestAnimationFrame(layoutFrame);
+    layoutRequest = requestAnimationFrame(() => {
+        layoutFrame();
+        if (isGridActive()) gridView.render();
+    });
 }).observe(elements.stage);
 
 renderChrome();

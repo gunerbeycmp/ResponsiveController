@@ -80,6 +80,12 @@
                     <span aria-hidden="true">◐</span>
                 </button>
             </div>
+            <p
+                class="visually-hidden"
+                id="app-status"
+                role="status"
+                aria-live="polite"
+            ></p>
         </header>
 
         <div class="workspace">
@@ -138,6 +144,80 @@
             </aside>
 
             <main class="stage" id="stage">
+                <div class="view-toolbar" id="view-toolbar" hidden>
+                    <div
+                        class="segmented"
+                        role="group"
+                        aria-labelledby="view-label"
+                    >
+                        <span
+                            class="visually-hidden"
+                            id="view-label"
+                            data-i18n="view.label"
+                            >Görünüm</span
+                        >
+                        <button
+                            type="button"
+                            data-view="single"
+                            data-i18n="view.single"
+                        >
+                            Tek cihaz
+                        </button>
+                        <button
+                            type="button"
+                            data-view="grid"
+                            data-i18n="view.grid"
+                        >
+                            Izgara
+                        </button>
+                    </div>
+                    <div
+                        class="segmented"
+                        id="size-group"
+                        role="group"
+                        aria-labelledby="size-label"
+                    >
+                        <span
+                            class="toolbar-label"
+                            id="size-label"
+                            data-i18n="grid.sizeLabel"
+                            >Kutu boyutu</span
+                        >
+                        <button
+                            type="button"
+                            data-size="small"
+                            data-i18n="grid.sizeSmall"
+                        >
+                            Küçük
+                        </button>
+                        <button
+                            type="button"
+                            data-size="medium"
+                            data-i18n="grid.sizeMedium"
+                        >
+                            Orta
+                        </button>
+                        <button
+                            type="button"
+                            data-size="large"
+                            data-i18n="grid.sizeLarge"
+                        >
+                            Büyük
+                        </button>
+                    </div>
+                </div>
+                <div class="slow-warning" id="slow-warning" hidden>
+                    <span aria-hidden="true">⚠</span>
+                    <p data-i18n="slow.warning"></p>
+                    <button
+                        class="slow-dismiss"
+                        id="slow-dismiss"
+                        type="button"
+                        data-i18n-label="slow.dismiss"
+                    >
+                        ✕
+                    </button>
+                </div>
                 <section class="empty-state" id="empty-state">
                     <h1 data-i18n="empty.title">
                         Sitenin responsive görünümünü test et
@@ -229,7 +309,20 @@
                         </div>
                     </div>
                 </section>
+                <section class="grid-section" id="grid-section" hidden>
+                    <p
+                        class="grid-empty"
+                        id="grid-empty"
+                        data-i18n="grid.empty"
+                        hidden
+                    ></p>
+                    <ul class="device-grid" id="device-grid"></ul>
+                </section>
             </main>
+            <div class="grid-drop-zone" id="grid-drop-zone">
+                <p data-i18n="grid.dropHint"></p>
+                <ul id="grid-drop"></ul>
+            </div>
         </div>
 
         <dialog

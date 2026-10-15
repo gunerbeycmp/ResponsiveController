@@ -16,11 +16,13 @@ export function createSidebar({
     search,
     tabList,
     panel,
-    status,
+    announce,
     i18n,
     favorites,
+    grid,
     getSelectedId,
     onSelect,
+    onDeviceDrag,
 }) {
     const selected = DEVICES.find((d) => d.id === getSelectedId());
     let activeTab =
@@ -42,15 +44,6 @@ export function createSidebar({
     const nameOf = (device) => deviceName(device, i18n.getLanguage());
     const findById = (id) => DEVICES.find((d) => d.id === id);
 
-    // Ekran okuyuculara kısa duyuru; aynı metin art arda da okunsun diye
-    // önce temizlenir
-    function announce(message) {
-        status.textContent = "";
-        setTimeout(() => {
-            status.textContent = message;
-        }, 50);
-    }
-
     function badge(key) {
         return el("span", { className: "badge", textContent: i18n.t(key) });
     }
@@ -61,9 +54,14 @@ export function createSidebar({
             className: "device-button",
         });
         button.dataset.deviceId = device.id;
+        // Izgara modunda satır cihazı ızgaraya ekler / çıkarır (FR-3.6)
         button.setAttribute(
             "aria-pressed",
-            String(device.id === getSelectedId()),
+            String(
+                grid.isActive()
+                    ? grid.has(device.id)
+                    : device.id === getSelectedId(),
+            ),
         );
         const title = el("span", { className: "device-name" }, nameOf(device));
         const meta = el(
@@ -99,6 +97,25 @@ export function createSidebar({
         return button;
     }
 
+    // "+" düğmesi yıldızla aynı kuralla görünür; ızgara modunda ızgaradaki
+    // cihazlarda ✓ olur ve cihazı ızgaradan çıkarır
+    function gridToggle(device) {
+        const inGrid = grid.isActive() && grid.has(device.id);
+        const button = el("button", {
+            type: "button",
+            className: inGrid ? "grid-toggle is-in-grid" : "grid-toggle",
+            textContent: inGrid ? "✓" : "+",
+        });
+        button.dataset.gridToggle = device.id;
+        button.setAttribute(
+            "aria-label",
+            i18n.t(inGrid ? "grid.remove" : "grid.add", {
+                device: nameOf(device),
+            }),
+        );
+        return button;
+    }
+
     function row(device, options = {}, ...extra) {
         return el(
             "div",
@@ -106,6 +123,7 @@ export function createSidebar({
             options.handle ?? null,
             deviceButton(device, options),
             ...extra,
+            gridToggle(device),
             favoriteToggle(device),
         );
     }
@@ -362,6 +380,40 @@ export function createSidebar({
         } else {
             panel.replaceChildren(...tabPanel());
         }
+        setupDeviceDrag();
+    }
+
+    // Menüden önizleme alanına sürükleyerek ızgaraya ekleme (FR-3.7).
+    // Dokunmatik ve dar ekranlarda kapalıdır (R-60)
+    const canDragToGrid = () =>
+        window.matchMedia(
+            "(hover: hover) and (pointer: fine) and (min-width: 768px)",
+        ).matches;
+
+    const dragEvents = {
+        onStart: () => onDeviceDrag?.(true),
+        onEnd: () => {
+            onDeviceDrag?.(false);
+            setTimeout(() => renderPanel());
+        },
+    };
+
+    function setupDeviceDrag() {
+        if (!canDragToGrid()) return;
+        for (const ul of panel.querySelectorAll("ul.device-list")) {
+            if (ul.dataset.zone) continue;
+            sortables.push(
+                Sortable.create(ul, {
+                    group: { name: "menu", pull: "clone", put: false },
+                    sort: false,
+                    forceFallback: true,
+                    fallbackTolerance: 4,
+                    filter: ".grid-toggle, .favorite-toggle, .resolution-toggle",
+                    preventOnFilter: false,
+                    ...dragEvents,
+                }),
+            );
+        }
     }
 
     // Sık kullanılanlara sürükleme (FR-3.2). Kategori grupları kendi içinde
@@ -373,6 +425,9 @@ export function createSidebar({
                 Sortable.create(ul, {
                     group: {
                         name: "favorites",
+                        // Önizleme alanına bırakılan favori ızgaraya eklenir
+                        pull: (to) =>
+                            to.el.id === "grid-drop" ? "clone" : true,
                         put: frequent
                             ? true
                             : (_to, from) =>
@@ -387,9 +442,12 @@ export function createSidebar({
                         openMenu = null;
                         panel.querySelector(".favorite-menu")?.remove();
                         panel.classList.add("is-dragging");
+                        if (canDragToGrid()) onDeviceDrag?.(true);
                     },
                     onEnd: (event) => {
                         panel.classList.remove("is-dragging");
+                        onDeviceDrag?.(false);
+                        if (event.to.id === "grid-drop") return;
                         // Sortable işini bitirdikten sonra liste yeniden çizilir
                         setTimeout(() => onDrop(event));
                     },
@@ -472,6 +530,19 @@ export function createSidebar({
         });
     }
 
+    // Izgara düğmesi ve ızgara modunda satır; odak aynı öğede kalır
+    function toggleGrid(target, selector, key) {
+        const id = target.dataset[key];
+        const all = [...panel.querySelectorAll(selector)];
+        const same = all.filter((node) => node.dataset[key] === id);
+        const occurrence = same.indexOf(target);
+        grid.onToggle(id);
+        const after = [...panel.querySelectorAll(selector)].filter(
+            (node) => node.dataset[key] === id,
+        );
+        (after[occurrence] ?? panel).focus();
+    }
+
     tabList.addEventListener("click", (event) => {
         const tab = event.target.closest("[role=tab]")?.dataset.tab;
         if (tab) selectTab(tab);
@@ -500,6 +571,8 @@ export function createSidebar({
     panel.addEventListener("click", (event) => {
         const star = event.target.closest(".favorite-toggle");
         if (star) return toggleFavorite(star);
+        const plus = event.target.closest(".grid-toggle");
+        if (plus) return toggleGrid(plus, ".grid-toggle", "gridToggle");
         const handleButton = event.target.closest(".drag-handle");
         if (handleButton) {
             const id = handleButton.dataset.handleId;
@@ -515,7 +588,10 @@ export function createSidebar({
         if (action)
             return runAction(action.dataset.action, action.dataset.menuFor);
         const button = event.target.closest("button[data-device-id]");
-        if (button) onSelect(button.dataset.deviceId);
+        if (!button) return;
+        if (grid.isActive())
+            toggleGrid(button, "button[data-device-id]", "deviceId");
+        else onSelect(button.dataset.deviceId);
     });
 
     // WAI-ARIA menü kalıbı: ok tuşları, Home, End, Esc ve Tab (NFR-5.1)

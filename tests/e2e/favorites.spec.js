@@ -118,6 +118,8 @@ test("yıldız klavyeyle kullanılır, odak korunur", async ({ page }) => {
     await button.focus();
     const iphone16 = star(page, "iphone-16").first();
     expect(await opacity(iphone16)).toBe("1");
+    // Satırda önce ızgara (+) düğmesi, sonra yıldız gelir (v0.3.4)
+    await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     await expect(iphone16).toBeFocused();
     await page.keyboard.press("Enter");
