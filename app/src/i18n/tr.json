@@ -67,5 +67,19 @@
     "badge.foldable": "Katlanabilir",
     "resolution.devices": "{count} cihaz",
     "resolution.devicesOne": "1 cihaz",
-    "frame.watchAdaptation": "Apple Watch sayfaları 320 piksel genişlikte çizip ekrana küçültür."
+    "frame.watchAdaptation": "Apple Watch sayfaları 320 piksel genişlikte çizip ekrana küçültür.",
+    "category.favorites": "Favoriler",
+    "favorites.empty": "Henüz favori yok. Bir cihazın yanındaki ☆ simgesiyle ekleyebilirsin.",
+    "favorites.add": "{device} cihazını favorilere ekle",
+    "favorites.remove": "{device} cihazını favorilerden çıkar",
+    "favorites.added": "{device} favorilere eklendi.",
+    "favorites.removed": "{device} favorilerden çıkarıldı.",
+    "group.frequent": "Sık kullanılan favoriler",
+    "favorites.dropHint": "Sık kullanılanlara eklemek için buraya bırak",
+    "favorites.handle": "{device} cihazını taşı",
+    "favorites.moveToFrequent": "Sık kullanılanlara taşı",
+    "favorites.removeFromFrequent": "Sık kullanılanlardan çıkar",
+    "favorites.moveUp": "Yukarı taşı",
+    "favorites.moveDown": "Aşağı taşı",
+    "favorites.moved": "{device} {position}. sıraya taşındı."
 }

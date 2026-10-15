@@ -7,6 +7,7 @@ import {
     fitScale,
     renderSize,
 } from "./devices/devices.js";
+import { createFavorites } from "./devices/favorites.js";
 import { createSidebar } from "./devices/sidebar.js";
 import { createI18n } from "./i18n/i18n.js";
 import { createSheet } from "./ui/sheet.js";
@@ -203,7 +204,12 @@ const sidebar = createSidebar({
     search: $("device-search"),
     tabList: $("device-tabs"),
     panel: $("device-list"),
+    status: $("sidebar-status"),
     i18n,
+    favorites: createFavorites({
+        storage: window.localStorage,
+        isKnown: (id) => Boolean(findDevice(id)),
+    }),
     getSelectedId: () => state.deviceId,
     onSelect: (id) => {
         state.deviceId = id;

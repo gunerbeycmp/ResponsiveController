@@ -1,19 +1,35 @@
+import Sortable from "sortablejs";
 import { DEVICES, deviceName } from "./devices.js";
-import { TABS, buildTab, searchDevices, tabOf } from "./menu.js";
+import {
+    TABS,
+    buildFavorites,
+    buildTab,
+    searchDevices,
+    tabOf,
+} from "./menu.js";
 
-// Sol menü: arama, kategori sekmeleri, gruplar (Aşama 3 Tasarım Kararları)
+const ALL_TABS = ["favorites", ...TABS];
+
+// Sol menü: arama, kategori sekmeleri, gruplar ve favoriler
+// (Aşama 3 Tasarım Kararları, FR-3.2)
 export function createSidebar({
     search,
     tabList,
     panel,
+    status,
     i18n,
+    favorites,
     getSelectedId,
     onSelect,
 }) {
-    let activeTab = tabOf(
-        DEVICES.find((d) => d.id === getSelectedId()) ?? DEVICES[0],
-    );
+    const selected = DEVICES.find((d) => d.id === getSelectedId());
+    let activeTab =
+        favorites.list().length > 0
+            ? "favorites"
+            : tabOf(selected ?? DEVICES[0]);
     let query = "";
+    let openMenu = null;
+    let sortables = [];
     const expanded = new Set();
 
     const el = (tag, props = {}, ...children) => {
@@ -22,6 +38,18 @@ export function createSidebar({
         node.append(...children.filter(Boolean));
         return node;
     };
+
+    const nameOf = (device) => deviceName(device, i18n.getLanguage());
+    const findById = (id) => DEVICES.find((d) => d.id === id);
+
+    // Ekran okuyuculara kısa duyuru; aynı metin art arda da okunsun diye
+    // önce temizlenir
+    function announce(message) {
+        status.textContent = "";
+        setTimeout(() => {
+            status.textContent = message;
+        }, 50);
+    }
 
     function badge(key) {
         return el("span", { className: "badge", textContent: i18n.t(key) });
@@ -37,11 +65,7 @@ export function createSidebar({
             "aria-pressed",
             String(device.id === getSelectedId()),
         );
-        const title = el(
-            "span",
-            { className: "device-name" },
-            deviceName(device, i18n.getLanguage()),
-        );
+        const title = el("span", { className: "device-name" }, nameOf(device));
         const meta = el(
             "span",
             { className: "device-meta" },
@@ -56,18 +80,48 @@ export function createSidebar({
         return button;
     }
 
+    // Yıldız fareyle üzerine gelince veya klavyeyle satıra gelince görünür;
+    // dokunmatik ekranlarda ve favorilerde her zaman görünür (R-59)
+    function favoriteToggle(device) {
+        const on = favorites.has(device.id);
+        const button = el("button", {
+            type: "button",
+            className: on ? "favorite-toggle is-favorite" : "favorite-toggle",
+            textContent: on ? "★" : "☆",
+        });
+        button.dataset.favoriteId = device.id;
+        button.setAttribute(
+            "aria-label",
+            i18n.t(on ? "favorites.remove" : "favorites.add", {
+                device: nameOf(device),
+            }),
+        );
+        return button;
+    }
+
+    function row(device, options = {}, ...extra) {
+        return el(
+            "div",
+            { className: "device-row" },
+            options.handle ?? null,
+            deviceButton(device, options),
+            ...extra,
+            favoriteToggle(device),
+        );
+    }
+
     function list(items, options) {
         return el(
             "ul",
             { className: "device-list" },
-            ...items.map((d) => el("li", {}, deviceButton(d, options))),
+            ...items.map((d) => el("li", {}, row(d, options))),
         );
     }
 
-    function group(title, content) {
+    function group(title, content, className = "device-group") {
         return el(
             "section",
-            { className: "device-group" },
+            { className },
             el("h3", { className: "group-title", textContent: title }),
             content,
         );
@@ -80,16 +134,11 @@ export function createSidebar({
             ...rows.map(({ resolution, devices }) => {
                 const key = resolution.id;
                 const item = el("li", { className: "resolution-row" });
-                const line = el(
-                    "div",
-                    { className: "resolution-line" },
-                    deviceButton(resolution),
-                );
-                item.append(line);
+                let toggle = null;
                 if (devices.length > 0) {
                     const open = expanded.has(key);
                     const subId = `res-devices-${key}`;
-                    const toggle = el("button", {
+                    toggle = el("button", {
                         type: "button",
                         className: "resolution-toggle",
                         textContent:
@@ -104,13 +153,16 @@ export function createSidebar({
                     toggle.addEventListener("click", () => {
                         if (expanded.has(key)) expanded.delete(key);
                         else expanded.add(key);
-                        render({ keepFocus: `[aria-controls="${subId}"]` });
+                        render({ focus: `[aria-controls="${subId}"]` });
                     });
-                    line.append(toggle);
+                }
+                item.append(row(resolution, {}, toggle));
+                if (toggle) {
                     const sub = list(devices);
-                    sub.id = subId;
+                    sub.id = toggle.getAttribute("aria-controls");
                     sub.classList.add("resolution-devices");
-                    sub.hidden = !open;
+                    sub.hidden =
+                        toggle.getAttribute("aria-expanded") !== "true";
                     item.append(sub);
                 }
                 return item;
@@ -118,9 +170,132 @@ export function createSidebar({
         );
     }
 
+    // Tutamaç hem sürüklenir hem de tıklanınca taşıma menüsünü açar;
+    // menü sürüklemenin klavye karşılığıdır (NFR-5.2)
+    function handle(device) {
+        const open = openMenu === device.id;
+        const button = el("button", {
+            type: "button",
+            className: "drag-handle",
+            textContent: "⋮⋮",
+        });
+        button.dataset.handleId = device.id;
+        button.setAttribute(
+            "aria-label",
+            i18n.t("favorites.handle", { device: nameOf(device) }),
+        );
+        button.setAttribute("aria-haspopup", "menu");
+        button.setAttribute("aria-expanded", String(open));
+        if (open) button.setAttribute("aria-controls", `favorite-menu`);
+        return button;
+    }
+
+    function moveMenu(device, inFrequent, index, count) {
+        const actions = inFrequent
+            ? [
+                  "removeFromFrequent",
+                  index > 0 ? "moveUp" : null,
+                  index < count - 1 ? "moveDown" : null,
+              ]
+            : ["moveToFrequent"];
+        const menu = el(
+            "ul",
+            { className: "favorite-menu", id: "favorite-menu" },
+            ...actions.filter(Boolean).map((action) => {
+                const item = el("button", {
+                    type: "button",
+                    textContent: i18n.t(`favorites.${action}`),
+                    tabIndex: -1,
+                });
+                item.setAttribute("role", "menuitem");
+                item.dataset.action = action;
+                item.dataset.menuFor = device.id;
+                const li = el("li", {}, item);
+                li.setAttribute("role", "none");
+                return li;
+            }),
+        );
+        menu.setAttribute("role", "menu");
+        menu.setAttribute(
+            "aria-label",
+            i18n.t("favorites.handle", { device: nameOf(device) }),
+        );
+        return menu;
+    }
+
+    function favoriteList(items, zone) {
+        const ul = el(
+            "ul",
+            { className: "device-list" },
+            ...items.map((device, index) => {
+                const li = el(
+                    "li",
+                    {},
+                    row(device, { handle: handle(device) }),
+                    openMenu === device.id
+                        ? moveMenu(
+                              device,
+                              zone === "frequent",
+                              index,
+                              items.length,
+                          )
+                        : null,
+                );
+                li.dataset.favoriteItem = device.id;
+                return li;
+            }),
+        );
+        ul.dataset.zone = zone;
+        return ul;
+    }
+
+    function favoritesPanel() {
+        const groups = buildFavorites(
+            DEVICES,
+            favorites.list(),
+            favorites.frequent(),
+        );
+        if (groups.length === 0)
+            return [
+                el("p", {
+                    className: "search-empty",
+                    textContent: i18n.t("favorites.empty"),
+                }),
+            ];
+        const frequent = groups[0].type === "frequent" ? groups.shift() : null;
+        const top = frequent
+            ? group(
+                  i18n.t("group.frequent"),
+                  favoriteList(frequent.items, "frequent"),
+              )
+            : // Grup yokken bırakma alanı yalnızca sürükleme sırasında görünür
+              el(
+                  "section",
+                  { className: "frequent-drop" },
+                  el("p", {
+                      className: "drop-hint",
+                      textContent: i18n.t("favorites.dropHint"),
+                  }),
+                  favoriteList([], "frequent"),
+              );
+        return [
+            top,
+            ...groups.map((g) =>
+                group(
+                    i18n.t(
+                        g.category === "generic"
+                            ? "group.generic"
+                            : `category.${g.category}`,
+                    ),
+                    favoriteList(g.items, "category"),
+                ),
+            ),
+        ];
+    }
+
     function renderTabs() {
         tabList.replaceChildren(
-            ...TABS.map((tab) => {
+            ...ALL_TABS.map((tab) => {
                 const selected = tab === activeTab;
                 const button = el("button", {
                     type: "button",
@@ -139,57 +314,162 @@ export function createSidebar({
         panel.setAttribute("aria-labelledby", `tab-${activeTab}`);
     }
 
+    function searchPanel() {
+        const results = searchDevices(DEVICES, query);
+        if (results.length === 0)
+            return [
+                el("p", {
+                    className: "search-empty",
+                    textContent: i18n.t("sidebar.searchEmpty", {
+                        query: query.trim(),
+                    }),
+                }),
+            ];
+        return results.map(({ category, items }) =>
+            group(
+                i18n.t(
+                    category === "generic"
+                        ? "group.generic"
+                        : `category.${category}`,
+                ),
+                list(items),
+            ),
+        );
+    }
+
+    function tabPanel() {
+        return buildTab(DEVICES, activeTab).map((g) => {
+            if (g.type === "popular")
+                return group(
+                    i18n.t("group.popular"),
+                    list(g.items, { showPopular: false }),
+                );
+            if (g.type === "generic")
+                return group(i18n.t("group.generic"), list(g.items));
+            if (g.type === "resolutions") return resolutionList(g.rows);
+            return group(g.brand, list(g.items));
+        });
+    }
+
     function renderPanel() {
+        for (const sortable of sortables) sortable.destroy();
+        sortables = [];
         if (query.trim()) {
-            const results = searchDevices(DEVICES, query);
-            panel.replaceChildren(
-                ...(results.length === 0
-                    ? [
-                          el("p", {
-                              className: "search-empty",
-                              textContent: i18n.t("sidebar.searchEmpty", {
-                                  query: query.trim(),
-                              }),
-                          }),
-                      ]
-                    : results.map(({ category, items }) =>
-                          group(
-                              i18n.t(
-                                  category === "generic"
-                                      ? "group.generic"
-                                      : `category.${category}`,
-                              ),
-                              list(items),
-                          ),
-                      )),
-            );
-            return;
+            panel.replaceChildren(...searchPanel());
+        } else if (activeTab === "favorites") {
+            panel.replaceChildren(...favoritesPanel());
+            setupDrag();
+        } else {
+            panel.replaceChildren(...tabPanel());
         }
-        panel.replaceChildren(
-            ...buildTab(DEVICES, activeTab).map((g) => {
-                if (g.type === "popular")
-                    return group(
-                        i18n.t("group.popular"),
-                        list(g.items, { showPopular: false }),
-                    );
-                if (g.type === "generic")
-                    return group(i18n.t("group.generic"), list(g.items));
-                if (g.type === "resolutions") return resolutionList(g.rows);
-                return group(g.brand, list(g.items));
+    }
+
+    // Sık kullanılanlara sürükleme (FR-3.2). Kategori grupları kendi içinde
+    // sıralanmaz, yalnızca sık kullanılanlardan geri bırakılan cihazı kabul eder
+    function setupDrag() {
+        for (const ul of panel.querySelectorAll("ul[data-zone]")) {
+            const frequent = ul.dataset.zone === "frequent";
+            sortables.push(
+                Sortable.create(ul, {
+                    group: {
+                        name: "favorites",
+                        put: frequent
+                            ? true
+                            : (_to, from) =>
+                                  from.el.dataset.zone === "frequent",
+                    },
+                    sort: frequent,
+                    handle: ".drag-handle",
+                    forceFallback: true,
+                    animation: 150,
+                    emptyInsertThreshold: 24,
+                    onStart: () => {
+                        openMenu = null;
+                        panel.querySelector(".favorite-menu")?.remove();
+                        panel.classList.add("is-dragging");
+                    },
+                    onEnd: (event) => {
+                        panel.classList.remove("is-dragging");
+                        // Sortable işini bitirdikten sonra liste yeniden çizilir
+                        setTimeout(() => onDrop(event));
+                    },
+                }),
+            );
+        }
+    }
+
+    function onDrop({ item, from, to, oldIndex, newIndex }) {
+        const id = item.dataset.favoriteItem;
+        const toFrequent = to.dataset.zone === "frequent";
+        if (toFrequent && (from !== to || oldIndex !== newIndex)) {
+            favorites.moveToFrequent(id, newIndex);
+            announceMoved(id);
+        } else if (!toFrequent && from.dataset.zone === "frequent") {
+            favorites.removeFromFrequent(id);
+        }
+        render();
+    }
+
+    function announceMoved(id) {
+        announce(
+            i18n.t("favorites.moved", {
+                device: nameOf(findById(id)),
+                position: favorites.frequent().indexOf(id) + 1,
             }),
         );
     }
 
-    function render({ keepFocus } = {}) {
+    function runAction(action, id) {
+        const index = favorites.frequent().indexOf(id);
+        if (action === "moveToFrequent") favorites.moveToFrequent(id);
+        if (action === "removeFromFrequent") favorites.removeFromFrequent(id);
+        if (action === "moveUp") favorites.moveToFrequent(id, index - 1);
+        if (action === "moveDown") favorites.moveToFrequent(id, index + 1);
+        if (action !== "removeFromFrequent") announceMoved(id);
+        openMenu = null;
+        render({ focus: `[data-handle-id="${id}"]` });
+    }
+
+    function render({ focus } = {}) {
         renderTabs();
         renderPanel();
-        if (keepFocus) panel.querySelector(keepFocus)?.focus();
+        if (!focus) return;
+        const target =
+            typeof focus === "string" ? panel.querySelector(focus) : focus();
+        (target ?? panel).focus();
     }
 
     function selectTab(tab, { focus = false } = {}) {
         activeTab = tab;
+        openMenu = null;
         render();
         if (focus) document.getElementById(`tab-${tab}`)?.focus();
+    }
+
+    function toggleFavorite(star) {
+        const id = star.dataset.favoriteId;
+        const stars = [...panel.querySelectorAll(".favorite-toggle")];
+        const position = stars.indexOf(star);
+        const sameId = stars.filter((s) => s.dataset.favoriteId === id);
+        const occurrence = sameId.indexOf(star);
+        const added = favorites.toggle(id);
+        announce(
+            i18n.t(added ? "favorites.added" : "favorites.removed", {
+                device: nameOf(findById(id)),
+            }),
+        );
+        // Odak aynı yıldızda kalır; satır kaybolduysa (Favoriler sekmesinden
+        // çıkarıldıysa) aynı sıradaki yıldıza geçer
+        render({
+            focus: () => {
+                const after = [...panel.querySelectorAll(".favorite-toggle")];
+                const same = after.filter((s) => s.dataset.favoriteId === id);
+                return (
+                    same[occurrence] ??
+                    after[Math.min(position, after.length - 1)]
+                );
+            },
+        });
     }
 
     tabList.addEventListener("click", (event) => {
@@ -199,26 +479,82 @@ export function createSidebar({
 
     // WAI-ARIA sekme kalıbı: ok tuşları, Home ve End (NFR-5.1)
     tabList.addEventListener("keydown", (event) => {
-        const index = TABS.indexOf(activeTab);
+        const index = ALL_TABS.indexOf(activeTab);
         const next = {
-            ArrowRight: (index + 1) % TABS.length,
-            ArrowLeft: (index - 1 + TABS.length) % TABS.length,
+            ArrowRight: (index + 1) % ALL_TABS.length,
+            ArrowLeft: (index - 1 + ALL_TABS.length) % ALL_TABS.length,
             Home: 0,
-            End: TABS.length - 1,
+            End: ALL_TABS.length - 1,
         }[event.key];
         if (next === undefined) return;
         event.preventDefault();
-        selectTab(TABS[next], { focus: true });
+        selectTab(ALL_TABS[next], { focus: true });
     });
 
     search.addEventListener("input", () => {
         query = search.value;
+        openMenu = null;
         renderPanel();
     });
 
     panel.addEventListener("click", (event) => {
+        const star = event.target.closest(".favorite-toggle");
+        if (star) return toggleFavorite(star);
+        const handleButton = event.target.closest(".drag-handle");
+        if (handleButton) {
+            const id = handleButton.dataset.handleId;
+            openMenu = openMenu === id ? null : id;
+            render({
+                focus: openMenu
+                    ? ".favorite-menu [role=menuitem]"
+                    : `[data-handle-id="${id}"]`,
+            });
+            return;
+        }
+        const action = event.target.closest("[role=menuitem]");
+        if (action)
+            return runAction(action.dataset.action, action.dataset.menuFor);
         const button = event.target.closest("button[data-device-id]");
         if (button) onSelect(button.dataset.deviceId);
+    });
+
+    // WAI-ARIA menü kalıbı: ok tuşları, Home, End, Esc ve Tab (NFR-5.1)
+    panel.addEventListener("keydown", (event) => {
+        const menu = event.target.closest(".favorite-menu");
+        if (!menu) return;
+        const items = [...menu.querySelectorAll("[role=menuitem]")];
+        const index = items.indexOf(event.target);
+        const closeMenu = () => {
+            const id = openMenu;
+            openMenu = null;
+            render({ focus: `[data-handle-id="${id}"]` });
+        };
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeMenu();
+            return;
+        }
+        if (event.key === "Tab") {
+            closeMenu();
+            return;
+        }
+        const next = {
+            ArrowDown: (index + 1) % items.length,
+            ArrowUp: (index - 1 + items.length) % items.length,
+            Home: 0,
+            End: items.length - 1,
+        }[event.key];
+        if (next === undefined) return;
+        event.preventDefault();
+        items[next].focus();
+    });
+
+    // Menü dışına tıklanınca menü kapanır
+    document.addEventListener("pointerdown", (event) => {
+        if (!openMenu) return;
+        if (event.target.closest(".favorite-menu, .drag-handle")) return;
+        openMenu = null;
+        renderPanel();
     });
 
     return { render };

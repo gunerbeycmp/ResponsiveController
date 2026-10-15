@@ -19,6 +19,7 @@ async function openPreview(page) {
 test("sekmeler ve gruplar (FR-3.1, FR-3.3, FR-3.4)", async ({ page }) => {
     await page.goto(APP_URL);
     await expect(page.getByRole("tab")).toHaveText([
+        "Favoriler",
         "Telefon",
         "Tablet",
         "Saat",
@@ -60,7 +61,7 @@ test("sekmeler klavyeyle değiştirilir (WAI-ARIA)", async ({ page }) => {
     await page.keyboard.press("End");
     await expect(tab(page, "Bilgisayar")).toBeFocused();
     await page.keyboard.press("ArrowRight");
-    await expect(tab(page, "Telefon")).toBeFocused();
+    await expect(tab(page, "Favoriler")).toBeFocused();
     await page.keyboard.press("ArrowLeft");
     await expect(tab(page, "Bilgisayar")).toBeFocused();
 });

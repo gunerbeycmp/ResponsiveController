@@ -67,5 +67,19 @@
     "badge.foldable": "Foldable",
     "resolution.devices": "{count} devices",
     "resolution.devicesOne": "1 device",
-    "frame.watchAdaptation": "Apple Watch draws pages 320 pixels wide and shrinks them to fit the screen."
+    "frame.watchAdaptation": "Apple Watch draws pages 320 pixels wide and shrinks them to fit the screen.",
+    "category.favorites": "Favorites",
+    "favorites.empty": "No favorites yet. Use the ☆ next to a device to add one.",
+    "favorites.add": "Add {device} to favorites",
+    "favorites.remove": "Remove {device} from favorites",
+    "favorites.added": "{device} added to favorites.",
+    "favorites.removed": "{device} removed from favorites.",
+    "group.frequent": "Frequently used favorites",
+    "favorites.dropHint": "Drop here to add to frequently used",
+    "favorites.handle": "Move {device}",
+    "favorites.moveToFrequent": "Move to frequently used",
+    "favorites.removeFromFrequent": "Remove from frequently used",
+    "favorites.moveUp": "Move up",
+    "favorites.moveDown": "Move down",
+    "favorites.moved": "{device} moved to position {position}."
 }

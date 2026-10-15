@@ -7,6 +7,7 @@ import {
 } from "../../app/src/devices/devices.js";
 import {
     TABS,
+    buildFavorites,
     buildTab,
     searchDevices,
     tabOf,
@@ -120,5 +121,46 @@ describe("cihaz yardımcıları", () => {
     it("sekmesi olmayan genel boyutlar Telefon sekmesine düşer", () => {
         expect(tabOf(findDevice("small-phone"))).toBe("phone");
         expect(tabOf(findDevice("macbook-pro-14"))).toBe("computer");
+    });
+});
+
+describe("Favoriler sekmesi (FR-3.2)", () => {
+    it("favori yoksa grup yok", () => {
+        expect(buildFavorites(DEVICES, [])).toEqual([]);
+    });
+
+    it("kategorilere göre gruplar, grup içinde ekleme sırasını korur", () => {
+        const groups = buildFavorites(DEVICES, [
+            "ipad-11th-gen",
+            "galaxy-s24",
+            "full-hd",
+            "iphone-17",
+            "bilinmeyen",
+        ]);
+        expect(groups.map((g) => g.category)).toEqual([
+            "phone",
+            "tablet",
+            "generic",
+        ]);
+        expect(groups[0].items.map((d) => d.id)).toEqual([
+            "galaxy-s24",
+            "iphone-17",
+        ]);
+    });
+
+    it("sık kullanılanlar en üstte, elle belirlenen sırayla", () => {
+        const groups = buildFavorites(
+            DEVICES,
+            ["iphone-17", "galaxy-s24", "ipad-11th-gen"],
+            ["ipad-11th-gen", "iphone-17"],
+        );
+        expect(groups[0].type).toBe("frequent");
+        expect(groups[0].items.map((d) => d.id)).toEqual([
+            "ipad-11th-gen",
+            "iphone-17",
+        ]);
+        // Sık kullanılanlardaki cihaz kategori grubunda tekrar edilmez
+        expect(groups.slice(1).map((g) => g.category)).toEqual(["phone"]);
+        expect(groups[1].items.map((d) => d.id)).toEqual(["galaxy-s24"]);
     });
 });

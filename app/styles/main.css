@@ -724,14 +724,15 @@ input {
     gap: 6px;
 }
 
-.resolution-line {
+.device-row {
     display: flex;
     align-items: flex-start;
     gap: 4px;
 }
 
-.resolution-line .device-button {
+.device-row .device-button {
     flex: 1;
+    min-width: 0;
 }
 
 .resolution-toggle {
@@ -760,4 +761,113 @@ input {
     margin: 0;
     color: var(--text-secondary);
     font-size: 12px;
+}
+
+/* Favoriler (FR-3.2, v0.3.2) */
+.favorite-toggle,
+.drag-handle {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    margin-top: 6px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.favorite-toggle {
+    opacity: 0;
+}
+
+.favorite-toggle.is-favorite {
+    color: var(--accent);
+}
+
+/* Yıldız fareyle üzerine gelince, klavyeyle satıra gelince ve favorideyken
+   görünür; dokunmatik ekranlarda her zaman görünür (R-59) */
+.device-row:hover .favorite-toggle,
+.device-row:focus-within .favorite-toggle,
+.favorite-toggle.is-favorite {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .favorite-toggle {
+        opacity: 1;
+    }
+}
+
+.drag-handle {
+    width: 20px;
+    letter-spacing: -3px;
+    cursor: grab;
+    touch-action: none;
+}
+
+.favorite-toggle:hover,
+.drag-handle:hover,
+.drag-handle[aria-expanded="true"] {
+    border-color: var(--border);
+}
+
+.favorite-menu {
+    margin: 2px 0 6px 24px;
+    padding: 4px;
+    list-style: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.favorite-menu button {
+    width: 100%;
+    padding: 6px 8px;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.favorite-menu button:hover,
+.favorite-menu button:focus-visible {
+    background: var(--surface);
+}
+
+.frequent-drop {
+    display: none;
+    margin-top: 6px;
+    padding: 6px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.is-dragging .frequent-drop {
+    display: block;
+}
+
+.drop-hint {
+    margin: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.frequent-drop .device-list {
+    min-height: 32px;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-fallback {
+    opacity: 0.9;
+    background: var(--surface);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }

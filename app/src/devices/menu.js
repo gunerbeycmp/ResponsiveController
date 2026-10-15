@@ -66,6 +66,23 @@ export function buildTab(devices, tab) {
     return groups;
 }
 
+// Favoriler sekmesi: önce "Sık kullanılan favoriler" (elle sıralı), sonra
+// kalan favoriler kategorilere göre, ekleme sırasıyla (FR-3.2)
+export function buildFavorites(devices, ids, frequent = []) {
+    const byId = new Map(devices.map((d) => [d.id, d]));
+    const pick = (list) => list.map((id) => byId.get(id)).filter(Boolean);
+    const groups = [];
+    const top = pick(frequent);
+    if (top.length > 0) groups.push({ type: "frequent", items: top });
+    const rest = pick(ids.filter((id) => !frequent.includes(id)));
+    for (const category of [...TABS, "generic"]) {
+        const items = rest.filter((d) => d.category === category);
+        if (items.length > 0)
+            groups.push({ type: "category", category, items });
+    }
+    return groups;
+}
+
 const normalize = (text) =>
     text
         .toLocaleLowerCase("tr")
