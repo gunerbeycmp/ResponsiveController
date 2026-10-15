@@ -134,7 +134,22 @@
                                 hidden
                             ></span>
                         </label>
+                        <button
+                            class="warnings-toggle"
+                            id="warnings-toggle"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="warnings-panel"
+                            hidden
+                        >
+                            <span aria-hidden="true">⚠</span>
+                            <span id="warnings-label"></span>
+                            <span class="help-chevron" aria-hidden="true"
+                                >▾</span
+                            >
+                        </button>
                     </div>
+                    <ul class="warnings-panel" id="warnings-panel" hidden></ul>
                     <div class="frame-viewport" id="frame-viewport">
                         <iframe id="preview-iframe"></iframe>
                     </div>
@@ -166,6 +181,15 @@
                                 Bu boyutta yeni pencerede aç
                             </button>
                             <p class="help-note" data-i18n="help.note"></p>
+                            <p data-i18n="help.uploadHint"></p>
+                            <button
+                                class="button-ghost"
+                                id="help-upload"
+                                type="button"
+                                data-i18n="help.uploadButton"
+                            >
+                                Projeni yükle
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -225,6 +249,27 @@
                 role="status"
                 aria-live="polite"
             ></p>
+            <section class="source-warning" id="source-warning" hidden>
+                <p data-i18n="upload.sourceWarning"></p>
+                <div class="upload-actions">
+                    <button
+                        class="button-ghost"
+                        id="source-cancel"
+                        type="button"
+                        data-i18n="upload.cancel"
+                    >
+                        Vazgeç
+                    </button>
+                    <button
+                        class="button-primary"
+                        id="source-open"
+                        type="button"
+                        data-i18n="upload.openAnyway"
+                    >
+                        Yine de aç
+                    </button>
+                </div>
+            </section>
             <section
                 class="entry-choice"
                 id="entry-choice"

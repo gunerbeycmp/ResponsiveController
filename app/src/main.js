@@ -64,6 +64,10 @@ const elements = {
     projectChip: $("project-chip"),
     projectName: $("project-name"),
     projectClose: $("project-close"),
+    warningsToggle: $("warnings-toggle"),
+    warningsLabel: $("warnings-label"),
+    warningsPanel: $("warnings-panel"),
+    helpUpload: $("help-upload"),
 };
 
 const sheet = createSheet({
@@ -102,12 +106,29 @@ function renderDeviceList() {
 }
 
 // Cihazı önizleme alanına sığacak şekilde ölçekler (FR-3.9'un ilk hâli)
+const MIN_FRAME_HEIGHT = 240;
+
 function layoutFrame() {
     if (!state.url) return;
     const device = findDevice(state.deviceId);
     const size = deviceSize(device, state.browserBars);
     const header = elements.frame.firstElementChild;
     const styles = getComputedStyle(elements.stage);
+    const reserved =
+        parseFloat(styles.paddingTop) +
+        parseFloat(styles.paddingBottom) +
+        header.offsetHeight +
+        (elements.warningsPanel.hidden
+            ? 0
+            : elements.warningsPanel.offsetHeight) +
+        20;
+    // Pencere yüksekliğinden hesaplanır: dar ekranda önizleme alanı içeriğe
+    // göre uzadığı için kendi yüksekliği kullanılırsa çerçeve ile alan
+    // birbirini büyüterek döngüye girer
+    const height = window.innerHeight - elements.stage.offsetTop - reserved;
+    // Açık yardım paneli çerçeveye çok az yer bırakıyorsa (dar ekranlar) yalnızca
+    // bağlantı hesaba katılır; panel altta kalır ve görünür alana kaydırılır
+    const withHelp = height - elements.help.offsetHeight;
     const available = {
         width:
             elements.stage.clientWidth -
@@ -115,12 +136,9 @@ function layoutFrame() {
             parseFloat(styles.paddingRight) -
             2,
         height:
-            elements.stage.clientHeight -
-            parseFloat(styles.paddingTop) -
-            parseFloat(styles.paddingBottom) -
-            header.offsetHeight -
-            elements.help.offsetHeight -
-            20,
+            withHelp >= MIN_FRAME_HEIGHT
+                ? withHelp
+                : height - elements.helpToggle.offsetHeight,
     };
     const scale = fitScale(size, available);
 
@@ -168,8 +186,31 @@ function renderProject() {
     }
 }
 
+// FR-1.7 - FR-1.10: proje açıldıktan sonra gösterilen uyarılar
+function renderWarnings() {
+    const warnings = state.project?.warnings ?? [];
+    elements.warningsToggle.hidden = warnings.length === 0;
+    if (warnings.length === 0) {
+        elements.warningsPanel.hidden = true;
+        elements.warningsToggle.setAttribute("aria-expanded", "false");
+        return;
+    }
+    elements.warningsLabel.textContent =
+        warnings.length === 1
+            ? i18n.t("warnings.toggleOne")
+            : i18n.t("warnings.toggle", { count: warnings.length });
+    elements.warningsPanel.replaceChildren(
+        ...warnings.map(({ key, params }) => {
+            const item = document.createElement("li");
+            item.textContent = i18n.t(key, params);
+            return item;
+        }),
+    );
+}
+
 function render() {
     renderProject();
+    renderWarnings();
     const hasUrl = Boolean(state.url);
     elements.emptyState.hidden = hasUrl;
     elements.frame.hidden = !hasUrl;
@@ -222,10 +263,14 @@ const upload = createUploadDialog({
         status: $("upload-status"),
         entryChoice: $("entry-choice"),
         entryList: $("entry-list"),
+        sourceWarning: $("source-warning"),
+        sourceCancel: $("source-cancel"),
+        sourceOpen: $("source-open"),
     },
-    onProject: async ({ name, files, entry }) => {
+    onProject: async ({ name, files, entry, warnings }) => {
+        const fileCount = files.length;
         await bridge.loadProject(files, entry);
-        state.project = { name, entry, fileCount: files.length };
+        state.project = { name, entry, fileCount, warnings };
         state.url = bridge.previewUrl(entry);
         elements.input.value = entry;
         showError(null);
@@ -255,6 +300,17 @@ function closeProject() {
 }
 
 elements.projectClose.addEventListener("click", closeProject);
+
+elements.warningsToggle.addEventListener("click", () => {
+    const open =
+        elements.warningsToggle.getAttribute("aria-expanded") !== "true";
+    elements.warningsToggle.setAttribute("aria-expanded", String(open));
+    elements.warningsPanel.hidden = !open;
+    layoutFrame();
+});
+
+// FR-2.3: "Site açılmıyor" yardımından proje yükleme
+elements.helpUpload.addEventListener("click", () => upload.open());
 
 // Önizlemede sayfa değişince yardımcı betik yeni yolu bildirir (R-40)
 window.addEventListener("message", (event) => {
@@ -334,6 +390,12 @@ elements.languageToggle.addEventListener("click", () => {
 elements.themeToggle.addEventListener("click", () => theme.toggle());
 theme.onChange(renderChrome);
 
-new ResizeObserver(layoutFrame).observe(elements.stage);
+// Boyutlandırma bir sonraki çizim karesine ertelenir; aksi hâlde çerçevenin
+// boyutu değişince gözlemci kendini yeniden tetikler (ResizeObserver loop)
+let layoutRequest = 0;
+new ResizeObserver(() => {
+    cancelAnimationFrame(layoutRequest);
+    layoutRequest = requestAnimationFrame(layoutFrame);
+}).observe(elements.stage);
 
 renderChrome();

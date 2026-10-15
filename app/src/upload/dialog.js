@@ -1,3 +1,4 @@
+import { isSourceProject, projectWarnings } from "./checks.js";
 import { UploadError, resolveProject } from "./project.js";
 import {
     fromDataTransfer,
@@ -22,9 +23,13 @@ export function createUploadDialog({ elements, t, onProject }) {
         status,
         entryChoice,
         entryList,
+        sourceWarning,
+        sourceCancel,
+        sourceOpen,
     } = elements;
 
     let busy = false;
+    let pendingOpen = null;
 
     const folderSupported = supportsFolderPicker(folderInput);
     chooseFolder.hidden = !folderSupported;
@@ -40,6 +45,8 @@ export function createUploadDialog({ elements, t, onProject }) {
         setStatus(null);
         entryChoice.hidden = true;
         entryList.replaceChildren();
+        sourceWarning.hidden = true;
+        pendingOpen = null;
         dropzone.dataset.active = "false";
     }
 
@@ -54,7 +61,8 @@ export function createUploadDialog({ elements, t, onProject }) {
 
     async function finish(name, project, entry) {
         try {
-            await onProject({ name, files: project.files, entry });
+            const warnings = projectWarnings({ files: project.files, entry });
+            await onProject({ name, files: project.files, entry, warnings });
             close();
         } catch {
             setStatus("upload.error.previewUnavailable", { error: true });
@@ -97,11 +105,20 @@ export function createUploadDialog({ elements, t, onProject }) {
         try {
             const files = await readUpload(items);
             const project = resolveProject(files);
-            if (project.entry) {
-                await finish(name, project, project.entry);
-            } else {
-                askForEntry(name, project);
+            const proceed = () =>
+                project.entry
+                    ? finish(name, project, project.entry)
+                    : askForEntry(name, project);
+            // FR-1.9: derlenmemiş kaynak kod; kullanıcı onaylarsa devam edilir
+            if (isSourceProject(project.files.map((file) => file.path))) {
+                setStatus(null);
+                sourceWarning.hidden = false;
+                pendingOpen = proceed;
+                sourceOpen.focus();
+                busy = false;
+                return;
             }
+            await proceed();
         } catch (error) {
             busy = false;
             const reason =
@@ -109,6 +126,17 @@ export function createUploadDialog({ elements, t, onProject }) {
             setStatus(`upload.error.${reason}`, { error: true });
         }
     }
+
+    sourceCancel.addEventListener("click", close);
+    sourceOpen.addEventListener("click", () => {
+        if (!pendingOpen) return;
+        const proceed = pendingOpen;
+        sourceWarning.hidden = true;
+        pendingOpen = null;
+        busy = true;
+        setStatus("upload.processing");
+        proceed();
+    });
 
     openButton.addEventListener("click", open);
     closeButton.addEventListener("click", close);

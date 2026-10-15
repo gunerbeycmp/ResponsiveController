@@ -79,10 +79,17 @@ test.describe("dar ekran", () => {
         await expect(page.locator("#help-panel")).toBeInViewport({
             ratio: 1,
         });
-        // Panel alttaki cihaz panelinin arkasında kalmamalı
-        const help = await page.locator("#help-panel").boundingBox();
-        const sheet = await page.locator("#sidebar").boundingBox();
-        expect(help.y + help.height).toBeLessThanOrEqual(sheet.y);
+        // Yumuşak kaydırma bitince panel alttaki cihaz panelinin arkasında kalmamalı
+        await expect
+            .poll(async () => {
+                const help = await page.locator("#help-panel").boundingBox();
+                const sheet = await page.locator("#sidebar").boundingBox();
+                return sheet.y - (help.y + help.height);
+            })
+            .toBeGreaterThanOrEqual(0);
+        // Çerçeve tam boyuta büyümemeli, alana sığacak şekilde küçük kalmalı
+        const frame = await page.locator("#frame-viewport").boundingBox();
+        expect(frame.height).toBeLessThan(812);
     });
 
     test("cihazlar alttan açılan panelde, klavyeyle kapanır (R-51)", async ({

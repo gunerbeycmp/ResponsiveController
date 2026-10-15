@@ -45,5 +45,14 @@
     "upload.cancel": "Vazgeç",
     "project.summary": "{name} · {count} dosya",
     "project.close": "Projeyi kapat",
-    "project.pathLabel": "Proje içindeki sayfa"
+    "project.pathLabel": "Proje içindeki sayfa",
+    "upload.sourceWarning": "Bu bir kaynak kod projesi gibi görünüyor (package.json ve src/ var). Doğru görünmesi için önce npm run build ile derleyip dist klasörünü yükle.",
+    "upload.openAnyway": "Yine de aç",
+    "warnings.toggle": "{count} uyarı",
+    "warnings.toggleOne": "1 uyarı",
+    "warnings.viewport": "Bu sayfada viewport etiketi yok. Gerçek telefonlar sayfayı masaüstü genişliğinde çizip küçültür, önizleme farklı görünebilir.",
+    "warnings.serverFiles": "Bu dosyalar tarayıcıda çalışmaz, bu sayfalar önizlemede boş ya da hatalı görünebilir: {files}",
+    "warnings.missingFiles": "Bulunamayan dosyalar: {files}",
+    "help.uploadHint": "Kendi projense yükleyerek test edebilirsin.",
+    "help.uploadButton": "Projeni yükle"
 }

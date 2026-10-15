@@ -45,5 +45,14 @@
     "upload.cancel": "Cancel",
     "project.summary": "{name} · {count} files",
     "project.close": "Close project",
-    "project.pathLabel": "Page in the project"
+    "project.pathLabel": "Page in the project",
+    "upload.sourceWarning": "This looks like a source code project (it has package.json and src/). Build it first with npm run build and upload the dist folder.",
+    "upload.openAnyway": "Open anyway",
+    "warnings.toggle": "{count} warnings",
+    "warnings.toggleOne": "1 warning",
+    "warnings.viewport": "This page has no viewport tag. Real phones draw it at desktop width and shrink it, so the preview may look different.",
+    "warnings.serverFiles": "These files don't run in the browser, so these pages may look empty or broken: {files}",
+    "warnings.missingFiles": "Missing files: {files}",
+    "help.uploadHint": "If it's your own project, you can upload it to test.",
+    "help.uploadButton": "Upload your project"
 }

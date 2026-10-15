@@ -9,6 +9,7 @@
     --on-accent: #ffffff;
     --border: #7e8396;
     --error: #b42318;
+    --warning: #8a5300;
     --radius: 8px;
     --sidebar-width: 240px;
     font-family: "Inter Variable", system-ui, sans-serif;
@@ -25,6 +26,7 @@
         --on-accent: #0f1117;
         --border: #666c80;
         --error: #ff8a80;
+        --warning: #f5c26b;
     }
 }
 
@@ -38,6 +40,7 @@
     --on-accent: #0f1117;
     --border: #666c80;
     --error: #ff8a80;
+    --warning: #f5c26b;
 }
 
 *,
@@ -620,4 +623,51 @@ input {
         flex: 0 0 100%;
         max-width: none;
     }
+}
+
+/* Proje uyarıları (FR-1.7 - FR-1.10) ve kaynak kod uyarısı (FR-1.9) */
+.warnings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    background: transparent;
+    border: 1px solid var(--warning);
+    border-radius: 999px;
+    color: var(--warning);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.warnings-toggle[aria-expanded="true"] .help-chevron {
+    transform: rotate(180deg);
+}
+
+.warnings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 10px 14px 10px 30px;
+    background: var(--surface);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.source-warning {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius);
+}
+
+.source-warning p {
+    margin: 0;
+}
+
+.source-warning .upload-actions {
+    margin-top: 12px;
 }
