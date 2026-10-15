@@ -206,7 +206,7 @@ test.describe("dar ekran", () => {
         await expect(upload).toContainText("Yükle");
         const button = await upload.boundingBox();
         const open = await page
-            .getByRole("button", { name: "Aç" })
+            .getByRole("button", { name: "Aç", exact: true })
             .boundingBox();
         const input = await page.locator("#url-input").boundingBox();
         const logo = await page.locator(".logo").boundingBox();

@@ -88,7 +88,7 @@
                     class="sheet-toggle"
                     id="sheet-toggle"
                     type="button"
-                    aria-controls="device-list"
+                    aria-controls="sidebar-panel"
                 >
                     <span class="sheet-handle" aria-hidden="true"></span>
                     <span id="sheet-toggle-label" data-i18n="sheet.show"
@@ -103,7 +103,31 @@
                     >
                         Cihazlar
                     </h2>
-                    <ul class="device-list" id="device-list"></ul>
+                    <label
+                        class="visually-hidden"
+                        for="device-search"
+                        data-i18n="sidebar.searchLabel"
+                        >Cihaz ara</label
+                    >
+                    <input
+                        class="device-search"
+                        id="device-search"
+                        type="search"
+                        autocomplete="off"
+                        data-i18n-placeholder="sidebar.searchPlaceholder"
+                    />
+                    <div
+                        class="tabs"
+                        id="device-tabs"
+                        role="tablist"
+                        aria-labelledby="sidebar-title"
+                    ></div>
+                    <div
+                        class="device-panel"
+                        id="device-list"
+                        role="tabpanel"
+                        tabindex="-1"
+                    ></div>
                 </div>
             </aside>
 
@@ -149,6 +173,12 @@
                             >
                         </button>
                     </div>
+                    <p
+                        class="frame-note"
+                        id="frame-note"
+                        data-i18n="frame.watchAdaptation"
+                        hidden
+                    ></p>
                     <ul class="warnings-panel" id="warnings-panel" hidden></ul>
                     <div class="frame-viewport" id="frame-viewport">
                         <iframe id="preview-iframe"></iframe>

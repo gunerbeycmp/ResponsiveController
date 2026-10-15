@@ -6,15 +6,22 @@ import {
     findDevice,
     fitScale,
 } from "../../app/src/devices/devices.js";
-import en from "../../app/src/i18n/en.json";
-import tr from "../../app/src/i18n/tr.json";
 
 describe("cihaz verisi (Teknik Tasarım 6)", () => {
     it("her cihazın zorunlu alanları var", () => {
         for (const device of DEVICES) {
             expect(device.id).toBeTruthy();
-            expect(device.name || device.nameKey).toBeTruthy();
-            expect(["phone", "tablet", "computer"]).toContain(device.category);
+            expect(
+                device.name || (device.names?.tr && device.names?.en),
+            ).toBeTruthy();
+            expect([
+                "phone",
+                "tablet",
+                "watch",
+                "tv",
+                "computer",
+                "generic",
+            ]).toContain(device.category);
             expect(device.screen.width).toBeGreaterThan(0);
             expect(device.screen.height).toBeGreaterThan(0);
             expect(typeof device.estimated).toBe("boolean");
@@ -37,10 +44,27 @@ describe("cihaz verisi (Teknik Tasarım 6)", () => {
         }
     });
 
-    it("çeviri anahtarı kullanan cihazların iki dilde de adı var", () => {
-        for (const device of DEVICES.filter((d) => d.nameKey)) {
-            expect(tr[device.nameKey]).toBeTruthy();
-            expect(en[device.nameKey]).toBeTruthy();
+    it("çevrilen adlar iki dilde de var", () => {
+        for (const device of DEVICES.filter((d) => d.names)) {
+            expect(device.names.tr).toBeTruthy();
+            expect(device.names.en).toBeTruthy();
+        }
+    });
+
+    it("onaylanan listeyle aynı sayıda cihaz var (93)", () => {
+        expect(DEVICES.filter((d) => !d.generated)).toHaveLength(93);
+    });
+
+    it("katlanabilir hâller ikişer, açık ve katlı", () => {
+        const groups = Object.groupBy(
+            DEVICES.filter((d) => d.foldable),
+            (d) => d.foldable.group,
+        );
+        for (const items of Object.values(groups)) {
+            expect(items.map((d) => d.foldable.state).sort()).toEqual([
+                "folded",
+                "open",
+            ]);
         }
     });
 });
@@ -52,7 +76,7 @@ describe("cihaz yardımcıları", () => {
 
     it("görünür alan yalnızca değeri varsa kullanılır", () => {
         const phone = findDevice("iphone-17");
-        const desktop = findDevice("desktop");
+        const desktop = findDevice("1920-x-1080");
         expect(deviceSize(phone, true)).toEqual(phone.visibleArea);
         expect(deviceSize(phone, false)).toEqual(phone.screen);
         expect(deviceSize(desktop, true)).toEqual(desktop.screen);

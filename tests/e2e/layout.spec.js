@@ -8,7 +8,7 @@ test.use({ locale: "tr-TR" });
 async function openTarget(page) {
     await page.goto(APP_URL);
     await page.getByLabel("Test edilecek sitenin adresi").fill(TARGET);
-    await page.getByRole("button", { name: "Aç" }).click();
+    await page.getByRole("button", { name: "Aç", exact: true }).click();
 }
 
 test("URL girilince seçili cihazda önizleme açılır (FR-2.1)", async ({
@@ -29,7 +29,7 @@ test("URL girilince seçili cihazda önizleme açılır (FR-2.1)", async ({
 test("geçersiz adreste hata mesajı gösterilir", async ({ page }) => {
     await page.goto(APP_URL);
     await page.getByLabel("Test edilecek sitenin adresi").fill("192.168.1.5");
-    await page.getByRole("button", { name: "Aç" }).click();
+    await page.getByRole("button", { name: "Aç", exact: true }).click();
     await expect(page.locator("#url-error")).toContainText(
         "Yerel ağ adresleri",
     );
@@ -47,11 +47,11 @@ test("cihaz seçimi ve tarayıcı çubukları görünümü (FR-3.14)", async ({
         .check();
     await expect(page.locator("#frame-size")).toHaveText("402 × 681");
 
-    await page.getByRole("button", { name: /Masaüstü/ }).click();
+    await page.locator('[data-device-id="full-hd"]').click();
     await expect(page.locator("#frame-size")).toHaveText("1920 × 1080");
     await expect(page.locator("#browser-bars-option")).toBeHidden();
 
-    await page.getByRole("button", { name: /Galaxy S24/ }).click();
+    await page.locator('[data-device-id="galaxy-s24"]').first().click();
     await expect(page.locator("#browser-bars-estimated")).toHaveText("tahmini");
 });
 
@@ -104,9 +104,8 @@ test.describe("dar ekran", () => {
         await expect(toggle).toHaveAttribute("aria-expanded", "true");
         await expect(toggle).toHaveAccessibleName("Cihazları gizle");
         await expect(page.locator("#device-list")).toBeVisible();
-        await expect(
-            page.getByRole("button", { name: /iPhone 17/ }),
-        ).toBeFocused();
+        // Panel açılınca odak ilk öğeye, arama kutusuna geçer
+        await expect(page.getByLabel("Cihaz ara")).toBeFocused();
 
         await page.keyboard.press("Escape");
         await expect(toggle).toHaveAttribute("aria-expanded", "false");

@@ -1,74 +1,1653 @@
 [
     {
+        "id": "iphone-17-pro-max",
+        "name": "iPhone 17 Pro Max",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 440,
+            "height": 956
+        },
+        "visibleArea": {
+            "width": 440,
+            "height": 763
+        },
+        "dpr": 3,
+        "popular": true,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi"
+    },
+    {
+        "id": "iphone-17-pro",
+        "name": "iPhone 17 Pro",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 402,
+            "height": 874
+        },
+        "visibleArea": {
+            "width": 402,
+            "height": 681
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi"
+    },
+    {
         "id": "iphone-17",
         "name": "iPhone 17",
         "brand": "Apple",
         "category": "phone",
-        "screen": { "width": 402, "height": 874 },
-        "visibleArea": { "width": 402, "height": 681 },
+        "screen": {
+            "width": 402,
+            "height": 874
+        },
+        "visibleArea": {
+            "width": 402,
+            "height": 681
+        },
         "dpr": 3,
         "popular": true,
         "year": 2025,
         "estimated": false,
-        "source": "Playwright cihaz listesi (screen ve viewport)"
+        "source": "Playwright cihaz listesi + yesviz.com"
     },
     {
-        "id": "pixel-9",
-        "name": "Google Pixel 9",
-        "brand": "Google",
+        "id": "iphone-air",
+        "name": "iPhone Air",
+        "brand": "Apple",
         "category": "phone",
-        "screen": { "width": 360, "height": 808 },
-        "visibleArea": { "width": 360, "height": 732 },
+        "screen": {
+            "width": 420,
+            "height": 912
+        },
+        "visibleArea": {
+            "width": 420,
+            "height": 719
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-17e",
+        "name": "iPhone 17e",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 390,
+            "height": 844
+        },
+        "visibleArea": {
+            "width": 390,
+            "height": 651
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2026,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-16-pro-max",
+        "name": "iPhone 16 Pro Max",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 440,
+            "height": 956
+        },
+        "visibleArea": {
+            "width": 440,
+            "height": 763
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-16-pro",
+        "name": "iPhone 16 Pro",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 402,
+            "height": 874
+        },
+        "visibleArea": {
+            "width": 402,
+            "height": 681
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-16-plus",
+        "name": "iPhone 16 Plus",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 430,
+            "height": 932
+        },
+        "visibleArea": {
+            "width": 430,
+            "height": 739
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-16",
+        "name": "iPhone 16",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 393,
+            "height": 852
+        },
+        "visibleArea": {
+            "width": 393,
+            "height": 659
+        },
         "dpr": 3,
         "popular": true,
         "year": 2024,
         "estimated": false,
-        "source": "Playwright cihaz listesi (screen ve viewport)"
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-16e",
+        "name": "iPhone 16e",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 390,
+            "height": 844
+        },
+        "visibleArea": {
+            "width": 390,
+            "height": 651
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi"
+    },
+    {
+        "id": "iphone-15-pro-max",
+        "name": "iPhone 15 Pro Max",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 430,
+            "height": 932
+        },
+        "visibleArea": {
+            "width": 430,
+            "height": 739
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-15-pro",
+        "name": "iPhone 15 Pro",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 393,
+            "height": 852
+        },
+        "visibleArea": {
+            "width": 393,
+            "height": 659
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-15-plus",
+        "name": "iPhone 15 Plus",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 430,
+            "height": 932
+        },
+        "visibleArea": {
+            "width": 430,
+            "height": 739
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-15",
+        "name": "iPhone 15",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 393,
+            "height": 852
+        },
+        "visibleArea": {
+            "width": 393,
+            "height": 659
+        },
+        "dpr": 3,
+        "popular": true,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-14-pro-max",
+        "name": "iPhone 14 Pro Max",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 430,
+            "height": 932
+        },
+        "visibleArea": {
+            "width": 430,
+            "height": 740
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-14-pro",
+        "name": "iPhone 14 Pro",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 393,
+            "height": 852
+        },
+        "visibleArea": {
+            "width": 393,
+            "height": 660
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-14-plus",
+        "name": "iPhone 14 Plus",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 428,
+            "height": 926
+        },
+        "visibleArea": {
+            "width": 428,
+            "height": 746
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-14",
+        "name": "iPhone 14",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 390,
+            "height": 844
+        },
+        "visibleArea": {
+            "width": 390,
+            "height": 664
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-13",
+        "name": "iPhone 13",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 390,
+            "height": 844
+        },
+        "visibleArea": {
+            "width": 390,
+            "height": 664
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2021,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-13-mini",
+        "name": "iPhone 13 mini",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 375,
+            "height": 812
+        },
+        "visibleArea": {
+            "width": 375,
+            "height": 629
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2021,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "note": "yesviz 360 × 780 diyor; Apple mini modellerde 375 puan kullandığı için Playwright değeri seçildi"
+    },
+    {
+        "id": "iphone-12",
+        "name": "iPhone 12",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 390,
+            "height": 844
+        },
+        "visibleArea": {
+            "width": 390,
+            "height": 664
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2020,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-11",
+        "name": "iPhone 11",
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 414,
+            "height": 896
+        },
+        "visibleArea": {
+            "width": 414,
+            "height": 715
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2019,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "iphone-se-3rd-gen",
+        "names": {
+            "tr": "iPhone SE (3. nesil)",
+            "en": "iPhone SE (3rd gen)"
+        },
+        "brand": "Apple",
+        "category": "phone",
+        "screen": {
+            "width": 375,
+            "height": 667
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "galaxy-s26-ultra",
+        "name": "Galaxy S26 Ultra",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 891
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2026,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-s26-plus",
+        "name": "Galaxy S26+",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 891
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2026,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-s26",
+        "name": "Galaxy S26",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 780
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2026,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-s25-ultra",
+        "name": "Galaxy S25 Ultra",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 891
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-s25-plus",
+        "name": "Galaxy S25+",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 891
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-s25",
+        "name": "Galaxy S25",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 780
+        },
+        "dpr": 3,
+        "popular": true,
+        "year": 2025,
+        "estimated": false,
+        "source": "yesviz.com"
     },
     {
         "id": "galaxy-s24",
-        "name": "Samsung Galaxy S24",
+        "name": "Galaxy S24",
         "brand": "Samsung",
         "category": "phone",
-        "screen": { "width": 360, "height": 780 },
-        "visibleArea": { "width": 360, "height": 704 },
+        "screen": {
+            "width": 360,
+            "height": 780
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 704
+        },
         "dpr": 3,
         "popular": true,
         "year": 2024,
         "estimated": true,
-        "source": "Tam ekran: Playwright + yesviz.com. Görünür alan tahmini (D-07)."
+        "source": "Tam ekran: Playwright + yesviz.com. Görünür alan tahmini (D-07)"
     },
     {
-        "id": "ipad-11",
-        "name": "iPad (11. nesil)",
+        "id": "galaxy-s23",
+        "name": "Galaxy S23",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 780
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-a55",
+        "name": "Galaxy A55",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 892
+        },
+        "dpr": 2.625,
+        "popular": true,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Playwright 480 × 1040 (2.25) diyor; kullanıcı kararıyla yesviz değeri seçildi"
+    },
+    {
+        "id": "galaxy-a35",
+        "name": "Galaxy A35",
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 892
+        },
+        "dpr": 2.625,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "galaxy-z-fold-7-open",
+        "names": {
+            "tr": "Galaxy Z Fold 7 · Açık",
+            "en": "Galaxy Z Fold 7 · Open"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 984,
+            "height": 1092
+        },
+        "visibleArea": {
+            "width": 984,
+            "height": 1016
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-fold-7",
+            "state": "open"
+        }
+    },
+    {
+        "id": "galaxy-z-fold-7-folded",
+        "names": {
+            "tr": "Galaxy Z Fold 7 · Katlı",
+            "en": "Galaxy Z Fold 7 · Folded"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 840
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 764
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-fold-7",
+            "state": "folded"
+        }
+    },
+    {
+        "id": "galaxy-z-fold-6-open",
+        "names": {
+            "tr": "Galaxy Z Fold 6 · Açık",
+            "en": "Galaxy Z Fold 6 · Open"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 928,
+            "height": 1080
+        },
+        "visibleArea": {
+            "width": 928,
+            "height": 1004
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-fold-6",
+            "state": "open"
+        }
+    },
+    {
+        "id": "galaxy-z-fold-6-folded",
+        "names": {
+            "tr": "Galaxy Z Fold 6 · Katlı",
+            "en": "Galaxy Z Fold 6 · Folded"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 484,
+            "height": 1188
+        },
+        "visibleArea": {
+            "width": 484,
+            "height": 1112
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-fold-6",
+            "state": "folded"
+        }
+    },
+    {
+        "id": "galaxy-z-flip-7-open",
+        "names": {
+            "tr": "Galaxy Z Flip 7 · Açık",
+            "en": "Galaxy Z Flip 7 · Open"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 840
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 764
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-flip-7",
+            "state": "open"
+        }
+    },
+    {
+        "id": "galaxy-z-flip-7-folded",
+        "names": {
+            "tr": "Galaxy Z Flip 7 · Katlı",
+            "en": "Galaxy Z Flip 7 · Folded"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 474,
+            "height": 524
+        },
+        "visibleArea": {
+            "width": 474,
+            "height": 448
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-flip-7",
+            "state": "folded"
+        }
+    },
+    {
+        "id": "galaxy-z-flip-6-open",
+        "names": {
+            "tr": "Galaxy Z Flip 6 · Açık",
+            "en": "Galaxy Z Flip 6 · Open"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 880
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 804
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-flip-6",
+            "state": "open"
+        }
+    },
+    {
+        "id": "galaxy-z-flip-6-folded",
+        "names": {
+            "tr": "Galaxy Z Flip 6 · Katlı",
+            "en": "Galaxy Z Flip 6 · Folded"
+        },
+        "brand": "Samsung",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 374
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 298
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "foldable": {
+            "group": "galaxy-z-flip-6",
+            "state": "folded"
+        }
+    },
+    {
+        "id": "google-pixel-10-pro-xl",
+        "name": "Google Pixel 10 Pro XL",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 448,
+            "height": 997
+        },
+        "visibleArea": {
+            "width": 448,
+            "height": 921
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi"
+    },
+    {
+        "id": "google-pixel-10-pro",
+        "name": "Google Pixel 10 Pro",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 427,
+            "height": 952
+        },
+        "visibleArea": {
+            "width": 427,
+            "height": 876
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi"
+    },
+    {
+        "id": "google-pixel-10",
+        "name": "Google Pixel 10",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 808
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 732
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "Playwright cihaz listesi"
+    },
+    {
+        "id": "google-pixel-9-pro-xl",
+        "name": "Google Pixel 9 Pro XL",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 448,
+            "height": 997
+        },
+        "visibleArea": {
+            "width": 448,
+            "height": 921
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-9-pro",
+        "name": "Google Pixel 9 Pro",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 427,
+            "height": 952
+        },
+        "visibleArea": {
+            "width": 427,
+            "height": 876
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-9",
+        "name": "Google Pixel 9",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 360,
+            "height": 808
+        },
+        "visibleArea": {
+            "width": 360,
+            "height": 732
+        },
+        "dpr": 3,
+        "popular": true,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-8-pro",
+        "name": "Google Pixel 8 Pro",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 448,
+            "height": 997
+        },
+        "visibleArea": {
+            "width": 448,
+            "height": 921
+        },
+        "dpr": 3,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-8",
+        "name": "Google Pixel 8",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 915
+        },
+        "visibleArea": {
+            "width": 412,
+            "height": 839
+        },
+        "dpr": 2.625,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-8a",
+        "name": "Google Pixel 8a",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 915
+        },
+        "visibleArea": {
+            "width": 412,
+            "height": 839
+        },
+        "dpr": 2.625,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-7-pro",
+        "name": "Google Pixel 7 Pro",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 892
+        },
+        "visibleArea": {
+            "width": 412,
+            "height": 816
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "google-pixel-7",
+        "name": "Google Pixel 7",
+        "brand": "Google",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 915
+        },
+        "visibleArea": {
+            "width": 412,
+            "height": 839
+        },
+        "dpr": 2.625,
+        "popular": false,
+        "year": 2022,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "oneplus-13",
+        "name": "OnePlus 13",
+        "brand": "OnePlus",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 905
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2025,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "oneplus-12",
+        "name": "OnePlus 12",
+        "brand": "OnePlus",
+        "category": "phone",
+        "screen": {
+            "width": 412,
+            "height": 905
+        },
+        "dpr": 3.5,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "ipad-pro-13-m4",
+        "name": "iPad Pro 13 (M4)",
         "brand": "Apple",
         "category": "tablet",
-        "screen": { "width": 820, "height": 1180 },
-        "visibleArea": { "width": 820, "height": 1106 },
+        "screen": {
+            "width": 1032,
+            "height": 1376
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "ipad-pro-11-m4",
+        "name": "iPad Pro 11 (M4)",
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": {
+            "width": 834,
+            "height": 1210
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "ipad-air-13-m2",
+        "name": "iPad Air 13 (M2)",
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": {
+            "width": 1024,
+            "height": 1366
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "ipad-air-11-m2",
+        "name": "iPad Air 11 (M2)",
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": {
+            "width": 820,
+            "height": 1180
+        },
+        "dpr": 2,
+        "popular": true,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "ipad-11th-gen",
+        "names": {
+            "tr": "iPad (11. nesil)",
+            "en": "iPad (11th gen)"
+        },
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": {
+            "width": 820,
+            "height": 1180
+        },
+        "visibleArea": {
+            "width": 820,
+            "height": 1106
+        },
         "dpr": 2,
         "popular": true,
         "year": 2025,
         "estimated": true,
-        "source": "Tam ekran: yesviz.com + Wikipedia. Görünür alan tahmini (D-07)."
+        "source": "Tam ekran: yesviz.com + Wikipedia. Görünür alan tahmini (D-07)"
+    },
+    {
+        "id": "ipad-mini-7th-gen",
+        "names": {
+            "tr": "iPad mini (7. nesil)",
+            "en": "iPad mini (7th gen)"
+        },
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": {
+            "width": 744,
+            "height": 1133
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2024,
+        "estimated": false,
+        "source": "yesviz.com"
+    },
+    {
+        "id": "ipad-9th-gen",
+        "names": {
+            "tr": "iPad (9. nesil)",
+            "en": "iPad (9th gen)"
+        },
+        "brand": "Apple",
+        "category": "tablet",
+        "screen": {
+            "width": 810,
+            "height": 1080
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2021,
+        "estimated": false,
+        "source": "Playwright cihaz listesi + yesviz.com"
+    },
+    {
+        "id": "galaxy-tab-s9",
+        "name": "Galaxy Tab S9",
+        "brand": "Samsung",
+        "category": "tablet",
+        "screen": {
+            "width": 640,
+            "height": 1024
+        },
+        "dpr": 2.5,
+        "popular": false,
+        "year": 2023,
+        "estimated": false,
+        "source": "Playwright cihaz listesi",
+        "note": "Tek kaynak"
+    },
+    {
+        "id": "huawei-matepad-pro",
+        "name": "Huawei MatePad Pro",
+        "brand": "Huawei",
+        "category": "tablet",
+        "screen": {
+            "width": 800,
+            "height": 1280
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": 2020,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Eski model, tek kaynak"
+    },
+    {
+        "id": "apple-watch-44-mm",
+        "name": "Apple Watch (44 mm)",
+        "brand": "Apple",
+        "category": "watch",
+        "screen": {
+            "width": 184,
+            "height": 224
+        },
+        "dpr": 2,
+        "popular": false,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Apple Watch sayfaları 320 px genişlikte çizip küçültür",
+        "layout": {
+            "width": 320,
+            "height": 390
+        }
+    },
+    {
+        "id": "apple-watch-40-mm",
+        "name": "Apple Watch (40 mm)",
+        "brand": "Apple",
+        "category": "watch",
+        "screen": {
+            "width": 162,
+            "height": 197
+        },
+        "dpr": 2,
+        "popular": false,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Apple Watch sayfaları 320 px genişlikte çizip küçültür",
+        "layout": {
+            "width": 320,
+            "height": 389
+        }
+    },
+    {
+        "id": "galaxy-watch",
+        "name": "Galaxy Watch",
+        "brand": "Samsung",
+        "category": "watch",
+        "screen": {
+            "width": 180,
+            "height": 180
+        },
+        "dpr": 2,
+        "popular": false,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Yuvarlak ekran; uyarlama davranışı bilinmiyor (R-58)"
+    },
+    {
+        "id": "huawei-watch-gt",
+        "name": "Huawei Watch GT",
+        "brand": "Huawei",
+        "category": "watch",
+        "screen": {
+            "width": 227,
+            "height": 227
+        },
+        "dpr": 2,
+        "popular": false,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Yuvarlak ekran; uyarlama davranışı bilinmiyor (R-58)"
+    },
+    {
+        "id": "tv-hd",
+        "name": "TV (HD)",
+        "category": "tv",
+        "screen": {
+            "width": 1280,
+            "height": 720
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Genel (ekran çözünürlüğü)",
+        "note": "R-58"
+    },
+    {
+        "id": "tv-full-hd",
+        "name": "TV (Full HD)",
+        "category": "tv",
+        "screen": {
+            "width": 1920,
+            "height": 1080
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Genel (ekran çözünürlüğü)",
+        "note": "R-58"
+    },
+    {
+        "id": "tv-4k-200-scale",
+        "names": {
+            "tr": "TV (4K, %200 ölçek)",
+            "en": "TV (4K, 200% scale)"
+        },
+        "category": "tv",
+        "screen": {
+            "width": 1920,
+            "height": 1080
+        },
+        "dpr": 2,
+        "popular": false,
+        "estimated": false,
+        "source": "Genel (ekran çözünürlüğü)",
+        "note": "3840 × 2160 ekran, %200 ölçek"
+    },
+    {
+        "id": "1920-x-1080",
+        "name": "1920 × 1080",
+        "category": "computer",
+        "screen": {
+            "width": 1920,
+            "height": 1080
+        },
+        "dpr": 1,
+        "popular": true,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1536-x-864",
+        "name": "1536 × 864",
+        "category": "computer",
+        "screen": {
+            "width": 1536,
+            "height": 864
+        },
+        "dpr": 1.25,
+        "popular": true,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "note": "Full HD dizüstüler %125 ölçekte",
+        "kind": "resolution"
+    },
+    {
+        "id": "1366-x-768",
+        "name": "1366 × 768",
+        "category": "computer",
+        "screen": {
+            "width": 1366,
+            "height": 768
+        },
+        "dpr": 1,
+        "popular": true,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1440-x-900",
+        "name": "1440 × 900",
+        "category": "computer",
+        "screen": {
+            "width": 1440,
+            "height": 900
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1280-x-720",
+        "name": "1280 × 720",
+        "category": "computer",
+        "screen": {
+            "width": 1280,
+            "height": 720
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1280-x-800",
+        "name": "1280 × 800",
+        "category": "computer",
+        "screen": {
+            "width": 1280,
+            "height": 800
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1600-x-900",
+        "name": "1600 × 900",
+        "category": "computer",
+        "screen": {
+            "width": 1600,
+            "height": 900
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1680-x-1050",
+        "name": "1680 × 1050",
+        "category": "computer",
+        "screen": {
+            "width": 1680,
+            "height": 1050
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "1920-x-1200",
+        "name": "1920 × 1200",
+        "category": "computer",
+        "screen": {
+            "width": 1920,
+            "height": 1200
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "2560-x-1440",
+        "name": "2560 × 1440",
+        "category": "computer",
+        "screen": {
+            "width": 2560,
+            "height": 1440
+        },
+        "dpr": 1,
+        "popular": false,
+        "estimated": false,
+        "source": "Yaygın çözünürlük",
+        "kind": "resolution"
+    },
+    {
+        "id": "macbook-air-pro-13-2560-x-1600-display",
+        "names": {
+            "tr": "MacBook Air / Pro 13 (2560 × 1600 ekran)",
+            "en": "MacBook Air / Pro 13 (2560 × 1600 display)"
+        },
+        "brand": "Apple",
+        "category": "computer",
+        "screen": {
+            "width": 1440,
+            "height": 900
+        },
+        "dpr": 2,
+        "popular": true,
+        "year": "2016-2022",
+        "estimated": false,
+        "source": "Ölçüm: kullanıcının MacBook'u (15.10.2026)",
+        "note": "Doğrulanmış",
+        "kind": "device"
+    },
+    {
+        "id": "macbook-air-13-m2-m4",
+        "name": "MacBook Air 13 (M2-M4)",
+        "brand": "Apple",
+        "category": "computer",
+        "screen": {
+            "width": 1470,
+            "height": 956
+        },
+        "dpr": 2,
+        "popular": true,
+        "year": "2022-2025",
+        "estimated": false,
+        "source": "Apple forumları",
+        "note": "yesviz 1280 × 832 diyor; kullanıcının Mac'indeki ölçüm tam yarı değerin kullanılmadığını gösterdi",
+        "kind": "device"
+    },
+    {
+        "id": "macbook-air-15-m2-m4",
+        "name": "MacBook Air 15 (M2-M4)",
+        "brand": "Apple",
+        "category": "computer",
+        "screen": {
+            "width": 1710,
+            "height": 1112
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": "2023-2025",
+        "estimated": false,
+        "source": "Apple forumları",
+        "note": "yesviz 1440 × 932 diyor",
+        "kind": "device"
+    },
+    {
+        "id": "macbook-pro-14",
+        "name": "MacBook Pro 14",
+        "brand": "Apple",
+        "category": "computer",
+        "screen": {
+            "width": 1512,
+            "height": 982
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": "2021-2025",
+        "estimated": false,
+        "source": "yesviz.com + Apple forumları",
+        "kind": "device"
+    },
+    {
+        "id": "macbook-pro-16",
+        "name": "MacBook Pro 16",
+        "brand": "Apple",
+        "category": "computer",
+        "screen": {
+            "width": 1728,
+            "height": 1117
+        },
+        "dpr": 2,
+        "popular": false,
+        "year": "2021-2025",
+        "estimated": false,
+        "source": "yesviz.com",
+        "kind": "device"
+    },
+    {
+        "id": "surface-laptop",
+        "name": "Surface Laptop",
+        "brand": "Microsoft",
+        "category": "computer",
+        "screen": {
+            "width": 1504,
+            "height": 1003
+        },
+        "dpr": 1.5,
+        "popular": false,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Eski modeller",
+        "kind": "device"
+    },
+    {
+        "id": "surface-pro",
+        "name": "Surface Pro",
+        "brand": "Microsoft",
+        "category": "computer",
+        "screen": {
+            "width": 1368,
+            "height": 912
+        },
+        "dpr": 2,
+        "popular": false,
+        "estimated": false,
+        "source": "yesviz.com",
+        "note": "Eski modeller",
+        "kind": "device"
+    },
+    {
+        "id": "small-phone",
+        "names": {
+            "tr": "Küçük telefon",
+            "en": "Small phone"
+        },
+        "category": "generic",
+        "screen": {
+            "width": 360,
+            "height": 800
+        },
+        "popular": false,
+        "estimated": false,
+        "source": "Genel boyut (FR-3.4)"
+    },
+    {
+        "id": "large-phone",
+        "names": {
+            "tr": "Büyük telefon",
+            "en": "Large phone"
+        },
+        "category": "generic",
+        "screen": {
+            "width": 430,
+            "height": 932
+        },
+        "popular": false,
+        "estimated": false,
+        "source": "Genel boyut (FR-3.4)"
+    },
+    {
+        "id": "tablet-portrait",
+        "names": {
+            "tr": "Tablet (dikey)",
+            "en": "Tablet (portrait)"
+        },
+        "category": "generic",
+        "screen": {
+            "width": 768,
+            "height": 1024
+        },
+        "popular": false,
+        "estimated": false,
+        "source": "Genel boyut (FR-3.4)"
+    },
+    {
+        "id": "tablet-landscape",
+        "names": {
+            "tr": "Tablet (yatay)",
+            "en": "Tablet (landscape)"
+        },
+        "category": "generic",
+        "screen": {
+            "width": 1024,
+            "height": 768
+        },
+        "popular": false,
+        "estimated": false,
+        "source": "Genel boyut (FR-3.4)"
     },
     {
         "id": "laptop",
-        "nameKey": "device.laptop",
-        "category": "computer",
-        "screen": { "width": 1440, "height": 900 },
-        "dpr": 1,
-        "popular": true,
+        "names": {
+            "tr": "Laptop",
+            "en": "Laptop"
+        },
+        "category": "generic",
+        "screen": {
+            "width": 1366,
+            "height": 768
+        },
+        "popular": false,
         "estimated": false,
-        "source": "Genel boyut"
+        "source": "Genel boyut (FR-3.4)"
     },
     {
-        "id": "desktop",
-        "nameKey": "device.desktop",
-        "category": "computer",
-        "screen": { "width": 1920, "height": 1080 },
-        "dpr": 1,
-        "popular": true,
+        "id": "full-hd",
+        "names": {
+            "tr": "Full HD",
+            "en": "Full HD"
+        },
+        "category": "generic",
+        "screen": {
+            "width": 1920,
+            "height": 1080
+        },
+        "popular": false,
         "estimated": false,
-        "source": "Genel boyut (Full HD)"
+        "source": "Genel boyut (FR-3.4)"
     }
 ]

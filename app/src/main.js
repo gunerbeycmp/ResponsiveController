@@ -1,12 +1,13 @@
 import "@fontsource-variable/inter/wght.css";
 import {
     DEFAULT_DEVICE_ID,
-    DEVICES,
     deviceName,
     deviceSize,
     findDevice,
     fitScale,
+    renderSize,
 } from "./devices/devices.js";
+import { createSidebar } from "./devices/sidebar.js";
 import { createI18n } from "./i18n/i18n.js";
 import { createSheet } from "./ui/sheet.js";
 import { createPreviewBridge } from "./upload/bridge.js";
@@ -42,7 +43,7 @@ const elements = {
     error: $("url-error"),
     languageToggle: $("language-toggle"),
     themeToggle: $("theme-toggle"),
-    deviceList: $("device-list"),
+    frameNote: $("frame-note"),
     sheetToggle: $("sheet-toggle"),
     sheetLabel: $("sheet-toggle-label"),
     emptyState: $("empty-state"),
@@ -80,31 +81,6 @@ const sheet = createSheet({
     },
 });
 
-function renderDeviceList() {
-    elements.deviceList.replaceChildren(
-        ...DEVICES.map((device) => {
-            const item = document.createElement("li");
-            const button = document.createElement("button");
-            button.type = "button";
-            button.dataset.deviceId = device.id;
-            button.setAttribute(
-                "aria-pressed",
-                String(device.id === state.deviceId),
-            );
-
-            const name = document.createElement("span");
-            name.textContent = deviceName(device, i18n.t);
-            const size = document.createElement("span");
-            size.className = "device-size";
-            size.textContent = i18n.t("frame.size", device.screen);
-
-            button.append(name, size);
-            item.append(button);
-            return item;
-        }),
-    );
-}
-
 // Cihazı önizleme alanına sığacak şekilde ölçekler (FR-3.9'un ilk hâli)
 const MIN_FRAME_HEIGHT = 240;
 
@@ -141,21 +117,26 @@ function layoutFrame() {
                 : height - elements.helpToggle.offsetHeight,
     };
     const scale = fitScale(size, available);
+    // Apple Watch: sayfa 320 px genişlikte çizilir, saat ekranına küçültülür
+    const render = renderSize(device, state.browserBars);
+    const deviceScale = size.width / render.width;
 
-    elements.iframe.style.width = `${size.width}px`;
-    elements.iframe.style.height = `${size.height}px`;
-    elements.iframe.style.transform = `scale(${scale})`;
+    elements.iframe.style.width = `${render.width}px`;
+    elements.iframe.style.height = `${render.height}px`;
+    elements.iframe.style.transform = `scale(${scale * deviceScale})`;
+    elements.frameNote.hidden = !device.layout;
     elements.viewport.style.width = `${Math.round(size.width * scale) + 2}px`;
     elements.viewport.style.height = `${Math.round(size.height * scale) + 2}px`;
 
-    elements.frameName.textContent = deviceName(device, i18n.t);
+    const name = deviceName(device, i18n.getLanguage());
+    elements.frameName.textContent = name;
     elements.frameSize.textContent = i18n.t("frame.size", size);
     elements.frameScale.textContent =
         scale < 1
             ? i18n.t("frame.scale", { scale: Math.round(scale * 100) })
             : "";
     elements.iframe.title = i18n.t("frame.title", {
-        device: deviceName(device, i18n.t),
+        device: name,
     });
 
     // FR-3.14: "tarayıcı çubukları" yalnızca görünür alan değeri olan cihazlarda
@@ -214,9 +195,22 @@ function render() {
     const hasUrl = Boolean(state.url);
     elements.emptyState.hidden = hasUrl;
     elements.frame.hidden = !hasUrl;
-    renderDeviceList();
+    sidebar.render();
     layoutFrame();
 }
+
+const sidebar = createSidebar({
+    search: $("device-search"),
+    tabList: $("device-tabs"),
+    panel: $("device-list"),
+    i18n,
+    getSelectedId: () => state.deviceId,
+    onSelect: (id) => {
+        state.deviceId = id;
+        render();
+        if (sheet.isOpen()) sheet.close();
+    },
+});
 
 function renderChrome() {
     i18n.translatePage(document);
@@ -343,14 +337,6 @@ elements.form.addEventListener("submit", (event) => {
     elements.input.value = result.url;
     elements.iframe.src = result.url;
     render();
-});
-
-elements.deviceList.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-device-id]");
-    if (!button) return;
-    state.deviceId = button.dataset.deviceId;
-    render();
-    if (sheet.isOpen()) sheet.close();
 });
 
 elements.browserBars.addEventListener("change", () => {
