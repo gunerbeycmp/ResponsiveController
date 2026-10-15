@@ -312,6 +312,30 @@ input {
     background: #ffffff;
 }
 
+/* 768 piksel ve üstü: sayfa pencere yüksekliğinde sabit kalır, uzun cihaz
+   listesi önizlemeyi büyütmeden kendi içinde kayar */
+@media (min-width: 768px) {
+    body {
+        height: 100vh;
+        height: 100dvh;
+    }
+
+    /* position: relative, görünmez (visually-hidden) öğelerin listenin
+       sonundaki konumuyla sayfayı uzatmasını önler */
+    .sidebar {
+        position: relative;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    /* Yardım paneli uzunsa önizleme alanı kendi içinde kayar; "safe" içerik
+       taştığında üst kısmın erişilemez olmasını önler */
+    .stage {
+        overflow-y: auto;
+        justify-content: safe center;
+    }
+}
+
 /* 768 piksel altı: sol menü alttan açılan panele dönüşür */
 @media (max-width: 767px) {
     .topbar {

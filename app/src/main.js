@@ -356,7 +356,8 @@ elements.helpToggle.addEventListener("click", () => {
     elements.helpToggle.setAttribute("aria-expanded", String(open));
     elements.helpPanel.hidden = !open;
     layoutFrame();
-    // Dar ekranda panel önizlemenin altında, görünür alanın dışında kalabilir
+    // Kısa pencerelerde panel önizlemenin altında, görünür alanın dışında
+    // kalabilir; sayfa (dar ekran) veya önizleme alanı (geniş ekran) kaydırılır
     if (open) {
         const reduceMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)",

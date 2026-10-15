@@ -130,10 +130,14 @@ test("'Site açılmıyor mu?' yardımı açılıp kapanır (FR-2.2)", async ({
     await expect(panel).toContainText("tarayıcının kimliğine göre");
     await expect(panel).toContainText("Windows'ta F12");
 
-    // Yardım açıkken önizleme yine alana sığmalı
-    const stage = await page.locator("#stage").boundingBox();
-    const help = await page.locator("#frame-help").boundingBox();
-    expect(help.y + help.height).toBeLessThanOrEqual(stage.y + stage.height);
+    // Yardım paneli görünür alana kaydırılır; sayfa pencereden uzamaz,
+    // gerekirse önizleme alanı kendi içinde kayar
+    await expect(panel).toBeInViewport();
+    expect(
+        await page.evaluate(
+            () => document.documentElement.scrollHeight - window.innerHeight,
+        ),
+    ).toBe(0);
 
     await toggle.click();
     await expect(panel).toBeHidden();
@@ -179,4 +183,36 @@ test("favicon yükleniyor", async ({ page, request }) => {
         const response = await request.get(`http://localhost:5173${href}`);
         expect(response.ok()).toBe(true);
     }
+});
+
+test("geniş ekranda cihaz menüsü kendi içinde kayar, sayfa büyümez", async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(APP_URL);
+    await page.locator("#url-input").fill("localhost:5174");
+    await page.getByRole("button", { name: "Aç", exact: true }).click();
+    const sizes = () =>
+        page.evaluate(() => {
+            const sidebar = document.getElementById("sidebar");
+            return {
+                page: document.documentElement.scrollHeight,
+                window: window.innerHeight,
+                stage: document.getElementById("stage").offsetHeight,
+                sidebar: sidebar.clientHeight,
+                list: sidebar.scrollHeight,
+                scrolled: sidebar.scrollTop,
+            };
+        });
+    const before = await sizes();
+    // Telefon listesi pencereden uzun, ama sayfa pencere yüksekliğinde kalır
+    expect(before.list).toBeGreaterThan(before.sidebar);
+    expect(before.page).toBe(before.window);
+    expect(before.stage).toBeLessThan(before.window);
+
+    await page.locator("#sidebar").hover();
+    await page.mouse.wheel(0, 600);
+    await expect.poll(async () => (await sizes()).scrolled).toBeGreaterThan(0);
+    // Önizleme alanı menü kaydırılınca yerinde kalır
+    await expect(page.locator("#device-frame")).toBeInViewport();
 });
