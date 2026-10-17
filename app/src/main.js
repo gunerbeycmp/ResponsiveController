@@ -2,17 +2,26 @@ import "@fontsource-variable/inter/wght.css";
 import {
     DEFAULT_DEVICE_ID,
     deviceName,
-    deviceSize,
     findDevice,
     fitScale,
-    renderSize,
+    isLandscape,
+    rotatedFor,
+    viewRenderSize,
+    viewSize,
 } from "./devices/devices.js";
 import Sortable from "sortablejs";
 import { createFavorites } from "./devices/favorites.js";
 import { createSidebar } from "./devices/sidebar.js";
 import { createFpsMonitor } from "./grid/fps.js";
 import { createGridStore } from "./grid/store.js";
-import { createGridView } from "./grid/view.js";
+import { BOX_AREAS, createGridView } from "./grid/view.js";
+import {
+    MAX_ZOOM,
+    ZOOM_STEPS,
+    clampZoom,
+    zoomIn,
+    zoomOut,
+} from "./grid/zoom.js";
 import { createI18n } from "./i18n/i18n.js";
 import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
@@ -86,6 +95,15 @@ const elements = {
     gridEmpty: $("grid-empty"),
     gridList: $("device-grid"),
     gridDrop: $("grid-drop"),
+    frameCanvas: $("frame-canvas"),
+    frameRotate: $("frame-rotate"),
+    scaleToolbar: $("scale-toolbar"),
+    scaleOut: $("scale-out"),
+    scaleIn: $("scale-in"),
+    scaleSlider: $("scale-slider"),
+    scaleValue: $("scale-value"),
+    scaleFit: $("scale-fit"),
+    rotateAll: $("rotate-all"),
 };
 
 const announce = createAnnouncer($("app-status"));
@@ -105,13 +123,31 @@ const sheet = createSheet({
     },
 });
 
-// Cihazı önizleme alanına sığacak şekilde ölçekler (FR-3.9'un ilk hâli)
+// Cihazı önizleme alanına sığdırır ya da genel ölçekte gösterir (FR-3.9)
 const MIN_FRAME_HEIGHT = 240;
+const MIN_SCALE = ZOOM_STEPS[0];
+const EPSILON = 0.001;
+let frameFit = 1;
+
+const blockHeight = (element) =>
+    element.hidden
+        ? 0
+        : element.offsetHeight +
+          parseFloat(getComputedStyle(element).marginTop) +
+          parseFloat(getComputedStyle(element).marginBottom);
+
+// FR-3.6: döndürme tek cihaz ve ızgarada ortaktır; FR-3.14 seçeneği yalnızca
+// döndürülmemiş cihazda uygulanır (R-62)
+const viewOptions = (id) => ({
+    rotated: gridStore.isRotated(id),
+    browserBars: state.browserBars,
+});
 
 function layoutFrame() {
     if (!state.url || isGridActive()) return;
     const device = findDevice(state.deviceId);
-    const size = deviceSize(device, state.browserBars);
+    const options = viewOptions(device.id);
+    const size = viewSize(device, options);
     const header = elements.frame.firstElementChild;
     const styles = getComputedStyle(elements.stage);
     const reserved =
@@ -121,11 +157,9 @@ function layoutFrame() {
         (elements.warningsPanel.hidden
             ? 0
             : elements.warningsPanel.offsetHeight) +
-        // Görünüm araç çubuğu çerçevenin üstünde yer kaplar (v0.3.4)
-        (elements.toolbar.hidden
-            ? 0
-            : elements.toolbar.offsetHeight +
-              parseFloat(getComputedStyle(elements.toolbar).marginBottom)) +
+        // Görünüm ve ölçek araç çubukları çerçevenin üstünde yer kaplar
+        blockHeight(elements.toolbar) +
+        blockHeight(elements.scaleToolbar) +
         20;
     // Pencere yüksekliğinden hesaplanır: dar ekranda önizleme alanı içeriğe
     // göre uzadığı için kendi yüksekliği kullanılırsa çerçeve ile alan
@@ -149,31 +183,46 @@ function layoutFrame() {
                 ? withHelp
                 : height - elements.helpToggle.offsetHeight,
     };
-    const scale = fitScale(size, available);
+    frameFit = fitScale(size, available);
+    const scale = clampZoom(gridStore.getScale() ?? frameFit, frameFit);
     // Apple Watch: sayfa 320 px genişlikte çizilir, saat ekranına küçültülür
-    const render = renderSize(device, state.browserBars);
+    const render = viewRenderSize(device, options);
     const deviceScale = size.width / render.width;
+    const scaled = {
+        width: Math.round(size.width * scale),
+        height: Math.round(size.height * scale),
+    };
 
     elements.iframe.style.width = `${render.width}px`;
     elements.iframe.style.height = `${render.height}px`;
     elements.iframe.style.transform = `scale(${scale * deviceScale})`;
     elements.frameNote.hidden = !device.layout;
-    elements.viewport.style.width = `${Math.round(size.width * scale) + 2}px`;
-    elements.viewport.style.height = `${Math.round(size.height * scale) + 2}px`;
+    // Yakınlaştırılan cihaz alanı aşmaz, çerçevenin içinde kayar
+    elements.frameCanvas.style.width = `${scaled.width}px`;
+    elements.frameCanvas.style.height = `${scaled.height}px`;
+    elements.viewport.style.width = `${Math.min(scaled.width, Math.floor(available.width)) + 2}px`;
+    elements.viewport.style.height = `${Math.min(scaled.height, Math.floor(available.height)) + 2}px`;
 
     const name = deviceName(device, i18n.getLanguage());
     elements.frameName.textContent = name;
     elements.frameSize.textContent = i18n.t("frame.size", size);
     elements.frameScale.textContent =
-        scale < 1
+        Math.abs(scale - 1) > EPSILON
             ? i18n.t("frame.scale", { scale: Math.round(scale * 100) })
             : "";
+    elements.frameRotate.setAttribute(
+        "aria-label",
+        i18n.t(isLandscape(size) ? "rotate.toPortrait" : "rotate.toLandscape", {
+            device: name,
+        }),
+    );
     elements.iframe.title = i18n.t("frame.title", {
         device: name,
     });
+    elements.viewport.setAttribute("aria-label", elements.iframe.title);
 
     // FR-3.14: "tarayıcı çubukları" yalnızca görünür alan değeri olan cihazlarda
-    elements.browserBarsOption.hidden = !device.visibleArea;
+    elements.browserBarsOption.hidden = !device.visibleArea || options.rotated;
     elements.browserBars.checked = state.browserBars;
     elements.browserBarsEstimated.hidden = !device.estimated;
     elements.browserBarsEstimated.textContent = i18n.t("device.estimated");
@@ -238,6 +287,72 @@ function placeShared(isGrid) {
     }
 }
 
+// Genel ölçek Sığdır'dayken kaydırıcının gösterdiği değer: tek cihazda
+// cihazın sığma ölçeği, ızgarada ilk kutununki
+function referenceFit() {
+    if (!isGridActive()) return frameFit;
+    const [first] = gridStore.list();
+    if (!first) return 1;
+    return fitScale(
+        viewSize(findDevice(first), { rotated: gridStore.isRotated(first) }),
+        BOX_AREAS[gridStore.getSize()],
+    );
+}
+
+// Izgaradaki cihazların hepsi yatay mı (kare ekranlar hesaba katılmaz)
+function rotatableIds() {
+    return gridStore.list().filter((id) => {
+        const { width, height } = findDevice(id).screen;
+        return width !== height;
+    });
+}
+
+const allLandscape = () =>
+    rotatableIds().every((id) =>
+        isLandscape(viewSize(findDevice(id), viewOptions(id))),
+    );
+
+function renderScaleControls(isGrid) {
+    const scale = gridStore.getScale();
+    const reference = Math.min(
+        MAX_ZOOM,
+        Math.max(MIN_SCALE, scale ?? referenceFit()),
+    );
+    const text =
+        scale === null
+            ? i18n.t("zoom.fit")
+            : i18n.t("frame.scale", { scale: Math.round(scale * 100) });
+    elements.scaleSlider.value = String(Math.round(reference * 100));
+    elements.scaleSlider.setAttribute("aria-valuetext", text);
+    // Sığdır'dayken basılı Sığdır düğmesi durumu gösterir; değer tekrar
+    // yazılmaz (ekran okuyucular kaydırıcının değerini okur)
+    elements.scaleValue.textContent = scale === null ? "" : text;
+    elements.scaleValue.hidden = scale === null;
+    elements.scaleFit.setAttribute("aria-pressed", String(scale === null));
+    elements.scaleOut.disabled = reference <= MIN_SCALE + EPSILON;
+    elements.scaleIn.disabled = reference >= MAX_ZOOM - EPSILON;
+    elements.rotateAll.hidden = !isGrid || rotatableIds().length === 0;
+    elements.rotateAll.textContent = i18n.t(
+        allLandscape() ? "rotate.allToPortrait" : "rotate.allToLandscape",
+    );
+}
+
+// Ölçek ve döndürme değişince yalnızca önizleme yeniden çizilir; menü
+// yeniden kurulmaz (NFR-2.3: 100 ms içinde tepki)
+function renderView() {
+    const isGrid = isGridActive();
+    if (isGrid) gridView.render();
+    layoutFrame();
+    renderScaleControls(isGrid);
+}
+
+function setGlobalScale(value) {
+    gridStore.setScale(value);
+    // Genel ölçek değişince kutuların kendi ayarları sıfırlanır (FR-3.9)
+    gridView.resetZooms();
+    renderView();
+}
+
 function renderToolbar(isGrid) {
     for (const button of elements.viewButtons)
         button.setAttribute(
@@ -259,6 +374,7 @@ function render() {
     const isGrid = isGridActive();
     elements.emptyState.hidden = hasUrl;
     elements.toolbar.hidden = !hasUrl;
+    elements.scaleToolbar.hidden = !hasUrl;
     elements.frame.hidden = !hasUrl || isGrid;
     elements.gridSection.hidden = !isGrid;
     renderToolbar(isGrid);
@@ -272,10 +388,11 @@ function render() {
         elements.slowWarning.hidden = true;
     }
     layoutFrame();
+    renderScaleControls(isGrid);
     updateMonitor();
 }
 
-// FR-3.6: ızgaraya ekleme. Tek cihaz modunda ızgaraya geçilir; o an açık
+// FR-3.7: ızgaraya ekleme. Tek cihaz modunda ızgaraya geçilir; o an açık
 // cihaz ile eklenen cihaz yan yana görünür (Aşama 3 Tasarım Kararları)
 function addToGrid(id) {
     if (!isGridActive()) {
@@ -495,6 +612,44 @@ for (const button of elements.sizeButtons)
         render();
     });
 
+elements.scaleSlider.addEventListener("input", () =>
+    setGlobalScale(Number(elements.scaleSlider.value) / 100),
+);
+elements.scaleOut.addEventListener("click", () =>
+    setGlobalScale(
+        zoomOut(Number(elements.scaleSlider.value) / 100, MIN_SCALE),
+    ),
+);
+elements.scaleIn.addEventListener("click", () =>
+    setGlobalScale(zoomIn(Number(elements.scaleSlider.value) / 100)),
+);
+elements.scaleFit.addEventListener("click", () => setGlobalScale(null));
+
+// FR-3.6: tek cihazı döndürme
+elements.frameRotate.addEventListener("click", () => {
+    const device = findDevice(state.deviceId);
+    gridStore.setRotated(device.id, !gridStore.isRotated(device.id));
+    renderView();
+    announce(
+        i18n.t(
+            isLandscape(viewSize(device, viewOptions(device.id)))
+                ? "rotate.landscape"
+                : "rotate.portrait",
+            { device: deviceName(device, i18n.getLanguage()) },
+        ),
+    );
+});
+
+// FR-3.6: toplu döndürme; en az biri dikeyse hepsi yataya, hepsi yataysa
+// hepsi dikeye geçer (Aşama 3 Tasarım Kararları)
+elements.rotateAll.addEventListener("click", () => {
+    const landscape = !allLandscape();
+    for (const id of rotatableIds())
+        gridStore.setRotated(id, rotatedFor(findDevice(id), landscape));
+    renderView();
+    announce(i18n.t(landscape ? "rotate.allLandscape" : "rotate.allPortrait"));
+});
+
 elements.slowDismiss.addEventListener("click", () => {
     elements.slowWarning.hidden = true;
 });
@@ -584,7 +739,8 @@ elements.helpToggle.addEventListener("click", () => {
 
 // FR-2.3: siteyi seçili cihaz boyutunda yeni pencerede açar
 elements.openWindow.addEventListener("click", () => {
-    const size = deviceSize(findDevice(state.deviceId), state.browserBars);
+    const device = findDevice(state.deviceId);
+    const size = viewSize(device, viewOptions(device.id));
     openSizedWindow(state.url, size);
 });
 

@@ -105,5 +105,15 @@
     "grid.expand": "Expand {device} box",
     "grid.collapse": "Collapse {device} box",
     "slow.warning": "The preview has slowed down. Removing a few devices from the grid may help.",
-    "slow.dismiss": "Dismiss warning"
+    "slow.dismiss": "Dismiss warning",
+    "rotate.toLandscape": "Rotate {device} to landscape",
+    "rotate.toPortrait": "Rotate {device} to portrait",
+    "rotate.allToLandscape": "Rotate all to landscape",
+    "rotate.allToPortrait": "Rotate all to portrait",
+    "rotate.landscape": "{device} rotated to landscape.",
+    "rotate.portrait": "{device} rotated to portrait.",
+    "rotate.allLandscape": "All devices rotated to landscape.",
+    "rotate.allPortrait": "All devices rotated to portrait.",
+    "scale.label": "Scale",
+    "scale.slider": "Scale of all devices"
 }

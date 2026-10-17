@@ -206,6 +206,64 @@
                         </button>
                     </div>
                 </div>
+                <div
+                    class="view-toolbar scale-toolbar"
+                    id="scale-toolbar"
+                    hidden
+                >
+                    <div
+                        class="scale-group"
+                        role="group"
+                        aria-labelledby="scale-label"
+                    >
+                        <span
+                            class="toolbar-label"
+                            id="scale-label"
+                            data-i18n="scale.label"
+                            >Ölçek</span
+                        >
+                        <button
+                            class="scale-step"
+                            id="scale-out"
+                            type="button"
+                            data-i18n-label="zoom.out"
+                        >
+                            −
+                        </button>
+                        <input
+                            class="scale-slider"
+                            id="scale-slider"
+                            type="range"
+                            min="25"
+                            max="200"
+                            step="5"
+                            data-i18n-label="scale.slider"
+                        />
+                        <button
+                            class="scale-step"
+                            id="scale-in"
+                            type="button"
+                            data-i18n-label="zoom.in"
+                        >
+                            +
+                        </button>
+                        <span class="scale-value" id="scale-value"></span>
+                        <button
+                            class="scale-fit"
+                            id="scale-fit"
+                            type="button"
+                            data-i18n="zoom.fit"
+                        >
+                            Sığdır
+                        </button>
+                    </div>
+                    <button
+                        class="rotate-all"
+                        id="rotate-all"
+                        type="button"
+                        hidden
+                    ></button>
+                </div>
                 <div class="slow-warning" id="slow-warning" hidden>
                     <span aria-hidden="true">⚠</span>
                     <p data-i18n="slow.warning"></p>
@@ -233,6 +291,13 @@
                             <span id="frame-size"></span>
                             <span class="frame-scale" id="frame-scale"></span>
                         </p>
+                        <button
+                            class="frame-rotate"
+                            id="frame-rotate"
+                            type="button"
+                        >
+                            ⟳
+                        </button>
                         <label class="frame-option" id="browser-bars-option">
                             <input type="checkbox" id="browser-bars" />
                             <span data-i18n="frame.browserBars"
@@ -266,8 +331,15 @@
                         hidden
                     ></p>
                     <ul class="warnings-panel" id="warnings-panel" hidden></ul>
-                    <div class="frame-viewport" id="frame-viewport">
-                        <iframe id="preview-iframe"></iframe>
+                    <div
+                        class="frame-viewport"
+                        id="frame-viewport"
+                        role="region"
+                        tabindex="0"
+                    >
+                        <div class="frame-canvas" id="frame-canvas">
+                            <iframe id="preview-iframe"></iframe>
+                        </div>
                     </div>
                     <div class="frame-help" id="frame-help">
                         <button

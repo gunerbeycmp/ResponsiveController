@@ -295,16 +295,26 @@ input {
     font-size: 12px;
 }
 
+/* Yakınlaştırılmış cihaz çerçevenin içinde kayar (v0.3.5) */
 .frame-viewport {
-    position: relative;
+    display: flex;
     align-self: center;
-    overflow: hidden;
-    background: #ffffff;
+    overflow: auto;
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 12px;
 }
 
-.frame-viewport iframe {
+/* margin: auto küçük cihazı ortalar, büyütülmüş cihazda kaydırmayı bozmaz */
+.frame-canvas {
+    position: relative;
+    flex-shrink: 0;
+    margin: auto;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.frame-canvas iframe {
     position: absolute;
     top: 0;
     left: 0;
@@ -909,7 +919,7 @@ input {
     box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }
 
-/* Görünüm araç çubuğu ve çoklu cihaz ızgarası (FR-3.6 - FR-3.9, v0.3.4) */
+/* Görünüm araç çubuğu ve çoklu cihaz ızgarası (FR-3.7 - FR-3.9, v0.3.4) */
 .view-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -1188,4 +1198,79 @@ input {
 
 #grid-drop > li {
     opacity: 0;
+}
+
+/* Döndürme ve genel ölçek (FR-3.6, FR-3.9, v0.3.5) */
+.scale-toolbar {
+    margin-top: -4px;
+}
+
+.scale-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.scale-step,
+.frame-rotate,
+.box-rotate {
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.scale-step:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.scale-slider {
+    width: 140px;
+    accent-color: var(--accent);
+}
+
+.scale-value {
+    min-width: 52px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.scale-fit,
+.rotate-all {
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.scale-fit[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+    font-weight: 500;
+}
+
+.frame-header {
+    align-items: center;
+}
+
+@media (max-width: 767px) {
+    .scale-slider {
+        width: 96px;
+    }
+
+    .scale-value {
+        min-width: 40px;
+    }
 }

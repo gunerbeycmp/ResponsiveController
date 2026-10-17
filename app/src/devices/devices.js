@@ -68,3 +68,31 @@ export function fitScale(size, available) {
         available.height / size.height,
     );
 }
+
+const swap = ({ width, height }) => ({ width: height, height: width });
+
+// FR-3.6: döndürülmüş cihazda genişlik ile yükseklik yer değiştirir. Yatay
+// konum için görünür alan verisi olmadığından tarayıcı çubukları yalnızca
+// döndürülmemiş cihazda uygulanır (R-62)
+export function viewSize(
+    device,
+    { rotated = false, browserBars = false } = {},
+) {
+    const size = deviceSize(device, browserBars && !rotated);
+    return rotated ? swap(size) : size;
+}
+
+export function viewRenderSize(
+    device,
+    { rotated = false, browserBars = false } = {},
+) {
+    const size = renderSize(device, browserBars && !rotated);
+    return rotated ? swap(size) : size;
+}
+
+export const isLandscape = ({ width, height }) => width > height;
+
+// Cihazın istenen konuma geçmesi için döndürülmüş olması gerekip gerekmediği
+export const rotatedFor = (device, landscape) =>
+    isLandscape(device.screen) !== landscape &&
+    device.screen.width !== device.screen.height;

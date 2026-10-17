@@ -1,10 +1,22 @@
-import { describe, expect, it } from "vitest";
+import {
+    isLandscape,
+    rotatedFor,
+    viewRenderSize,
+    viewSize,
+    describe,
+    expect,
+    it,
+} from "vitest";
 import {
     DEFAULT_DEVICE_ID,
     DEVICES,
     deviceSize,
     findDevice,
     fitScale,
+    isLandscape,
+    rotatedFor,
+    viewRenderSize,
+    viewSize,
 } from "../../app/src/devices/devices.js";
 
 describe("cihaz verisi (Teknik Tasarım 6)", () => {
@@ -87,5 +99,46 @@ describe("cihaz yardımcıları", () => {
         expect(fitScale(size, { width: 960, height: 1000 })).toBe(0.5);
         expect(fitScale(size, { width: 4000, height: 4000 })).toBe(1);
         expect(fitScale(size, { width: 0, height: 500 })).toBe(1);
+    });
+});
+
+describe("döndürme (FR-3.6, R-62)", () => {
+    const iphone = findDevice("iphone-17");
+    const desktop = findDevice("1920-x-1080");
+
+    it("döndürülen cihazın genişliği ve yüksekliği yer değiştirir", () => {
+        expect(viewSize(iphone)).toEqual({ width: 402, height: 874 });
+        expect(viewSize(iphone, { rotated: true })).toEqual({
+            width: 874,
+            height: 402,
+        });
+        expect(isLandscape(viewSize(desktop))).toBe(true);
+    });
+
+    it("tarayıcı çubukları yalnızca döndürülmemiş cihazda uygulanır", () => {
+        expect(viewSize(iphone, { browserBars: true })).toEqual(
+            iphone.visibleArea,
+        );
+        expect(viewSize(iphone, { rotated: true, browserBars: true })).toEqual({
+            width: 874,
+            height: 402,
+        });
+    });
+
+    it("Apple Watch çizim boyutu da döner", () => {
+        const watch = findDevice("apple-watch-44-mm");
+        expect(viewRenderSize(watch, { rotated: true })).toEqual({
+            width: 390,
+            height: 320,
+        });
+    });
+
+    it("istenen konum için döndürme gerekip gerekmediğini bulur", () => {
+        expect(rotatedFor(iphone, true)).toBe(true);
+        expect(rotatedFor(iphone, false)).toBe(false);
+        expect(rotatedFor(desktop, true)).toBe(false);
+        expect(rotatedFor(desktop, false)).toBe(true);
+        // Kare ekran hiç döndürülmez
+        expect(rotatedFor(findDevice("galaxy-watch"), true)).toBe(false);
     });
 });

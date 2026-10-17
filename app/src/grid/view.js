@@ -3,7 +3,9 @@ import {
     deviceName,
     findDevice,
     fitScale,
-    renderSize,
+    isLandscape,
+    viewRenderSize,
+    viewSize,
 } from "../devices/devices.js";
 import { MAX_ZOOM, clampZoom, minZoom, zoomIn, zoomOut } from "./zoom.js";
 
@@ -26,7 +28,7 @@ const el = (tag, props = {}, ...children) => {
 const iconButton = (className, text) =>
     el("button", { type: "button", className, textContent: text });
 
-// Çoklu cihaz ızgarası (FR-3.6, FR-3.7, FR-3.9). Kutular kimliğe göre
+// Çoklu cihaz ızgarası (FR-3.6 döndürme, FR-3.7 ızgara, FR-3.9 ölçek). Kutular kimliğe göre
 // tutulur ve yeniden kullanılır; böylece yakınlaştırma gibi değişikliklerde
 // iframe'ler yeniden yüklenmez.
 export function createGridView({
@@ -45,14 +47,22 @@ export function createGridView({
 
     const nameOf = (id) => deviceName(findDevice(id), i18n.getLanguage());
 
+    // Kutunun ölçeği: kutuya özel ayar ("fit" ya da sayı), yoksa genel ölçek
+    // (FR-3.9), o da yoksa Sığdır
     function geometry(id) {
         const device = findDevice(id);
-        const size = device.screen;
+        const rotated = store.isRotated(id);
+        const size = viewSize(device, { rotated });
+        const render = viewRenderSize(device, { rotated });
         const area =
             expanded === id ? getExpandedArea() : BOX_AREAS[store.getSize()];
         const fit = fitScale(size, area);
-        const zoom = clampZoom(zooms.get(id) ?? fit, fit);
-        return { device, size, area, fit, zoom };
+        const own = zooms.get(id);
+        const zoom =
+            own === "fit"
+                ? fit
+                : clampZoom(own ?? store.getScale() ?? fit, fit);
+        return { device, size, render, area, fit, zoom };
     }
 
     function setZoom(id, value) {
@@ -72,6 +82,7 @@ export function createGridView({
             scale: el("span", { className: "box-scale" }),
             in: iconButton("box-zoom-in", "+"),
             fit: iconButton("box-fit", ""),
+            rotate: iconButton("box-rotate", "⟳"),
             expand: iconButton("box-expand", ""),
             menuSlot: el("div"),
             iframe: el("iframe"),
@@ -105,6 +116,7 @@ export function createGridView({
                     p.scale,
                     p.in,
                     p.fit,
+                    p.rotate,
                     p.expand,
                 ),
             ),
@@ -127,8 +139,20 @@ export function createGridView({
             setZoom(id, zoomIn(geometry(id).zoom)),
         );
         p.fit.addEventListener("click", () => {
-            zooms.delete(id);
+            zooms.set(id, "fit");
             update(id);
+        });
+        p.rotate.addEventListener("click", () => {
+            store.setRotated(id, !store.isRotated(id));
+            update(id);
+            announce(
+                i18n.t(
+                    isLandscape(geometry(id).size)
+                        ? "rotate.landscape"
+                        : "rotate.portrait",
+                    { device: nameOf(id) },
+                ),
+            );
         });
         p.expand.addEventListener("click", () => {
             expanded = expanded === id ? null : id;
@@ -218,8 +242,7 @@ export function createGridView({
     function update(id) {
         const p = boxes.get(id);
         if (!p) return;
-        const { device, size, area, fit, zoom } = geometry(id);
-        const render = renderSize(device, false);
+        const { size, render, area, fit, zoom } = geometry(id);
         const name = nameOf(id);
         const ids = store.list();
         const index = ids.indexOf(id);
@@ -263,7 +286,14 @@ export function createGridView({
         p.out.disabled = zoom <= minZoom(fit) + EPSILON;
         p.in.disabled = zoom >= MAX_ZOOM - EPSILON;
         p.fit.textContent = i18n.t("zoom.fit");
-        p.fit.disabled = !zooms.has(id);
+        p.fit.disabled = Math.abs(zoom - fit) < EPSILON;
+        p.rotate.setAttribute(
+            "aria-label",
+            i18n.t(
+                isLandscape(size) ? "rotate.toPortrait" : "rotate.toLandscape",
+                { device: name },
+            ),
+        );
         const isExpanded = expanded === id;
         p.expand.textContent = isExpanded ? "⤡" : "⤢";
         p.expand.setAttribute(
@@ -385,6 +415,11 @@ export function createGridView({
 
     return {
         render,
+        // Genel ölçek değişince kutuların kendi ayarları sıfırlanır (FR-3.9)
+        resetZooms() {
+            zooms.clear();
+            render();
+        },
         // Tek cihaz moduna geçince ya da proje yeniden yüklenince kutular
         // (ve iframe'leri) kaldırılır; ızgaraya dönünce yeniden yüklenir
         clear() {

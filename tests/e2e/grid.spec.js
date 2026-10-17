@@ -49,7 +49,7 @@ test("araç çubuğu adres açılınca görünür, varsayılan tek cihaz", async
     await expect(page.locator("#device-frame")).toBeVisible();
 });
 
-test("tek cihaz modunda + ızgaraya geçer, iki cihaz yan yana (FR-3.6)", async ({
+test("tek cihaz modunda + ızgaraya geçer, iki cihaz yan yana (FR-3.7)", async ({
     page,
 }) => {
     await openPreview(page);

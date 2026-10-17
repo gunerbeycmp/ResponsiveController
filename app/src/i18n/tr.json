@@ -105,5 +105,15 @@
     "grid.expand": "{device} kutusunu büyüt",
     "grid.collapse": "{device} kutusunu küçült",
     "slow.warning": "Önizleme yavaşladı. Izgaradan birkaç cihaz kaldırmak performansı artırabilir.",
-    "slow.dismiss": "Uyarıyı kapat"
+    "slow.dismiss": "Uyarıyı kapat",
+    "rotate.toLandscape": "{device} cihazını yataya çevir",
+    "rotate.toPortrait": "{device} cihazını dikeye çevir",
+    "rotate.allToLandscape": "Tümünü yataya çevir",
+    "rotate.allToPortrait": "Tümünü dikeye çevir",
+    "rotate.landscape": "{device} yatay konuma çevrildi.",
+    "rotate.portrait": "{device} dikey konuma çevrildi.",
+    "rotate.allLandscape": "Tüm cihazlar yatay konuma çevrildi.",
+    "rotate.allPortrait": "Tüm cihazlar dikey konuma çevrildi.",
+    "scale.label": "Ölçek",
+    "scale.slider": "Tüm cihazların ölçeği"
 }

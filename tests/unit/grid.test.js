@@ -20,7 +20,7 @@ function fakeStorage(initial = {}) {
     };
 }
 
-describe("ızgara deposu (FR-3.6)", () => {
+describe("ızgara deposu (FR-3.7)", () => {
     it("varsayılan: boş, tek cihaz modu, orta kutu", () => {
         const store = createGridStore({ storage: fakeStorage() });
         expect(store.list()).toEqual([]);
@@ -45,6 +45,8 @@ describe("ızgara deposu (FR-3.6)", () => {
             ids: ["a", "c"],
             mode: "grid",
             size: "large",
+            rotated: [],
+            scale: null,
         });
         expect(store.has("a")).toBe(true);
         expect(store.has("b")).toBe(false);
@@ -89,6 +91,48 @@ describe("ızgara deposu (FR-3.6)", () => {
         const store = createGridStore({ storage: throwing });
         expect(() => store.add("a")).not.toThrow();
         expect(store.list()).toEqual(["a"]);
+    });
+});
+
+describe("döndürme ve genel ölçek (FR-3.6, FR-3.9)", () => {
+    it("döndürülen cihazları ve genel ölçeği saklar", () => {
+        const storage = fakeStorage();
+        const store = createGridStore({ storage });
+        store.setRotated("a", true);
+        store.setRotated("a", true);
+        store.setRotated("b", true);
+        store.setRotated("b", false);
+        expect(store.isRotated("a")).toBe(true);
+        expect(store.isRotated("b")).toBe(false);
+        expect(store.getScale()).toBe(null);
+        store.setScale(1.5);
+        const saved = JSON.parse(storage.data[GRID_STORAGE_KEY]);
+        expect(saved.rotated).toEqual(["a"]);
+        expect(saved.scale).toBe(1.5);
+        // Sınır dışı değerler sınıra çekilir, null Sığdır'dır
+        store.setScale(9);
+        expect(store.getScale()).toBe(2);
+        store.setScale(0.01);
+        expect(store.getScale()).toBe(0.25);
+        store.setScale(null);
+        expect(store.getScale()).toBe(null);
+    });
+
+    it("geçersiz saklanan ölçeği ve bilinmeyen döndürmeleri atlar", () => {
+        const storage = fakeStorage({
+            [GRID_STORAGE_KEY]: JSON.stringify({
+                ids: [],
+                rotated: ["a", "x"],
+                scale: 7,
+            }),
+        });
+        const store = createGridStore({
+            storage,
+            isKnown: (id) => id === "a",
+        });
+        expect(store.isRotated("a")).toBe(true);
+        expect(store.isRotated("x")).toBe(false);
+        expect(store.getScale()).toBe(null);
     });
 });
 

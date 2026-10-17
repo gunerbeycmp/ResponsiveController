@@ -54,7 +54,7 @@ export function createSidebar({
             className: "device-button",
         });
         button.dataset.deviceId = device.id;
-        // Izgara modunda satır cihazı ızgaraya ekler / çıkarır (FR-3.6)
+        // Izgara modunda satır cihazı ızgaraya ekler / çıkarır (FR-3.7)
         button.setAttribute(
             "aria-pressed",
             String(
