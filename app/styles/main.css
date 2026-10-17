@@ -1482,3 +1482,13 @@ input {
 .custom-delete:hover {
     border-color: var(--border);
 }
+
+.frame-restore {
+    height: 26px;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+}

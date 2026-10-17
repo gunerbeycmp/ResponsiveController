@@ -132,5 +132,7 @@
     "custom.delete": "Delete {device}",
     "custom.created": "{device} created.",
     "custom.deleted": "{device} deleted.",
-    "custom.error.range": "Width and height must be between 100 and 3840 px."
+    "custom.error.range": "Width and height must be between 100 and 3840 px.",
+    "custom.restore": "Back to original",
+    "custom.restoreLabel": "Switch back to {device}"
 }

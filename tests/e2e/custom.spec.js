@@ -236,6 +236,31 @@ test("ad dil değişince çevrilir; sayfa yenilenince özel boyutlar silinir", a
     await expect(customRows(page)).toHaveCount(0);
 });
 
+test("türetilmiş özel boyuttan orijinale dönülür", async ({ page }) => {
+    await openPreview(page);
+    const restore = page.getByRole("button", { name: "Orijinale dön" });
+    // Hazır cihazda görünmez
+    await expect(restore).toBeHidden();
+    await width(page).fill("500");
+    await width(page).press("Enter");
+    await expect(restore).toBeVisible();
+    await expect(restore).toHaveAccessibleDescription("iPhone 17 cihazına dön");
+    await restore.click();
+    await expect(page.locator("#frame-name")).toHaveText("iPhone 17");
+    await expect(width(page)).toHaveValue("402");
+    await expect(restore).toBeHidden();
+    await expect(width(page)).toBeFocused();
+    // Özel boyut listede kalır, tekrar seçilince düğme geri gelir
+    await tab(page, "Özel").click();
+    await customRows(page).first().click();
+    await expect(width(page)).toHaveValue("500");
+    await expect(restore).toBeVisible();
+
+    // Özel sekmesinden sıfırdan oluşturulanda görünmez
+    await createFromTab(page, 300, 300);
+    await expect(restore).toBeHidden();
+});
+
 test("Özel sekmesi ve hata durumunda WCAG 2.1 AA ihlali yok", async ({
     page,
 }) => {

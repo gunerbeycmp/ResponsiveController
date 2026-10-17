@@ -132,5 +132,7 @@
     "custom.delete": "{device} boyutunu sil",
     "custom.created": "{device} oluşturuldu.",
     "custom.deleted": "{device} silindi.",
-    "custom.error.range": "Genişlik ve yükseklik 100 ile 3840 px arasında olmalı."
+    "custom.error.range": "Genişlik ve yükseklik 100 ile 3840 px arasında olmalı.",
+    "custom.restore": "Orijinale dön",
+    "custom.restoreLabel": "{device} cihazına dön"
 }

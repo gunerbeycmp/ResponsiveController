@@ -107,6 +107,8 @@ const elements = {
     rotateAll: $("rotate-all"),
     rotateReset: $("rotate-reset"),
     frameNameButton: $("frame-name-button"),
+    frameRestore: $("frame-restore"),
+    frameRestoreDescription: $("frame-restore-description"),
     frameNameInput: $("frame-name-input"),
     frameWidth: $("frame-width"),
     frameHeight: $("frame-height"),
@@ -232,6 +234,17 @@ function layoutFrame() {
         "aria-label",
         i18n.t("custom.rename", { device: name }),
     );
+    // Hazır cihazdan türetilmiş özel boyutta kaynak cihaza dönüş. Ekran
+    // okuyucu adı görünen yazıyla aynı kalır (WCAG 2.5.3); kaynak cihazın adı
+    // açıklama olarak okunur
+    const source = device.sourceId ? findDevice(device.sourceId) : null;
+    const hasSource = Boolean(source) && source.id === device.sourceId;
+    elements.frameRestore.hidden = !hasSource;
+    elements.frameRestoreDescription.textContent = hasSource
+        ? i18n.t("custom.restoreLabel", {
+              device: deviceName(source, i18n.getLanguage()),
+          })
+        : "";
     // Kullanıcı yazarken değer üzerine yazılmaz
     for (const [input, value] of [
         [elements.frameWidth, size.width],
@@ -797,6 +810,14 @@ for (const input of [elements.frameWidth, elements.frameHeight]) {
         applyHeaderSize();
     });
 }
+
+// Türetilmiş özel boyuttan kaynak cihaza dönülür; özel boyut listede kalır
+elements.frameRestore.addEventListener("click", () => {
+    state.deviceId = findDevice(state.deviceId).sourceId ?? state.deviceId;
+    render();
+    // Düğme gizlendiği için odak boyut alanına geçer
+    elements.frameWidth.focus();
+});
 
 // Özel boyutun adı başlıkta düzenlenir (Enter kaydeder, Esc vazgeçer)
 function finishNameEdit({ save }) {
