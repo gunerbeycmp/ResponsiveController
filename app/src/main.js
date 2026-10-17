@@ -104,6 +104,7 @@ const elements = {
     scaleValue: $("scale-value"),
     scaleFit: $("scale-fit"),
     rotateAll: $("rotate-all"),
+    rotateReset: $("rotate-reset"),
 };
 
 const announce = createAnnouncer($("app-status"));
@@ -335,6 +336,11 @@ function renderScaleControls(isGrid) {
     elements.rotateAll.textContent = i18n.t(
         allLandscape() ? "rotate.allToPortrait" : "rotate.allToLandscape",
     );
+    // Hiçbir kutu döndürülmemişken görünür ama pasif (Aşama 3 kararları)
+    elements.rotateReset.hidden = elements.rotateAll.hidden;
+    elements.rotateReset.disabled = !gridStore
+        .list()
+        .some((id) => gridStore.isRotated(id));
 }
 
 // Ölçek ve döndürme değişince yalnızca önizleme yeniden çizilir; menü
@@ -648,6 +654,15 @@ elements.rotateAll.addEventListener("click", () => {
         gridStore.setRotated(id, rotatedFor(findDevice(id), landscape));
     renderView();
     announce(i18n.t(landscape ? "rotate.allLandscape" : "rotate.allPortrait"));
+});
+
+// Izgaradaki bütün cihazlar varsayılan konumlarına döner
+elements.rotateReset.addEventListener("click", () => {
+    for (const id of gridStore.list()) gridStore.setRotated(id, false);
+    renderView();
+    announce(i18n.t("rotate.resetDone"));
+    // Düğme pasifleştiği için odak toplu döndürme düğmesine geçer
+    elements.rotateAll.focus();
 });
 
 elements.slowDismiss.addEventListener("click", () => {

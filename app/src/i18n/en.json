@@ -115,5 +115,7 @@
     "rotate.allLandscape": "All devices rotated to landscape.",
     "rotate.allPortrait": "All devices rotated to portrait.",
     "scale.label": "Scale",
-    "scale.slider": "Scale of all devices"
+    "scale.slider": "Scale of all devices",
+    "rotate.reset": "Restore original orientation",
+    "rotate.resetDone": "All devices restored to their original orientation."
 }

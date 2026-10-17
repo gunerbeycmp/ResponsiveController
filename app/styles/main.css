@@ -1274,3 +1274,8 @@ input {
         min-width: 40px;
     }
 }
+
+.rotate-all:disabled {
+    opacity: 0.45;
+    cursor: default;
+}

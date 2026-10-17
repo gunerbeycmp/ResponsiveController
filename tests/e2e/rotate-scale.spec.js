@@ -112,6 +112,36 @@ test("ızgarada kutu ve toplu döndürme (FR-3.6)", async ({ page }) => {
     await expect(rotateAll).toBeHidden();
 });
 
+test("orijinal konuma çevir bütün kutuları varsayılan konuma döndürür", async ({
+    page,
+}) => {
+    await withGrid(page, ["iphone-17", "1920-x-1080"]);
+    const reset = page.getByRole("button", { name: "Orijinal konuma çevir" });
+    await expect(reset).toBeVisible();
+    await expect(reset).toBeDisabled();
+    await page.locator("#rotate-all").click();
+    await expect(reset).toBeEnabled();
+    // Bilgisayar da dikeye çevrilsin: hepsi farklı konumda
+    await box(page, "1920-x-1080")
+        .getByRole("button", { name: "1920 × 1080 cihazını dikeye çevir" })
+        .click();
+    await expect(box(page, "iphone-17").locator(".box-size")).toHaveText(
+        "874 × 402",
+    );
+    await reset.click();
+    await expect(box(page, "iphone-17").locator(".box-size")).toHaveText(
+        "402 × 874",
+    );
+    await expect(box(page, "1920-x-1080").locator(".box-size")).toHaveText(
+        "1920 × 1080",
+    );
+    await expect(status(page)).toHaveText(
+        "Tüm cihazlar orijinal konumuna çevrildi.",
+    );
+    await expect(reset).toBeDisabled();
+    await expect(page.locator("#rotate-all")).toBeFocused();
+});
+
 test("genel ölçek tek cihazda çalışır, cihaz çerçevenin içinde kayar (FR-3.9)", async ({
     page,
 }) => {
