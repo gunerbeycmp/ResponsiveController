@@ -126,6 +126,10 @@ const gridStore = createGridStore({
     storage: window.localStorage,
     isKnown: (id) => findDevice(id).id === id,
 });
+// Izgarada iki hâl yan yanayken Katla / Aç ile kaldırılan hâl ve yeri
+// (katlanabilir grubu → { removedId, index }); yalnızca bu oturumda
+const mergedFolds = new Map();
+
 // FR-3.11: özel boyutlar yalnızca bu oturumda tutulur (R-19)
 const custom = createCustomSizes();
 const isGridActive = () => Boolean(state.url) && gridStore.getMode() === "grid";
@@ -537,19 +541,49 @@ const gridView = createGridView({
     getUrl: () => state.url,
     getExpandedArea: expandedArea,
     onRotate: () => renderScaleControls(isGridActive()),
-    // Izgarada Katla / Aç: kutu aynı sırada kalır, hâl değişir
+    // Izgarada Katla / Aç: kutu aynı sırada kalır, hâl değişir. Diğer hâl
+    // zaten ızgaradaysa kutu kalkar ama yeri hatırlanır; kalan kutuda tekrar
+    // basılınca kaldırılan hâl yerine döner ve ikisi yine yan yana olur
     onFold: (id) => {
-        const sibling = foldSibling(findDevice(id));
+        const device = findDevice(id);
+        const sibling = foldSibling(device);
         if (!sibling) return;
-        const index = gridStore.list().indexOf(id);
+        const group = device.foldable.group;
+        const ids = gridStore.list();
+        const index = ids.indexOf(id);
+        const merged = mergedFolds.get(group);
+        const language = i18n.getLanguage();
+        if (ids.includes(sibling.id)) {
+            mergedFolds.set(group, { removedId: id, index });
+            gridStore.remove(id);
+            render();
+            announce(
+                i18n.t("fold.switched", {
+                    device: deviceName(sibling, language),
+                }),
+            );
+            gridView.boxFor(sibling.id)?.fold.focus();
+            return;
+        }
+        mergedFolds.delete(group);
+        if (merged?.removedId === sibling.id) {
+            gridStore.setRotated(sibling.id, gridStore.isRotated(id));
+            gridStore.add(sibling.id, merged.index);
+            render();
+            announce(
+                i18n.t("fold.sideBySideDone", {
+                    device: baseName(device, language),
+                }),
+            );
+            gridView.boxFor(id)?.fold.focus();
+            return;
+        }
         gridStore.setRotated(sibling.id, gridStore.isRotated(id));
         gridStore.remove(id);
         gridStore.add(sibling.id, index);
         render();
         announce(
-            i18n.t("fold.switched", {
-                device: deviceName(sibling, i18n.getLanguage()),
-            }),
+            i18n.t("fold.switched", { device: deviceName(sibling, language) }),
         );
         gridView.boxFor(sibling.id)?.fold.focus();
     },

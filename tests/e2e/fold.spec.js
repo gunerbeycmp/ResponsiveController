@@ -144,6 +144,48 @@ test("ızgarada Katla / Aç kutunun yerini korur", async ({ page }) => {
     ).toHaveText("✓");
 });
 
+test("iki hâl yan yanayken Katla / Aç ikisini geri getirir", async ({
+    page,
+}) => {
+    await openWith(page, null, {
+        ids: ["iphone-17", "galaxy-z-fold-7-folded", "galaxy-z-fold-7-open"],
+        mode: "grid",
+        size: "small",
+    });
+    // Açık kutuda Katla: diğer hâl zaten ızgarada olduğu için tek kutu kalır
+    await box(page, "galaxy-z-fold-7-open")
+        .getByRole("button", { name: "Galaxy Z Fold 7 cihazını katla" })
+        .click();
+    expect(await boxIds(page)).toEqual(["iphone-17", "galaxy-z-fold-7-folded"]);
+    const unfold = box(page, "galaxy-z-fold-7-folded").getByRole("button", {
+        name: "Galaxy Z Fold 7 cihazını aç",
+    });
+    await expect(unfold).toBeFocused();
+    // Kalan kutuda Aç: açık hâl eski yerine döner, ikisi yine yan yana
+    await unfold.click();
+    expect(await boxIds(page)).toEqual([
+        "iphone-17",
+        "galaxy-z-fold-7-folded",
+        "galaxy-z-fold-7-open",
+    ]);
+    await expect(status(page)).toHaveText(
+        "Galaxy Z Fold 7 katlı ve açık hâli ızgarada yan yana.",
+    );
+    await expect(unfold).toBeFocused();
+
+    // Katlı kutuda Aç da aynı şekilde çalışır
+    await unfold.click();
+    expect(await boxIds(page)).toEqual(["iphone-17", "galaxy-z-fold-7-open"]);
+    await box(page, "galaxy-z-fold-7-open")
+        .getByRole("button", { name: "Galaxy Z Fold 7 cihazını katla" })
+        .click();
+    expect(await boxIds(page)).toEqual([
+        "iphone-17",
+        "galaxy-z-fold-7-folded",
+        "galaxy-z-fold-7-open",
+    ]);
+});
+
 test("katlanabilir cihazda WCAG 2.1 AA ihlali yok", async ({ page }) => {
     await openWith(page, "galaxy-z-fold-7-open");
     const single = await new AxeBuilder({ page })
