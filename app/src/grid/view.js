@@ -39,6 +39,7 @@ export function createGridView({
     getUrl,
     getExpandedArea,
     onEmpty,
+    onRotate,
 }) {
     const boxes = new Map();
     const zooms = new Map();
@@ -145,6 +146,9 @@ export function createGridView({
         p.rotate.addEventListener("click", () => {
             store.setRotated(id, !store.isRotated(id));
             update(id);
+            // Araç çubuğundaki toplu döndürme ve orijinal konum düğmeleri
+            // de güncellenir
+            onRotate?.();
             announce(
                 i18n.t(
                     isLandscape(geometry(id).size)

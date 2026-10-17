@@ -471,6 +471,7 @@ const gridView = createGridView({
     announce,
     getUrl: () => state.url,
     getExpandedArea: expandedArea,
+    onRotate: () => renderScaleControls(isGridActive()),
     onEmpty: (_empty, next) => {
         render();
         const target = next

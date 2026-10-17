@@ -142,6 +142,31 @@ test("orijinal konuma çevir bütün kutuları varsayılan konuma döndürür", 
     await expect(page.locator("#rotate-all")).toBeFocused();
 });
 
+test("kutudaki döndür düğmesi araç çubuğunu da günceller", async ({ page }) => {
+    await withGrid(page, ["iphone-17", "galaxy-s24"]);
+    const reset = page.getByRole("button", { name: "Orijinal konuma çevir" });
+    const rotateAll = page.locator("#rotate-all");
+    await expect(reset).toBeDisabled();
+    // Yalnızca kutulardaki düğmelerle döndürülür
+    await box(page, "iphone-17")
+        .getByRole("button", { name: "iPhone 17 cihazını yataya çevir" })
+        .click();
+    await expect(reset).toBeEnabled();
+    await expect(rotateAll).toHaveText("Tümünü yataya çevir");
+    await box(page, "galaxy-s24")
+        .getByRole("button", { name: "Galaxy S24 cihazını yataya çevir" })
+        .click();
+    await expect(rotateAll).toHaveText("Tümünü dikeye çevir");
+    await reset.click();
+    await expect(box(page, "iphone-17").locator(".box-size")).toHaveText(
+        "402 × 874",
+    );
+    await expect(box(page, "galaxy-s24").locator(".box-size")).toHaveText(
+        "360 × 780",
+    );
+    await expect(reset).toBeDisabled();
+});
+
 test("genel ölçek tek cihazda çalışır, cihaz çerçevenin içinde kayar (FR-3.9)", async ({
     page,
 }) => {
