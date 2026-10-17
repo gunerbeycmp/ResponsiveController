@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+const expectFrameSize = async (page, text) => {
+    const [width, height] = text.split(" × ");
+    await expect(page.locator("#frame-width")).toHaveValue(width);
+    await expect(page.locator("#frame-height")).toHaveValue(height);
+};
+
 const APP_URL = "http://localhost:5173/";
 const TARGET = "localhost:5174";
 
@@ -17,7 +23,7 @@ test("URL girilince seçili cihazda önizleme açılır (FR-2.1)", async ({
     await openTarget(page);
     const iframe = page.locator("#preview-iframe");
     await expect(iframe).toHaveAttribute("src", "http://localhost:5174/");
-    await expect(page.locator("#frame-size")).toHaveText("402 × 874");
+    await expectFrameSize(page, "402 × 874");
     await expect(
         page.frameLocator("#preview-iframe").locator("body"),
     ).toContainText("önizleme sitesi çalışıyor");
@@ -45,10 +51,10 @@ test("cihaz seçimi ve tarayıcı çubukları görünümü (FR-3.14)", async ({
     await page
         .getByRole("checkbox", { name: "Tarayıcı çubukları dahil" })
         .check();
-    await expect(page.locator("#frame-size")).toHaveText("402 × 681");
+    await expectFrameSize(page, "402 × 681");
 
     await page.locator('[data-device-id="full-hd"]').click();
-    await expect(page.locator("#frame-size")).toHaveText("1920 × 1080");
+    await expectFrameSize(page, "1920 × 1080");
     await expect(page.locator("#browser-bars-option")).toBeHidden();
 
     await page.locator('[data-device-id="galaxy-s24"]').first().click();

@@ -1,6 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+const expectFrameSize = async (page, text) => {
+    const [width, height] = text.split(" × ");
+    await expect(page.locator("#frame-width")).toHaveValue(width);
+    await expect(page.locator("#frame-height")).toHaveValue(height);
+};
+
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 test.use({ locale: "tr-TR" });
@@ -25,6 +31,7 @@ test("sekmeler ve gruplar (FR-3.1, FR-3.3, FR-3.4)", async ({ page }) => {
         "Saat",
         "TV",
         "Bilgisayar",
+        "Özel",
     ]);
     await expect(tab(page, "Telefon")).toHaveAttribute("aria-selected", "true");
     await expect(groupTitles(page)).toHaveText([
@@ -59,9 +66,11 @@ test("sekmeler klavyeyle değiştirilir (WAI-ARIA)", async ({ page }) => {
     await expect(tab(page, "Tablet")).toBeFocused();
     await expect(tab(page, "Tablet")).toHaveAttribute("aria-selected", "true");
     await page.keyboard.press("End");
-    await expect(tab(page, "Bilgisayar")).toBeFocused();
+    await expect(tab(page, "Özel")).toBeFocused();
     await page.keyboard.press("ArrowRight");
     await expect(tab(page, "Favoriler")).toBeFocused();
+    await page.keyboard.press("ArrowLeft");
+    await expect(tab(page, "Özel")).toBeFocused();
     await page.keyboard.press("ArrowLeft");
     await expect(tab(page, "Bilgisayar")).toBeFocused();
 });
@@ -103,7 +112,7 @@ test("bilgisayar sekmesinde çözünürlük satırı açılır ve cihaz seçilir
     await expect(page.locator("#frame-name")).toHaveText(
         "MacBook Air / Pro 13 (2560 × 1600 ekran)",
     );
-    await expect(page.locator("#frame-size")).toHaveText("1440 × 900");
+    await expectFrameSize(page, "1440 × 900");
     // Cihazı olmayan çözünürlükte açma düğmesi yok
     const plain = page.locator(".resolution-row", {
         has: page.locator('[data-device-id="1280-x-720"]'),
@@ -115,7 +124,7 @@ test("Apple Watch sayfayı 320 px'te çizip küçültür", async ({ page }) => {
     await openPreview(page);
     await tab(page, "Saat").click();
     await device(page, "apple-watch-44-mm").click();
-    await expect(page.locator("#frame-size")).toHaveText("184 × 224");
+    await expectFrameSize(page, "184 × 224");
     await expect(page.locator("#frame-note")).toBeVisible();
     const iframe = page.locator("#preview-iframe");
     await expect(iframe).toHaveCSS("width", "320px");

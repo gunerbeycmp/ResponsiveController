@@ -10,6 +10,7 @@ import {
     viewSize,
 } from "./devices/devices.js";
 import Sortable from "sortablejs";
+import { clampSize, createCustomSizes, isValidSize } from "./devices/custom.js";
 import { createFavorites } from "./devices/favorites.js";
 import { createSidebar } from "./devices/sidebar.js";
 import { createFpsMonitor } from "./grid/fps.js";
@@ -105,6 +106,13 @@ const elements = {
     scaleFit: $("scale-fit"),
     rotateAll: $("rotate-all"),
     rotateReset: $("rotate-reset"),
+    frameNameButton: $("frame-name-button"),
+    frameNameInput: $("frame-name-input"),
+    frameWidth: $("frame-width"),
+    frameHeight: $("frame-height"),
+    frameSizeError: $("frame-size-error"),
+    frameResizable: $("frame-resizable"),
+    resizeHandles: [...document.querySelectorAll("[data-resize]")],
 };
 
 const announce = createAnnouncer($("app-status"));
@@ -112,6 +120,8 @@ const gridStore = createGridStore({
     storage: window.localStorage,
     isKnown: (id) => findDevice(id).id === id,
 });
+// FR-3.11: özel boyutlar yalnızca bu oturumda tutulur (R-19)
+const custom = createCustomSizes();
 const isGridActive = () => Boolean(state.url) && gridStore.getMode() === "grid";
 
 const sheet = createSheet({
@@ -129,6 +139,8 @@ const MIN_FRAME_HEIGHT = 240;
 const MIN_SCALE = ZOOM_STEPS[0];
 const EPSILON = 0.001;
 let frameFit = 1;
+let frameScale = 1;
+let resizing = null;
 
 const blockHeight = (element) =>
     element.hidden
@@ -185,7 +197,12 @@ function layoutFrame() {
                 : height - elements.helpToggle.offsetHeight,
     };
     frameFit = fitScale(size, available);
-    const scale = clampZoom(gridStore.getScale() ?? frameFit, frameFit);
+    // Sürüklerken ölçek sabit kalır; aksi hâlde Sığdır'da cihaz büyüdükçe
+    // küçülür ve tutamaç imleçten kaçar
+    const scale =
+        resizing?.scale ??
+        clampZoom(gridStore.getScale() ?? frameFit, frameFit);
+    frameScale = scale;
     // Apple Watch: sayfa 320 px genişlikte çizilir, saat ekranına küçültülür
     const render = viewRenderSize(device, options);
     const deviceScale = size.width / render.width;
@@ -206,7 +223,22 @@ function layoutFrame() {
 
     const name = deviceName(device, i18n.getLanguage());
     elements.frameName.textContent = name;
-    elements.frameSize.textContent = i18n.t("frame.size", size);
+    // Özel boyutun adına tıklanınca ad düzenlenir
+    const editingName = !elements.frameNameInput.hidden;
+    elements.frameName.hidden = Boolean(device.custom) || editingName;
+    elements.frameNameButton.hidden = !device.custom || editingName;
+    elements.frameNameButton.textContent = name;
+    elements.frameNameButton.setAttribute(
+        "aria-label",
+        i18n.t("custom.rename", { device: name }),
+    );
+    // Kullanıcı yazarken değer üzerine yazılmaz
+    for (const [input, value] of [
+        [elements.frameWidth, size.width],
+        [elements.frameHeight, size.height],
+    ]) {
+        if (input.dataset.dirty !== "true") input.value = String(value);
+    }
     elements.frameScale.textContent =
         Math.abs(scale - 1) > EPSILON
             ? i18n.t("frame.scale", { scale: Math.round(scale * 100) })
@@ -283,8 +315,8 @@ function placeShared(isGrid) {
         }
     } else if (warningsToggle.parentElement !== elements.frameHeader) {
         elements.frameHeader.append(warningsToggle);
-        elements.viewport.before(warningsPanel);
-        elements.viewport.after(help);
+        elements.frameResizable.before(warningsPanel);
+        elements.frameResizable.after(help);
     }
 }
 
@@ -496,6 +528,71 @@ function updateMonitor() {
     else monitor.stop();
 }
 
+function announceCustom(key, device) {
+    announce(i18n.t(key, { device: deviceName(device, i18n.getLanguage()) }));
+}
+
+// Silinen özel boyut ızgaradan da kalkar; seçiliyse türetildiği cihaza
+// (yoksa varsayılan cihaza) dönülür
+function deleteCustom(id) {
+    const device = custom.remove(id);
+    if (!device) return;
+    gridStore.remove(id);
+    gridStore.setRotated(id, false);
+    if (state.deviceId === id)
+        state.deviceId = device.sourceId ?? DEFAULT_DEVICE_ID;
+    announceCustom("custom.deleted", device);
+    render();
+}
+
+// FR-3.10 / FR-3.11: seçili cihazı boyutlandırır. Hazır cihaz değişmez,
+// ondan türetilen yeni bir özel boyut oluşturulup seçilir; özel boyut ise
+// doğrudan değişir. Boyut ekranda görünen (döndürülmüş) hâliyle verilir.
+function resizeCurrent(size, { live = false } = {}) {
+    const device = findDevice(state.deviceId);
+    const rotated = gridStore.isRotated(device.id);
+    const screen = rotated ? { width: size.height, height: size.width } : size;
+    if (device.custom) {
+        custom.resize(device.id, screen);
+        if (live) layoutFrame();
+        else render();
+        return;
+    }
+    const created = custom.create(size, device);
+    state.deviceId = created.id;
+    announceCustom("custom.created", created);
+    render();
+}
+
+function showSizeError(show) {
+    elements.frameSizeError.textContent = show
+        ? i18n.t("custom.error.range")
+        : "";
+    for (const input of [elements.frameWidth, elements.frameHeight]) {
+        input.setAttribute("aria-invalid", String(show));
+        if (show) input.setAttribute("aria-describedby", "frame-size-error");
+        else input.removeAttribute("aria-describedby");
+    }
+}
+
+function applyHeaderSize() {
+    const size = {
+        width: Number(elements.frameWidth.value),
+        height: Number(elements.frameHeight.value),
+    };
+    if (!isValidSize(size)) {
+        showSizeError(true);
+        return;
+    }
+    showSizeError(false);
+    elements.frameWidth.dataset.dirty = "false";
+    elements.frameHeight.dataset.dirty = "false";
+    const device = findDevice(state.deviceId);
+    const current = viewSize(device, viewOptions(device.id));
+    if (current.width === size.width && current.height === size.height) return;
+    resizeCurrent(size);
+}
+
 const sidebar = createSidebar({
     search: $("device-search"),
     tabList: $("device-tabs"),
@@ -518,6 +615,22 @@ const sidebar = createSidebar({
         storage: window.localStorage,
         isKnown: (id) => findDevice(id).id === id,
     }),
+    custom: {
+        list: () => custom.list(),
+        isValid: isValidSize,
+        onCreate: (size) => {
+            const device = custom.create(size);
+            state.deviceId = device.id;
+            if (isGridActive()) gridStore.add(device.id);
+            announceCustom("custom.created", device);
+            render();
+        },
+        onRename: (id, name) => {
+            custom.rename(id, name);
+            render();
+        },
+        onDelete: deleteCustom,
+    },
     getSelectedId: () => state.deviceId,
     onSelect: (id) => {
         state.deviceId = id;
@@ -656,6 +769,108 @@ elements.rotateAll.addEventListener("click", () => {
     renderView();
     announce(i18n.t(landscape ? "rotate.allLandscape" : "rotate.allPortrait"));
 });
+
+// FR-3.11, NFR-5.2: başlıktaki boyut alanları; Enter'da ya da alandan
+// çıkınca uygulanır. Ok tuşları 1, Shift + ok 10 px değiştirir ve hemen uygulanır.
+for (const input of [elements.frameWidth, elements.frameHeight]) {
+    input.addEventListener("input", () => {
+        input.dataset.dirty = "true";
+    });
+    input.addEventListener("change", applyHeaderSize);
+    input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            applyHeaderSize();
+            return;
+        }
+        const direction = { ArrowUp: 1, ArrowDown: -1 }[event.key];
+        if (!direction) return;
+        event.preventDefault();
+        const step = event.shiftKey ? 10 : 1;
+        const current = Number(input.value) || 0;
+        input.value = String(
+            clampSize({
+                width: current + direction * step,
+                height: current + direction * step,
+            }).width,
+        );
+        applyHeaderSize();
+    });
+}
+
+// Özel boyutun adı başlıkta düzenlenir (Enter kaydeder, Esc vazgeçer)
+function finishNameEdit({ save }) {
+    const input = elements.frameNameInput;
+    if (input.hidden) return;
+    input.hidden = true;
+    if (save) custom.rename(state.deviceId, input.value);
+    render();
+    elements.frameNameButton.focus();
+}
+
+elements.frameNameButton.addEventListener("click", () => {
+    const device = findDevice(state.deviceId);
+    elements.frameNameInput.value = deviceName(device, i18n.getLanguage());
+    elements.frameNameInput.hidden = false;
+    layoutFrame();
+    elements.frameNameInput.focus();
+    elements.frameNameInput.select();
+});
+elements.frameNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        finishNameEdit({ save: true });
+    } else if (event.key === "Escape") {
+        event.preventDefault();
+        finishNameEdit({ save: false });
+    }
+});
+elements.frameNameInput.addEventListener("blur", () =>
+    finishNameEdit({ save: true }),
+);
+
+// FR-3.10: çerçeveyi sağ kenarından, alt kenarından veya köşesinden sürükleme
+for (const handle of elements.resizeHandles) {
+    handle.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        handle.setPointerCapture(event.pointerId);
+        const device = findDevice(state.deviceId);
+        resizing = {
+            axis: handle.dataset.resize,
+            x: event.clientX,
+            y: event.clientY,
+            start: viewSize(device, viewOptions(device.id)),
+            scale: frameScale,
+        };
+        document.body.classList.add("is-dragging", "is-resizing");
+    });
+    handle.addEventListener("pointermove", (event) => {
+        if (!resizing) return;
+        const { axis, start, scale } = resizing;
+        const size = clampSize({
+            width: axis.includes("x")
+                ? start.width + (event.clientX - resizing.x) / scale
+                : start.width,
+            height: axis.includes("y")
+                ? start.height + (event.clientY - resizing.y) / scale
+                : start.height,
+        });
+        const device = findDevice(state.deviceId);
+        const current = viewSize(device, viewOptions(device.id));
+        if (current.width === size.width && current.height === size.height)
+            return;
+        resizeCurrent(size, { live: true });
+    });
+    const finish = () => {
+        if (!resizing) return;
+        resizing = null;
+        document.body.classList.remove("is-dragging", "is-resizing");
+        // Menüdeki özel boyut listesi de güncellenir
+        render();
+    };
+    handle.addEventListener("pointerup", finish);
+    handle.addEventListener("pointercancel", finish);
+}
 
 // Izgaradaki bütün cihazlar varsayılan konumlarına döner
 elements.rotateReset.addEventListener("click", () => {

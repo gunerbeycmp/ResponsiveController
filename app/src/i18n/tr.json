@@ -117,5 +117,20 @@
     "scale.label": "Ölçek",
     "scale.slider": "Tüm cihazların ölçeği",
     "rotate.reset": "Orijinal konuma çevir",
-    "rotate.resetDone": "Tüm cihazlar orijinal konumuna çevrildi."
+    "rotate.resetDone": "Tüm cihazlar orijinal konumuna çevrildi.",
+    "category.custom": "Özel",
+    "custom.widthLabel": "Genişlik",
+    "custom.heightLabel": "Yükseklik",
+    "custom.create": "Oluştur",
+    "custom.note": "Özel boyutlar kaydedilmez, sayfa yenilenince silinir.",
+    "custom.empty": "Henüz özel boyut yok. Genişlik ve yükseklik girip Oluştur'a bas ya da cihaz çerçevesini kenarından sürükle.",
+    "custom.defaultName": "Özel boyut {number}",
+    "custom.derivedName": "{device} (özel)",
+    "custom.derivedNameN": "{device} (özel {number})",
+    "custom.nameLabel": "Özel boyutun adı",
+    "custom.rename": "{device} adını düzenle",
+    "custom.delete": "{device} boyutunu sil",
+    "custom.created": "{device} oluşturuldu.",
+    "custom.deleted": "{device} silindi.",
+    "custom.error.range": "Genişlik ve yükseklik 100 ile 3840 px arasında olmalı."
 }

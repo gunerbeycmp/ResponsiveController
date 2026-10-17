@@ -109,7 +109,7 @@ export function searchDevices(devices, query) {
         );
         return terms.every((term) => haystack.includes(term));
     });
-    return [...TABS, "generic"]
+    return [...TABS, "generic", "custom"]
         .map((category) => ({
             type: "category",
             category,
@@ -118,5 +118,7 @@ export function searchDevices(devices, query) {
         .filter((group) => group.items.length > 0);
 }
 
-export const tabOf = (device) =>
-    TABS.includes(device.category) ? device.category : "phone";
+export const tabOf = (device) => {
+    if (device.category === "custom") return "custom";
+    return TABS.includes(device.category) ? device.category : "phone";
+};

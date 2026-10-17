@@ -1,12 +1,4 @@
-import {
-    isLandscape,
-    rotatedFor,
-    viewRenderSize,
-    viewSize,
-    describe,
-    expect,
-    it,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 import {
     DEFAULT_DEVICE_ID,
     DEVICES,

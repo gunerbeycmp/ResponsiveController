@@ -295,11 +295,46 @@
                 </section>
                 <section class="device-frame" id="device-frame" hidden>
                     <div class="frame-header">
-                        <p class="frame-info">
+                        <div class="frame-info">
                             <strong id="frame-name"></strong>
-                            <span id="frame-size"></span>
+                            <button
+                                class="frame-name-button"
+                                id="frame-name-button"
+                                type="button"
+                                hidden
+                            ></button>
+                            <input
+                                class="frame-name-input"
+                                id="frame-name-input"
+                                type="text"
+                                data-i18n-label="custom.nameLabel"
+                                hidden
+                            />
+                            <span class="frame-size" id="frame-size">
+                                <input
+                                    class="size-input"
+                                    id="frame-width"
+                                    type="number"
+                                    min="100"
+                                    max="3840"
+                                    step="1"
+                                    inputmode="numeric"
+                                    data-i18n-label="custom.widthLabel"
+                                />
+                                <span aria-hidden="true">×</span>
+                                <input
+                                    class="size-input"
+                                    id="frame-height"
+                                    type="number"
+                                    min="100"
+                                    max="3840"
+                                    step="1"
+                                    inputmode="numeric"
+                                    data-i18n-label="custom.heightLabel"
+                                />
+                            </span>
                             <span class="frame-scale" id="frame-scale"></span>
-                        </p>
+                        </div>
                         <button
                             class="frame-rotate"
                             id="frame-rotate"
@@ -334,21 +369,44 @@
                         </button>
                     </div>
                     <p
+                        class="frame-size-error"
+                        id="frame-size-error"
+                        aria-live="polite"
+                    ></p>
+                    <p
                         class="frame-note"
                         id="frame-note"
                         data-i18n="frame.watchAdaptation"
                         hidden
                     ></p>
                     <ul class="warnings-panel" id="warnings-panel" hidden></ul>
-                    <div
-                        class="frame-viewport"
-                        id="frame-viewport"
-                        role="region"
-                        tabindex="0"
-                    >
-                        <div class="frame-canvas" id="frame-canvas">
-                            <iframe id="preview-iframe"></iframe>
+                    <div class="frame-resizable" id="frame-resizable">
+                        <div
+                            class="frame-viewport"
+                            id="frame-viewport"
+                            role="region"
+                            tabindex="0"
+                        >
+                            <div class="frame-canvas" id="frame-canvas">
+                                <iframe id="preview-iframe"></iframe>
+                            </div>
                         </div>
+                        <!-- FR-3.10: fare ve dokunma için; klavye karşılığı başlıktaki alanlar -->
+                        <div
+                            class="resize-handle resize-x"
+                            data-resize="x"
+                            aria-hidden="true"
+                        ></div>
+                        <div
+                            class="resize-handle resize-y"
+                            data-resize="y"
+                            aria-hidden="true"
+                        ></div>
+                        <div
+                            class="resize-handle resize-xy"
+                            data-resize="xy"
+                            aria-hidden="true"
+                        ></div>
                     </div>
                     <div class="frame-help" id="frame-help">
                         <button

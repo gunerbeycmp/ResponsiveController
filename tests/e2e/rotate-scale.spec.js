@@ -1,6 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+const expectFrameSize = async (page, text) => {
+    const [width, height] = text.split(" × ");
+    await expect(page.locator("#frame-width")).toHaveValue(width);
+    await expect(page.locator("#frame-height")).toHaveValue(height);
+};
+
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 test.use({ locale: "tr-TR", viewport: { width: 1280, height: 800 } });
@@ -30,13 +36,13 @@ test("tek cihaz döndürülür; yatayda tarayıcı çubukları seçeneği gizlen
 }) => {
     await page.goto(APP_URL);
     await openPreview(page);
-    await expect(page.locator("#frame-size")).toHaveText("402 × 874");
+    await expectFrameSize(page, "402 × 874");
     await expect(page.locator("#browser-bars-option")).toBeVisible();
     const rotate = page.getByRole("button", {
         name: "iPhone 17 cihazını yataya çevir",
     });
     await rotate.click();
-    await expect(page.locator("#frame-size")).toHaveText("874 × 402");
+    await expectFrameSize(page, "874 × 402");
     await expect(status(page)).toHaveText("iPhone 17 yatay konuma çevrildi.");
     await expect(page.locator("#browser-bars-option")).toBeHidden();
     const viewport = page.locator("#frame-viewport");
@@ -46,7 +52,7 @@ test("tek cihaz döndürülür; yatayda tarayıcı çubukları seçeneği gizlen
     await page
         .getByRole("button", { name: "iPhone 17 cihazını dikeye çevir" })
         .click();
-    await expect(page.locator("#frame-size")).toHaveText("402 × 874");
+    await expectFrameSize(page, "402 × 874");
     await expect(page.locator("#browser-bars-option")).toBeVisible();
 });
 
@@ -58,7 +64,7 @@ test("döndürme hatırlanır ve ızgarayla ortaktır", async ({ page }) => {
         .click();
     await page.reload();
     await openPreview(page);
-    await expect(page.locator("#frame-size")).toHaveText("874 × 402");
+    await expectFrameSize(page, "874 × 402");
     await page
         .locator(".view-toolbar")
         .getByRole("button", { name: "Izgara", exact: true })

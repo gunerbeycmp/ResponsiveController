@@ -271,6 +271,8 @@ input {
 
 .frame-info {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
     margin: 0;
 }
@@ -295,10 +297,15 @@ input {
     font-size: 12px;
 }
 
+/* Sürükleme tutamaçları çerçevenin sağına ve altına yerleşir (FR-3.10) */
+.frame-resizable {
+    position: relative;
+    align-self: center;
+}
+
 /* Yakınlaştırılmış cihaz çerçevenin içinde kayar (v0.3.5) */
 .frame-viewport {
     display: flex;
-    align-self: center;
     overflow: auto;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -1278,4 +1285,200 @@ input {
 .rotate-all:disabled {
     opacity: 0.45;
     cursor: default;
+}
+
+/* Özel boyut ve sürükleyerek boyutlandırma (FR-3.10, FR-3.11, v0.3.8) */
+.frame-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.size-input {
+    width: 64px;
+    height: 26px;
+    padding: 0 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.size-input[aria-invalid="true"],
+.custom-field input[aria-invalid="true"] {
+    border-color: var(--error);
+}
+
+.frame-size-error,
+.custom-error {
+    margin: 0;
+    color: var(--error);
+    font-size: 13px;
+}
+
+.frame-size-error:empty,
+.custom-error:empty {
+    display: none;
+}
+
+.frame-name-button {
+    padding: 0 4px;
+    background: transparent;
+    border: 1px dashed transparent;
+    border-radius: var(--radius);
+    font-weight: 700;
+    cursor: text;
+}
+
+.frame-name-button:hover {
+    border-color: var(--border);
+}
+
+.frame-name-input,
+.custom-name-input {
+    min-width: 0;
+    height: 28px;
+    padding: 0 8px;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 14px;
+}
+
+.custom-name-input {
+    flex: 1;
+    margin: 6px 0;
+}
+
+.resize-handle {
+    position: absolute;
+    z-index: 1;
+    touch-action: none;
+}
+
+.resize-handle::after {
+    content: "";
+    position: absolute;
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.resize-x {
+    top: 0;
+    right: -12px;
+    width: 12px;
+    height: 100%;
+    cursor: ew-resize;
+}
+
+.resize-x::after {
+    top: calc(50% - 16px);
+    left: 4px;
+    width: 4px;
+    height: 32px;
+}
+
+.resize-y {
+    bottom: -12px;
+    left: 0;
+    width: 100%;
+    height: 12px;
+    cursor: ns-resize;
+}
+
+.resize-y::after {
+    top: 4px;
+    left: calc(50% - 16px);
+    width: 32px;
+    height: 4px;
+}
+
+.resize-xy {
+    right: -14px;
+    bottom: -14px;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+}
+
+.resize-xy::after {
+    right: 2px;
+    bottom: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 0 0 4px 0;
+    background: transparent;
+    border-right: 3px solid var(--border);
+    border-bottom: 3px solid var(--border);
+}
+
+.resize-handle:hover::after,
+.is-resizing .resize-handle::after {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.resize-xy:hover::after,
+.is-resizing .resize-xy::after {
+    background-color: transparent;
+}
+
+.custom-form {
+    margin: 4px 0 8px;
+}
+
+.custom-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.custom-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.custom-field input {
+    width: 76px;
+    height: 32px;
+    padding: 0 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+}
+
+.custom-create {
+    height: 32px;
+}
+
+.custom-note {
+    margin: 6px 0 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.custom-rename,
+.custom-delete {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    margin-top: 6px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.custom-rename:hover,
+.custom-delete:hover {
+    border-color: var(--border);
 }

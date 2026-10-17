@@ -117,5 +117,20 @@
     "scale.label": "Scale",
     "scale.slider": "Scale of all devices",
     "rotate.reset": "Restore original orientation",
-    "rotate.resetDone": "All devices restored to their original orientation."
+    "rotate.resetDone": "All devices restored to their original orientation.",
+    "category.custom": "Custom",
+    "custom.widthLabel": "Width",
+    "custom.heightLabel": "Height",
+    "custom.create": "Create",
+    "custom.note": "Custom sizes aren't saved and are removed when the page reloads.",
+    "custom.empty": "No custom sizes yet. Enter a width and height and select Create, or drag the edge of the device frame.",
+    "custom.defaultName": "Custom size {number}",
+    "custom.derivedName": "{device} (custom)",
+    "custom.derivedNameN": "{device} (custom {number})",
+    "custom.nameLabel": "Custom size name",
+    "custom.rename": "Rename {device}",
+    "custom.delete": "Delete {device}",
+    "custom.created": "{device} created.",
+    "custom.deleted": "{device} deleted.",
+    "custom.error.range": "Width and height must be between 100 and 3840 px."
 }

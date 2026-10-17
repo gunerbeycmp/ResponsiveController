@@ -8,7 +8,7 @@ import {
     tabOf,
 } from "./menu.js";
 
-const ALL_TABS = ["favorites", ...TABS];
+const ALL_TABS = ["favorites", ...TABS, "custom"];
 
 // Sol menü: arama, kategori sekmeleri, gruplar ve favoriler
 // (Aşama 3 Tasarım Kararları, FR-3.2)
@@ -20,6 +20,7 @@ export function createSidebar({
     i18n,
     favorites,
     grid,
+    custom,
     getSelectedId,
     onSelect,
     onDeviceDrag,
@@ -33,6 +34,9 @@ export function createSidebar({
     let openMenu = null;
     let sortables = [];
     const expanded = new Set();
+    // Özel sekmesi: formdaki yazılı değerler yeniden çizimde kaybolmasın
+    const draft = { width: "", height: "", error: false };
+    let editing = null;
 
     const el = (tag, props = {}, ...children) => {
         const node = document.createElement(tag);
@@ -116,7 +120,45 @@ export function createSidebar({
         return button;
     }
 
+    // Özel boyutlarda yıldız yerine ad düzenleme ve silme düğmeleri gelir;
+    // kaydedilmedikleri için favorilere eklenemezler (R-19)
+    function customActions(device) {
+        const rename = el("button", {
+            type: "button",
+            className: "custom-rename",
+            textContent: "✎",
+        });
+        rename.dataset.renameId = device.id;
+        rename.setAttribute(
+            "aria-label",
+            i18n.t("custom.rename", { device: nameOf(device) }),
+        );
+        const remove = el("button", {
+            type: "button",
+            className: "custom-delete",
+            textContent: "✕",
+        });
+        remove.dataset.deleteId = device.id;
+        remove.setAttribute(
+            "aria-label",
+            i18n.t("custom.delete", { device: nameOf(device) }),
+        );
+        return [rename, remove];
+    }
+
+    function nameEditor(device) {
+        const input = el("input", {
+            className: "custom-name-input",
+            type: "text",
+            value: nameOf(device),
+        });
+        input.dataset.editId = device.id;
+        input.setAttribute("aria-label", i18n.t("custom.nameLabel"));
+        return el("div", { className: "device-row is-editing" }, input);
+    }
+
     function row(device, options = {}, ...extra) {
+        if (device.custom && editing === device.id) return nameEditor(device);
         return el(
             "div",
             { className: "device-row" },
@@ -124,7 +166,9 @@ export function createSidebar({
             deviceButton(device, options),
             ...extra,
             gridToggle(device),
-            favoriteToggle(device),
+            ...(device.custom
+                ? customActions(device)
+                : [favoriteToggle(device)]),
         );
     }
 
@@ -369,11 +413,79 @@ export function createSidebar({
         });
     }
 
+    // FR-3.11: Özel sekmesi; form, kaydedilmediği notu ve oturumdaki boyutlar
+    function customPanel() {
+        const field = (key, id, value) => {
+            const input = el("input", {
+                id,
+                type: "number",
+                min: "100",
+                max: "3840",
+                step: "1",
+                inputMode: "numeric",
+                value,
+            });
+            input.dataset.draft = key;
+            if (draft.error) {
+                input.setAttribute("aria-invalid", "true");
+                input.setAttribute("aria-describedby", "custom-error");
+            }
+            return el(
+                "label",
+                { className: "custom-field" },
+                el("span", {
+                    textContent: i18n.t(
+                        key === "width"
+                            ? "custom.widthLabel"
+                            : "custom.heightLabel",
+                    ),
+                }),
+                input,
+            );
+        };
+        const form = el(
+            "form",
+            { className: "custom-form", noValidate: true },
+            el(
+                "div",
+                { className: "custom-fields" },
+                field("width", "custom-width", draft.width),
+                field("height", "custom-height", draft.height),
+                el("button", {
+                    type: "submit",
+                    className: "button-primary custom-create",
+                    textContent: i18n.t("custom.create"),
+                }),
+            ),
+            el("p", {
+                className: "custom-error",
+                id: "custom-error",
+                textContent: draft.error ? i18n.t("custom.error.range") : "",
+            }),
+            el("p", {
+                className: "custom-note",
+                textContent: i18n.t("custom.note"),
+            }),
+        );
+        const items = custom.list();
+        return [
+            form,
+            items.length > 0
+                ? list(items)
+                : el("p", {
+                      className: "search-empty",
+                      textContent: i18n.t("custom.empty"),
+                  }),
+        ];
+    }
+
     function renderPanel() {
         for (const sortable of sortables) sortable.destroy();
         sortables = [];
         if (query.trim()) {
             panel.replaceChildren(...searchPanel());
+        } else if (activeTab === "custom") {
+            panel.replaceChildren(...customPanel());
         } else if (activeTab === "favorites") {
             panel.replaceChildren(...favoritesPanel());
             setupDrag();
@@ -568,7 +680,72 @@ export function createSidebar({
         renderPanel();
     });
 
+    panel.addEventListener("input", (event) => {
+        const key = event.target.dataset.draft;
+        if (key) draft[key] = event.target.value;
+    });
+
+    panel.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const size = {
+            width: Number(draft.width),
+            height: Number(draft.height),
+        };
+        draft.error = !custom.isValid(size);
+        if (draft.error) {
+            render({ focus: "#custom-width" });
+            return;
+        }
+        draft.width = "";
+        draft.height = "";
+        custom.onCreate(size);
+    });
+
+    function saveName(input, { cancel = false } = {}) {
+        const id = input.dataset.editId;
+        editing = null;
+        if (!cancel) custom.onRename(id, input.value);
+        render({ focus: `[data-rename-id="${id}"]` });
+    }
+
+    panel.addEventListener("keydown", (event) => {
+        const input = event.target.closest(".custom-name-input");
+        if (!input) return;
+        if (event.key === "Enter") {
+            event.preventDefault();
+            saveName(input);
+        } else if (event.key === "Escape") {
+            event.preventDefault();
+            saveName(input, { cancel: true });
+        }
+    });
+
+    panel.addEventListener("focusout", (event) => {
+        const input = event.target.closest?.(".custom-name-input");
+        if (input && editing === input.dataset.editId) saveName(input);
+    });
+
     panel.addEventListener("click", (event) => {
+        const rename = event.target.closest(".custom-rename");
+        if (rename) {
+            editing = rename.dataset.renameId;
+            render({ focus: ".custom-name-input" });
+            panel.querySelector(".custom-name-input")?.select();
+            return;
+        }
+        const remove = event.target.closest(".custom-delete");
+        if (remove) {
+            const buttons = [...panel.querySelectorAll(".custom-delete")];
+            const position = buttons.indexOf(remove);
+            custom.onDelete(remove.dataset.deleteId);
+            const after = [...panel.querySelectorAll(".custom-delete")];
+            (
+                after[Math.min(position, after.length - 1)] ??
+                panel.querySelector("#custom-width") ??
+                panel
+            ).focus();
+            return;
+        }
         const star = event.target.closest(".favorite-toggle");
         if (star) return toggleFavorite(star);
         const plus = event.target.closest(".grid-toggle");
