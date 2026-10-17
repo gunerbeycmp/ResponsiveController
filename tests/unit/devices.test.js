@@ -4,7 +4,9 @@ import {
     DEVICES,
     deviceSize,
     findDevice,
+    baseName,
     fitScale,
+    foldSibling,
     isLandscape,
     rotatedFor,
     viewRenderSize,
@@ -132,5 +134,21 @@ describe("döndürme (FR-3.6, R-62)", () => {
         expect(rotatedFor(desktop, false)).toBe(true);
         // Kare ekran hiç döndürülmez
         expect(rotatedFor(findDevice("galaxy-watch"), true)).toBe(false);
+    });
+});
+
+describe("katlanabilir telefonlar (FR-3.5)", () => {
+    it("diğer hâli bulur", () => {
+        const open = findDevice("galaxy-z-fold-7-open");
+        expect(foldSibling(open).id).toBe("galaxy-z-fold-7-folded");
+        expect(foldSibling(foldSibling(open)).id).toBe(open.id);
+        expect(foldSibling(findDevice("iphone-17"))).toBe(null);
+    });
+
+    it("hâl eki olmadan ad verir", () => {
+        const folded = findDevice("galaxy-z-flip-7-folded");
+        expect(baseName(folded, "tr")).toBe("Galaxy Z Flip 7");
+        expect(baseName(folded, "en")).toBe("Galaxy Z Flip 7");
+        expect(baseName(findDevice("iphone-17"))).toBe("iPhone 17");
     });
 });

@@ -134,5 +134,12 @@
     "custom.deleted": "{device} silindi.",
     "custom.error.range": "Genişlik ve yükseklik 100 ile 3840 px arasında olmalı.",
     "custom.restore": "Orijinale dön",
-    "custom.restoreLabel": "{device} cihazına dön"
+    "custom.restoreLabel": "{device} cihazına dön",
+    "fold.fold": "Katla",
+    "fold.unfold": "Aç",
+    "fold.foldLabel": "{device} cihazını katla",
+    "fold.unfoldLabel": "{device} cihazını aç",
+    "fold.switched": "{device} gösteriliyor.",
+    "fold.sideBySide": "Yan yana göster",
+    "fold.sideBySideDone": "{device} katlı ve açık hâli ızgarada yan yana."
 }

@@ -3,7 +3,9 @@ import {
     DEFAULT_DEVICE_ID,
     deviceName,
     findDevice,
+    baseName,
     fitScale,
+    foldSibling,
     isLandscape,
     rotatedFor,
     viewRenderSize,
@@ -108,6 +110,8 @@ const elements = {
     rotateReset: $("rotate-reset"),
     frameNameButton: $("frame-name-button"),
     frameRestore: $("frame-restore"),
+    frameFold: $("frame-fold"),
+    frameSideBySide: $("frame-side-by-side"),
     frameRestoreDescription: $("frame-restore-description"),
     frameNameInput: $("frame-name-input"),
     frameWidth: $("frame-width"),
@@ -245,6 +249,22 @@ function layoutFrame() {
               device: deviceName(source, i18n.getLanguage()),
           })
         : "";
+    // FR-3.5: katlanabilir cihazlarda Katla / Aç ve Yan yana göster
+    const sibling = foldSibling(device);
+    elements.frameFold.hidden = !sibling;
+    elements.frameSideBySide.hidden = !sibling;
+    if (sibling) {
+        const folded = device.foldable.state === "folded";
+        elements.frameFold.textContent = i18n.t(
+            folded ? "fold.unfold" : "fold.fold",
+        );
+        elements.frameFold.setAttribute(
+            "aria-label",
+            i18n.t(folded ? "fold.unfoldLabel" : "fold.foldLabel", {
+                device: baseName(device, i18n.getLanguage()),
+            }),
+        );
+    }
     // Kullanıcı yazarken değer üzerine yazılmaz
     for (const [input, value] of [
         [elements.frameWidth, size.width],
@@ -517,6 +537,22 @@ const gridView = createGridView({
     getUrl: () => state.url,
     getExpandedArea: expandedArea,
     onRotate: () => renderScaleControls(isGridActive()),
+    // Izgarada Katla / Aç: kutu aynı sırada kalır, hâl değişir
+    onFold: (id) => {
+        const sibling = foldSibling(findDevice(id));
+        if (!sibling) return;
+        const index = gridStore.list().indexOf(id);
+        gridStore.setRotated(sibling.id, gridStore.isRotated(id));
+        gridStore.remove(id);
+        gridStore.add(sibling.id, index);
+        render();
+        announce(
+            i18n.t("fold.switched", {
+                device: deviceName(sibling, i18n.getLanguage()),
+            }),
+        );
+        gridView.boxFor(sibling.id)?.fold.focus();
+    },
     onEmpty: (_empty, next) => {
         render();
         const target = next
@@ -810,6 +846,50 @@ for (const input of [elements.frameWidth, elements.frameHeight]) {
         applyHeaderSize();
     });
 }
+
+// FR-3.5: tek cihazda Katla / Aç; döndürme diğer hâle de taşınır
+elements.frameFold.addEventListener("click", () => {
+    const device = findDevice(state.deviceId);
+    const sibling = foldSibling(device);
+    if (!sibling) return;
+    gridStore.setRotated(sibling.id, gridStore.isRotated(device.id));
+    state.deviceId = sibling.id;
+    render();
+    announce(
+        i18n.t("fold.switched", {
+            device: deviceName(sibling, i18n.getLanguage()),
+        }),
+    );
+});
+
+// FR-3.5: katlı ve açık hâl ızgarada yan yana. Izgaradaki cihazlar kalır;
+// biri zaten ızgaradaysa diğeri hemen yanına eklenir (Aşama 3 kararları)
+elements.frameSideBySide.addEventListener("click", () => {
+    const device = findDevice(state.deviceId);
+    const sibling = foldSibling(device);
+    if (!sibling) return;
+    const [folded, open] =
+        device.foldable.state === "folded"
+            ? [device, sibling]
+            : [sibling, device];
+    const ids = gridStore.list();
+    if (ids.includes(folded.id) && !ids.includes(open.id))
+        gridStore.add(open.id, ids.indexOf(folded.id) + 1);
+    else if (ids.includes(open.id) && !ids.includes(folded.id))
+        gridStore.add(folded.id, ids.indexOf(open.id));
+    else if (!ids.includes(folded.id)) {
+        gridStore.add(folded.id);
+        gridStore.add(open.id);
+    }
+    gridStore.setMode("grid");
+    monitor.reset();
+    render();
+    announce(
+        i18n.t("fold.sideBySideDone", {
+            device: baseName(device, i18n.getLanguage()),
+        }),
+    );
+});
 
 // Türetilmiş özel boyuttan kaynak cihaza dönülür; özel boyut listede kalır
 elements.frameRestore.addEventListener("click", () => {

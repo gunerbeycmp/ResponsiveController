@@ -1041,10 +1041,14 @@ input {
     touch-action: pan-x pan-y;
 }
 
+/* Başlık kutu genişliğini belirlemez (width: 0, min-width: 100%); kutu,
+   cihaz alanının genişliğinde kalır, sığmayan kontroller alta sarılır */
 .box-header {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    width: 0;
+    min-width: 100%;
 }
 
 .box-title,
@@ -1052,6 +1056,10 @@ input {
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.box-controls {
+    flex-wrap: wrap;
 }
 
 .box-info {
@@ -1491,4 +1499,22 @@ input {
     border-radius: 999px;
     font-size: 13px;
     cursor: pointer;
+}
+
+/* Katlanabilir telefonlar (FR-3.5, v0.3.10) */
+.frame-fold,
+.box-fold {
+    height: 26px;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.box-fold {
+    padding: 0 8px;
+    border-radius: var(--radius);
+    font-size: 12px;
 }

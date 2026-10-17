@@ -96,3 +96,21 @@ export const isLandscape = ({ width, height }) => width > height;
 export const rotatedFor = (device, landscape) =>
     isLandscape(device.screen) !== landscape &&
     device.screen.width !== device.screen.height;
+
+// FR-3.5: katlanabilir cihazın diğer hâli (açık ↔ katlı)
+export function foldSibling(device, devices = DEVICES) {
+    if (!device.foldable) return null;
+    return (
+        devices.find(
+            (other) =>
+                other.foldable?.group === device.foldable.group &&
+                other.id !== device.id,
+        ) ?? null
+    );
+}
+
+// Hâl eki olmadan ad: "Galaxy Z Fold 7 · Açık" → "Galaxy Z Fold 7"
+export function baseName(device, language = "tr") {
+    const name = deviceName(device, language);
+    return device.foldable ? name.split(" · ")[0] : name;
+}

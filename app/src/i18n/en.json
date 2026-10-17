@@ -134,5 +134,12 @@
     "custom.deleted": "{device} deleted.",
     "custom.error.range": "Width and height must be between 100 and 3840 px.",
     "custom.restore": "Back to original",
-    "custom.restoreLabel": "Switch back to {device}"
+    "custom.restoreLabel": "Switch back to {device}",
+    "fold.fold": "Fold",
+    "fold.unfold": "Unfold",
+    "fold.foldLabel": "Fold {device}",
+    "fold.unfoldLabel": "Unfold {device}",
+    "fold.switched": "Showing {device}.",
+    "fold.sideBySide": "Show side by side",
+    "fold.sideBySideDone": "{device} folded and unfolded are now side by side in the grid."
 }

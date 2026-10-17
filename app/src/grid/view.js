@@ -1,6 +1,8 @@
 import Sortable from "sortablejs";
 import {
+    baseName,
     deviceName,
+    foldSibling,
     findDevice,
     fitScale,
     isLandscape,
@@ -40,6 +42,7 @@ export function createGridView({
     getExpandedArea,
     onEmpty,
     onRotate,
+    onFold,
 }) {
     const boxes = new Map();
     const zooms = new Map();
@@ -84,6 +87,7 @@ export function createGridView({
             in: iconButton("box-zoom-in", "+"),
             fit: iconButton("box-fit", ""),
             rotate: iconButton("box-rotate", "⟳"),
+            fold: iconButton("box-fold", ""),
             expand: iconButton("box-expand", ""),
             menuSlot: el("div"),
             iframe: el("iframe"),
@@ -118,6 +122,7 @@ export function createGridView({
                     p.in,
                     p.fit,
                     p.rotate,
+                    p.fold,
                     p.expand,
                 ),
             ),
@@ -158,6 +163,8 @@ export function createGridView({
                 ),
             );
         });
+        // FR-3.5: kutu aynı yerde kalır, içindeki hâl değişir
+        p.fold.addEventListener("click", () => onFold?.(id));
         p.expand.addEventListener("click", () => {
             expanded = expanded === id ? null : id;
             render();
@@ -306,6 +313,18 @@ export function createGridView({
                 device: name,
             }),
         );
+        const device = findDevice(id);
+        p.fold.hidden = !foldSibling(device);
+        if (device.foldable) {
+            const folded = device.foldable.state === "folded";
+            p.fold.textContent = i18n.t(folded ? "fold.unfold" : "fold.fold");
+            p.fold.setAttribute(
+                "aria-label",
+                i18n.t(folded ? "fold.unfoldLabel" : "fold.foldLabel", {
+                    device: baseName(device, i18n.getLanguage()),
+                }),
+            );
+        }
         p.menuSlot.replaceChildren(
             openMenu === id ? moveMenu(id, index, ids.length) : "",
         );
