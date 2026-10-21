@@ -141,5 +141,15 @@
     "fold.unfoldLabel": "{device} cihazını aç",
     "fold.switched": "{device} gösteriliyor.",
     "fold.sideBySide": "Yan yana göster",
-    "fold.sideBySideDone": "{device} katlı ve açık hâli ızgarada yan yana."
+    "fold.sideBySideDone": "{device} katlı ve açık hâli ızgarada yan yana.",
+    "shot.take": "{device} ekran görüntüsünü al",
+    "shot.taking": "Ekran görüntüsü alınıyor…",
+    "shot.title": "Ekran görüntüsü",
+    "shot.imageAlt": "{device} ekran görüntüsü ({width} × {height})",
+    "shot.download": "İndir",
+    "shot.copy": "Kopyala",
+    "shot.copied": "Panoya kopyalandı.",
+    "shot.copyFailed": "Kopyalanamadı. Bu tarayıcı panoya görsel kopyalamaya izin vermiyor; İndir'i kullanabilirsin.",
+    "shot.close": "Kapat",
+    "shot.error": "Ekran görüntüsü alınamadı. Tekrar dene."
 }

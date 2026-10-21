@@ -4,7 +4,9 @@
     "scripts": {
         "dev": "concurrently -n app,preview -c blue,green \"npm:dev:app\" \"npm:dev:preview\"",
         "dev:app": "vite --config vite.app.config.js",
+        "predev:preview": "node scripts/vendor.js",
         "dev:preview": "vite --config vite.preview.config.js",
+        "prebuild": "node scripts/vendor.js",
         "build": "vite build --config vite.app.config.js && vite build --config vite.preview.config.js",
         "lint": "eslint .",
         "format": "prettier --write .",
@@ -37,6 +39,7 @@
     "dependencies": {
         "@fontsource-variable/inter": "^5.3.0",
         "fflate": "^0.8.3",
+        "modern-screenshot": "^4.7.0",
         "sortablejs": "^1.15.7"
     }
 }

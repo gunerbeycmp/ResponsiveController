@@ -141,5 +141,15 @@
     "fold.unfoldLabel": "Unfold {device}",
     "fold.switched": "Showing {device}.",
     "fold.sideBySide": "Show side by side",
-    "fold.sideBySideDone": "{device} folded and unfolded are now side by side in the grid."
+    "fold.sideBySideDone": "{device} folded and unfolded are now side by side in the grid.",
+    "shot.take": "Take a screenshot of {device}",
+    "shot.taking": "Taking screenshot…",
+    "shot.title": "Screenshot",
+    "shot.imageAlt": "Screenshot of {device} ({width} × {height})",
+    "shot.download": "Download",
+    "shot.copy": "Copy",
+    "shot.copied": "Copied to clipboard.",
+    "shot.copyFailed": "Couldn't copy. This browser doesn't allow copying images to the clipboard; you can use Download.",
+    "shot.close": "Close",
+    "shot.error": "The screenshot couldn't be taken. Try again."
 }

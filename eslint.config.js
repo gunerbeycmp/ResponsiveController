@@ -3,7 +3,7 @@ import globals from "globals";
 
 // Teknik Tasarım 8: ESLint önerilen kurallar
 export default [
-    { ignores: ["dist/", "node_modules/"] },
+    { ignores: ["dist/", "node_modules/", "preview/public/__rc/vendor/"] },
     js.configs.recommended,
     {
         // Araç ve önizleme tarayıcıda çalışır
@@ -17,7 +17,7 @@ export default [
     },
     {
         // Ayar dosyaları ve testler Node'da çalışır
-        files: ["*.config.js", "tests/**/*.js"],
+        files: ["*.config.js", "tests/**/*.js", "scripts/**/*.js"],
         languageOptions: { globals: globals.node },
     },
     {

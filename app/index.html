@@ -357,6 +357,14 @@
                             ⟳
                         </button>
                         <button
+                            class="frame-rotate"
+                            id="frame-shot"
+                            type="button"
+                            hidden
+                        >
+                            📷
+                        </button>
+                        <button
                             class="frame-fold"
                             id="frame-fold"
                             type="button"
@@ -492,6 +500,47 @@
                 <ul id="grid-drop"></ul>
             </div>
         </div>
+
+        <dialog
+            class="upload-dialog shot-dialog"
+            id="shot-dialog"
+            aria-labelledby="shot-title"
+        >
+            <div class="dialog-header">
+                <h2 id="shot-title" data-i18n="shot.title">Ekran görüntüsü</h2>
+                <button
+                    class="button-icon"
+                    id="shot-close"
+                    type="button"
+                    data-i18n-label="shot.close"
+                >
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </div>
+            <p class="shot-status" id="shot-status"></p>
+            <div class="shot-preview">
+                <img id="shot-image" alt="" hidden />
+            </div>
+            <div class="upload-actions" id="shot-actions" hidden>
+                <button
+                    class="button-primary"
+                    id="shot-download"
+                    type="button"
+                    data-i18n="shot.download"
+                >
+                    İndir
+                </button>
+                <button
+                    class="button-ghost"
+                    id="shot-copy"
+                    type="button"
+                    data-i18n="shot.copy"
+                >
+                    Kopyala
+                </button>
+            </div>
+            <p class="shot-message" id="shot-message" aria-live="polite"></p>
+        </dialog>
 
         <dialog
             class="upload-dialog"

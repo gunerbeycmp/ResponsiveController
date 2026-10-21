@@ -26,6 +26,8 @@ import {
     zoomOut,
 } from "./grid/zoom.js";
 import { createI18n } from "./i18n/i18n.js";
+import { requestCapture, shotFileName } from "./shot/capture.js";
+import { createShotDialog } from "./shot/dialog.js";
 import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
 import { createPreviewBridge } from "./upload/bridge.js";
@@ -111,6 +113,7 @@ const elements = {
     frameNameButton: $("frame-name-button"),
     frameRestore: $("frame-restore"),
     frameFold: $("frame-fold"),
+    frameShot: $("frame-shot"),
     frameSideBySide: $("frame-side-by-side"),
     frameRestoreDescription: $("frame-restore-description"),
     frameNameInput: $("frame-name-input"),
@@ -253,6 +256,13 @@ function layoutFrame() {
               device: deviceName(source, i18n.getLanguage()),
           })
         : "";
+    // FR-4.1: ekran görüntüsü şimdilik yalnızca yüklenen projelerde;
+    // URL ile açılan siteler v0.4.5'te ekran paylaşımıyla (Aşama 4 kararları)
+    elements.frameShot.hidden = !state.project;
+    elements.frameShot.setAttribute(
+        "aria-label",
+        i18n.t("shot.take", { device: name }),
+    );
     // FR-3.5: katlanabilir cihazlarda Katla / Aç ve Yan yana göster
     const sibling = foldSibling(device);
     elements.frameFold.hidden = !sibling;
@@ -922,6 +932,41 @@ elements.frameSideBySide.addEventListener("click", () => {
         i18n.t("fold.sideBySideDone", {
             device: baseName(device, i18n.getLanguage()),
         }),
+    );
+});
+
+// FR-4.1: ekran görüntüsü cihazın gerçek piksel yoğunluğunda alınır;
+// DPR'ı olmayan cihazlarda 1x (Aşama 4 kararları)
+const shotDialog = createShotDialog({
+    t: i18n.t,
+    announce,
+    elements: {
+        dialog: $("shot-dialog"),
+        close: $("shot-close"),
+        status: $("shot-status"),
+        image: $("shot-image"),
+        actions: $("shot-actions"),
+        download: $("shot-download"),
+        copy: $("shot-copy"),
+        message: $("shot-message"),
+    },
+});
+
+elements.frameShot.addEventListener("click", () => {
+    const device = findDevice(state.deviceId);
+    const size = viewSize(device, viewOptions(device.id));
+    const name = deviceName(device, i18n.getLanguage());
+    shotDialog.open(
+        () =>
+            requestCapture(elements.iframe.contentWindow, {
+                scale: device.dpr ?? 1,
+            }),
+        {
+            name,
+            size,
+            fileName: shotFileName(name, size),
+            opener: elements.frameShot,
+        },
     );
 });
 

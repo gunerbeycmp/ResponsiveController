@@ -1518,3 +1518,33 @@ input {
     border-radius: var(--radius);
     font-size: 12px;
 }
+
+/* Ekran görüntüsü penceresi (FR-4.1, v0.4.1) */
+.shot-dialog {
+    width: min(100% - 32px, 720px);
+}
+
+.shot-status,
+.shot-message {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.shot-message:empty {
+    display: none;
+}
+
+.shot-preview {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.shot-preview img {
+    max-width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}

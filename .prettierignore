@@ -4,3 +4,4 @@ package-lock.json
 .claude/
 test-results/
 playwright-report/
+preview/public/__rc/vendor/
