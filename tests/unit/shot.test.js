@@ -6,7 +6,7 @@ describe("ekran görüntüsü dosya adı (FR-4.1)", () => {
 
     it("cihaz, CSS boyutu, tarih ve saat içerir", () => {
         expect(
-            shotFileName("iPhone 17", { width: 402, height: 874 }, date),
+            shotFileName("iPhone 17", { width: 402, height: 874 }, { date }),
         ).toBe("iphone-17-402x874-2026-10-21-0905.png");
     });
 
@@ -15,18 +15,22 @@ describe("ekran görüntüsü dosya adı (FR-4.1)", () => {
             shotFileName(
                 "Galaxy Z Fold 7 · Açık",
                 { width: 984, height: 1092 },
-                date,
+                { date },
             ),
         ).toBe("galaxy-z-fold-7-acik-984x1092-2026-10-21-0905.png");
         expect(
             shotFileName(
                 "Büyük telefon (özel)",
                 { width: 430, height: 932 },
-                date,
+                { date },
             ),
         ).toBe("buyuk-telefon-ozel-430x932-2026-10-21-0905.png");
         expect(
-            shotFileName("İç ekran ışığı", { width: 100, height: 100 }, date),
+            shotFileName(
+                "İç ekran ışığı",
+                { width: 100, height: 100 },
+                { date },
+            ),
         ).toBe("ic-ekran-isigi-100x100-2026-10-21-0905.png");
     });
 });

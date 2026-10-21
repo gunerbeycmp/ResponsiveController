@@ -26,7 +26,7 @@ import {
     zoomOut,
 } from "./grid/zoom.js";
 import { createI18n } from "./i18n/i18n.js";
-import { requestCapture, shotFileName } from "./shot/capture.js";
+import { requestCapture } from "./shot/capture.js";
 import { createShotDialog } from "./shot/dialog.js";
 import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
@@ -940,9 +940,15 @@ elements.frameSideBySide.addEventListener("click", () => {
 const shotDialog = createShotDialog({
     t: i18n.t,
     announce,
+    getLanguage: () => i18n.getLanguage(),
     elements: {
         dialog: $("shot-dialog"),
         close: $("shot-close"),
+        modes: [...document.querySelectorAll("[data-shot-mode]")],
+        note: $("shot-note"),
+        noteText: $("shot-note-text"),
+        split: $("shot-split"),
+        parts: $("shot-parts"),
         status: $("shot-status"),
         image: $("shot-image"),
         actions: $("shot-actions"),
@@ -956,18 +962,16 @@ elements.frameShot.addEventListener("click", () => {
     const device = findDevice(state.deviceId);
     const size = viewSize(device, viewOptions(device.id));
     const name = deviceName(device, i18n.getLanguage());
-    shotDialog.open(
-        () =>
+    shotDialog.open({
+        capture: (mode) =>
             requestCapture(elements.iframe.contentWindow, {
                 scale: device.dpr ?? 1,
+                mode,
             }),
-        {
-            name,
-            size,
-            fileName: shotFileName(name, size),
-            opener: elements.frameShot,
-        },
-    );
+        name,
+        size,
+        opener: elements.frameShot,
+    });
 });
 
 // Türetilmiş özel boyuttan kaynak cihaza dönülür; özel boyut listede kalır

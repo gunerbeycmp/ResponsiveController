@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { strToU8, zipSync } from "fflate";
+import { readFileSync } from "node:fs";
+import { strToU8, unzipSync, zipSync } from "fflate";
 
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -15,13 +16,22 @@ const PROJECT = Buffer.from(
     }),
 );
 
-async function uploadProject(page) {
+// 6000 px uzunluğunda sayfa: iPhone 17'nin DPR 3 değeriyle sınırı aşar
+const LONG = Buffer.from(
+    zipSync({
+        "index.html": strToU8(
+            '<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{margin:0}div{height:3000px}</style></head><body><div style="background:#ff0000"></div><div style="background:#0000ff"></div></body></html>',
+        ),
+    }),
+);
+
+async function uploadProject(page, buffer = PROJECT) {
     await page.goto(APP_URL);
     await page.getByRole("button", { name: "Yükle" }).click();
     await page.locator("#file-input").setInputFiles({
         name: "renk.zip",
         mimeType: "application/zip",
-        buffer: PROJECT,
+        buffer,
     });
     await expect(page.locator("#upload-dialog")).not.toBeVisible();
 }
@@ -142,6 +152,92 @@ test("ekran görüntüsü alınamazsa hata gösterilir", async ({ page }) => {
         { timeout: 20000 },
     );
     await expect(page.locator("#shot-actions")).toBeHidden();
+});
+
+test("tam sayfa görüntü alınır (FR-4.1)", async ({ page }) => {
+    await uploadProject(page);
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    const full = page.getByRole("button", { name: "Tam sayfa" });
+    await full.click();
+    await expect(full).toHaveAttribute("aria-pressed", "true");
+    await expect(
+        page.getByRole("img", {
+            name: "iPhone 17 ekran görüntüsü (402 × 1500)",
+        }),
+    ).toBeVisible();
+    // 1500 px sayfa sınıra sığar: tam yoğunluk, not yok
+    const size = await page.locator("#shot-image").evaluate(async (img) => {
+        await img.decode();
+        return [img.naturalWidth, img.naturalHeight];
+    });
+    expect(size).toEqual([1206, 4500]);
+    await expect(page.locator("#shot-note")).toBeHidden();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "İndir" }).click();
+    expect((await download).suggestedFilename()).toMatch(
+        /^iphone-17-402x874-tam-sayfa-\d{4}-\d{2}-\d{2}-\d{4}\.png$/,
+    );
+    // Görünen alana dönülür
+    await page.getByRole("button", { name: "Görünen alan" }).click();
+    await expect(
+        page.getByRole("img", {
+            name: "iPhone 17 ekran görüntüsü (402 × 874)",
+        }),
+    ).toBeVisible();
+});
+
+test("çok uzun sayfada yoğunluk düşer, parçalara bölünür (R-64)", async ({
+    page,
+}) => {
+    test.setTimeout(60000);
+    await uploadProject(page, LONG);
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    await page.getByRole("button", { name: "Tam sayfa" }).click();
+    await expect(page.locator("#shot-note-text")).toHaveText(
+        /Sayfa çok uzun olduğu için görüntü 2,7x yoğunlukta alındı\./,
+    );
+    const size = await page.locator("#shot-image").evaluate(async (img) => {
+        await img.decode();
+        return [img.naturalWidth, img.naturalHeight];
+    });
+    expect(size[1]).toBeLessThanOrEqual(16384);
+    expect(size[1]).toBeGreaterThan(16000);
+
+    await page.getByRole("button", { name: "Parçalara böl" }).click();
+    await expect(page.locator("#shot-note-text")).toHaveText(
+        "Sayfa 2 parçaya bölündü. İndir, parçaları tek bir ZIP dosyası olarak indirir; Kopyala yalnızca tek görselde kullanılabilir.",
+    );
+    await expect(
+        page.getByRole("img", { name: "iPhone 17 tam sayfa, parça 2 / 2" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Kopyala" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "İndir" })).toBeFocused();
+    // Parçalar tam yoğunlukta (DPR 3)
+    const heights = await page
+        .locator("#shot-parts img")
+        .evaluateAll((images) =>
+            Promise.all(
+                images.map(async (img) => {
+                    await img.decode();
+                    return [img.naturalWidth, img.naturalHeight];
+                }),
+            ),
+        );
+    expect(heights).toEqual([
+        [1206, 16383],
+        [1206, 1617],
+    ]);
+
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "İndir" }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toMatch(
+        /^iphone-17-402x874-tam-sayfa-.+\.zip$/,
+    );
+    const entries = Object.keys(unzipSync(readFileSync(await file.path())));
+    expect(entries).toEqual(["parca-01.png", "parca-02.png"]);
 });
 
 test("ekran görüntüsü penceresinde WCAG 2.1 AA ihlali yok", async ({

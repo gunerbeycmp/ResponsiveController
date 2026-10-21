@@ -517,9 +517,47 @@
                     <span aria-hidden="true">✕</span>
                 </button>
             </div>
+            <div
+                class="segmented shot-modes"
+                role="group"
+                aria-labelledby="shot-mode-label"
+            >
+                <span
+                    class="visually-hidden"
+                    id="shot-mode-label"
+                    data-i18n="shot.modeLabel"
+                    >Ekran görüntüsü türü</span
+                >
+                <button
+                    type="button"
+                    data-shot-mode="visible"
+                    data-i18n="shot.visible"
+                >
+                    Görünen alan
+                </button>
+                <button
+                    type="button"
+                    data-shot-mode="full"
+                    data-i18n="shot.fullPage"
+                >
+                    Tam sayfa
+                </button>
+            </div>
             <p class="shot-status" id="shot-status"></p>
+            <div class="shot-note" id="shot-note" hidden>
+                <p id="shot-note-text"></p>
+                <button
+                    class="button-ghost"
+                    id="shot-split"
+                    type="button"
+                    data-i18n="shot.split"
+                >
+                    Parçalara böl
+                </button>
+            </div>
             <div class="shot-preview">
                 <img id="shot-image" alt="" hidden />
+                <ol class="shot-parts" id="shot-parts" hidden></ol>
             </div>
             <div class="upload-actions" id="shot-actions" hidden>
                 <button

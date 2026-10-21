@@ -151,5 +151,14 @@
     "shot.copied": "Panoya kopyalandı.",
     "shot.copyFailed": "Kopyalanamadı. Bu tarayıcı panoya görsel kopyalamaya izin vermiyor; İndir'i kullanabilirsin.",
     "shot.close": "Kapat",
-    "shot.error": "Ekran görüntüsü alınamadı. Tekrar dene."
+    "shot.error": "Ekran görüntüsü alınamadı. Tekrar dene.",
+    "shot.modeLabel": "Ekran görüntüsü türü",
+    "shot.visible": "Görünen alan",
+    "shot.fullPage": "Tam sayfa",
+    "shot.reducedNote": "Sayfa çok uzun olduğu için görüntü {scale}x yoğunlukta alındı. Tam çözünürlük için parçalara bölebilirsin.",
+    "shot.split": "Parçalara böl",
+    "shot.partsNote": "Sayfa {count} parçaya bölündü. İndir, parçaları tek bir ZIP dosyası olarak indirir; Kopyala yalnızca tek görselde kullanılabilir.",
+    "shot.partAlt": "{device} tam sayfa, parça {number} / {count}",
+    "shot.fullPageFile": "tam-sayfa",
+    "shot.partFile": "parca"
 }

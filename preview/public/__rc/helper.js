@@ -29,30 +29,59 @@
     // FR-4.1: ekran görüntüsü önizlemenin içinde alınır; araç önizlemenin
     // içeriğine erişemediği için görüntü araca mesajla gönderilir (R-40).
     // Kütüphane yalnızca istenince yüklenir, sayfaya görsel bir şey eklemez.
-    async function capture({ scale }) {
-        const { domToBlob } = await import("/__rc/vendor/modern-screenshot.js");
+    async function capture({ mode, scale }) {
+        const [{ domToBlob }, plan] = await Promise.all([
+            import("/__rc/vendor/modern-screenshot.js"),
+            import("/__rc/shot-plan.js"),
+        ]);
         const width = window.innerWidth;
-        const height = window.innerHeight;
+        const shoot = (top, height, at) =>
+            domToBlob(document.documentElement, {
+                width,
+                height,
+                scale: at,
+                type: "image/png",
+                style: {
+                    transform: `translate(${-window.scrollX}px, ${-top}px)`,
+                },
+            });
+
         // Görünen alan: sayfa kaydırılmışsa kopya o kadar kaydırılır
-        const blob = await domToBlob(document.documentElement, {
-            width,
-            height,
-            scale,
-            type: "image/png",
-            style: {
-                transform: `translate(${-window.scrollX}px, ${-window.scrollY}px)`,
-            },
-        });
-        return { blob, width, height };
+        if (mode === "visible") {
+            const height = window.innerHeight;
+            const blob = await shoot(window.scrollY, height, scale);
+            return { blobs: [blob], width, height, scale, reduced: false };
+        }
+
+        // Tam sayfa ve parçalar (FR-4.1, R-64)
+        const height = Math.max(
+            document.documentElement.scrollHeight,
+            document.body?.scrollHeight ?? 0,
+        );
+        const limits = plan.canvasLimits(navigator.userAgent);
+        if (mode === "parts") {
+            const blobs = [];
+            for (const part of plan.partPlan({ width, height, scale, limits }))
+                blobs.push(await shoot(part.top, part.height, scale));
+            return { blobs, width, height, scale, reduced: false };
+        }
+        const fit = plan.fitScale({ width, height, scale, limits });
+        const blob = await shoot(0, height, fit.scale);
+        return { blobs: [blob], width, height, ...fit };
     }
 
     window.addEventListener("message", async (event) => {
         if (!APP_ORIGINS.includes(event.origin)) return;
         if (event.source !== window.parent) return;
-        const { type, id, scale } = event.data ?? {};
+        const { type, id, scale, mode } = event.data ?? {};
         if (type !== "rc:capture") return;
         try {
-            const result = await capture({ scale: Number(scale) || 1 });
+            const result = await capture({
+                mode: ["visible", "full", "parts"].includes(mode)
+                    ? mode
+                    : "visible",
+                scale: Number(scale) || 1,
+            });
             window.parent.postMessage(
                 { type: "rc:capture-result", id, ...result },
                 event.origin,

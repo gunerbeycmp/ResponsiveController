@@ -151,5 +151,14 @@
     "shot.copied": "Copied to clipboard.",
     "shot.copyFailed": "Couldn't copy. This browser doesn't allow copying images to the clipboard; you can use Download.",
     "shot.close": "Close",
-    "shot.error": "The screenshot couldn't be taken. Try again."
+    "shot.error": "The screenshot couldn't be taken. Try again.",
+    "shot.modeLabel": "Screenshot type",
+    "shot.visible": "Visible area",
+    "shot.fullPage": "Full page",
+    "shot.reducedNote": "The page is too long, so the screenshot was taken at {scale}x. Split it into parts for full resolution.",
+    "shot.split": "Split into parts",
+    "shot.partsNote": "The page was split into {count} parts. Download saves them as a single ZIP file; Copy works only with a single image.",
+    "shot.partAlt": "{device} full page, part {number} of {count}",
+    "shot.fullPageFile": "full-page",
+    "shot.partFile": "part"
 }

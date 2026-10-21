@@ -5,7 +5,10 @@ let nextId = 1;
 
 // FR-4.1: önizlemedeki yardımcı betikten ekran görüntüsü ister (R-40).
 // Yanıt yalnızca o iframe'den ve önizleme adresinden kabul edilir.
-export function requestCapture(frameWindow, { scale = 1 } = {}) {
+export function requestCapture(
+    frameWindow,
+    { scale = 1, mode = "visible" } = {},
+) {
     const id = nextId++;
     return new Promise((resolve, reject) => {
         const timer = setTimeout(() => finish(new Error("timeout")), TIMEOUT);
@@ -22,16 +25,18 @@ export function requestCapture(frameWindow, { scale = 1 } = {}) {
             if (data.id !== id) return;
             if (data.type === "rc:capture-result")
                 finish(null, {
-                    blob: data.blob,
+                    blobs: data.blobs,
                     width: data.width,
                     height: data.height,
+                    scale: data.scale,
+                    reduced: data.reduced,
                 });
             else if (data.type === "rc:capture-error")
                 finish(new Error(data.message));
         }
         window.addEventListener("message", onMessage);
         frameWindow.postMessage(
-            { type: "rc:capture", id, scale },
+            { type: "rc:capture", id, scale, mode },
             PREVIEW_ORIGIN,
         );
     });
@@ -48,11 +53,20 @@ const slug = (text) =>
 
 const pad = (value) => String(value).padStart(2, "0");
 
-// Dosya adı: cihaz, CSS boyutu, tarih ve saat
-// (ör. iphone-17-402x874-2026-10-21-2246.png)
-export function shotFileName(name, { width, height }, date = new Date()) {
+// Dosya adı: cihaz, CSS boyutu, (tam sayfa eki), tarih ve saat
+// (ör. iphone-17-402x874-tam-sayfa-2026-10-21-2246.png)
+export function shotFileName(
+    name,
+    { width, height },
+    { date = new Date(), suffix = "", extension = "png" } = {},
+) {
     const stamp = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
         date.getDate(),
     )}-${pad(date.getHours())}${pad(date.getMinutes())}`;
-    return `${slug(name)}-${width}x${height}-${stamp}.png`;
+    const parts = [slug(name), `${width}x${height}`, suffix, stamp];
+    return `${parts.filter(Boolean).join("-")}.${extension}`;
 }
+
+// ZIP içindeki parça adı (ör. parca-01.png)
+export const partFileName = (prefix, index) =>
+    `${prefix}-${String(index + 1).padStart(2, "0")}.png`;
