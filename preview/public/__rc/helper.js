@@ -35,11 +35,21 @@
             import("/__rc/shot-plan.js"),
         ]);
         const width = window.innerWidth;
+        // Tarayıcılar arka plan rengi verilmemiş sayfayı beyaz zeminde gösterir;
+        // görüntü de saydam değil, sayfanın kendi rengiyle ya da beyazla alınır
+        const transparent = (color) =>
+            !color || color === "transparent" || /,\s*0\)$/.test(color);
+        const backgroundColor =
+            [document.documentElement, document.body]
+                .filter(Boolean)
+                .map((node) => getComputedStyle(node).backgroundColor)
+                .find((color) => !transparent(color)) ?? "#ffffff";
         const shoot = (top, height, at) =>
             domToBlob(document.documentElement, {
                 width,
                 height,
                 scale: at,
+                backgroundColor,
                 type: "image/png",
                 style: {
                     transform: `translate(${-window.scrollX}px, ${-top}px)`,

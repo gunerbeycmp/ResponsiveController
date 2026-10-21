@@ -160,5 +160,7 @@
     "shot.partsNote": "Sayfa {count} parçaya bölündü. İndir, parçaları tek bir ZIP dosyası olarak indirir; Kopyala yalnızca tek görselde kullanılabilir.",
     "shot.partAlt": "{device} tam sayfa, parça {number} / {count}",
     "shot.fullPageFile": "tam-sayfa",
-    "shot.partFile": "parca"
+    "shot.partFile": "parca",
+    "shot.formatLabel": "Dosya biçimi",
+    "shot.webpUnsupported": "Bu tarayıcı WebP dosyası oluşturamıyor; görüntü PNG olarak indirildi."
 }

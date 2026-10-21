@@ -160,5 +160,7 @@
     "shot.partsNote": "The page was split into {count} parts. Download saves them as a single ZIP file; Copy works only with a single image.",
     "shot.partAlt": "{device} full page, part {number} of {count}",
     "shot.fullPageFile": "full-page",
-    "shot.partFile": "part"
+    "shot.partFile": "part",
+    "shot.formatLabel": "File format",
+    "shot.webpUnsupported": "This browser can't create WebP files; the image was downloaded as PNG."
 }

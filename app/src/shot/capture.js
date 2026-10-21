@@ -67,6 +67,6 @@ export function shotFileName(
     return `${parts.filter(Boolean).join("-")}.${extension}`;
 }
 
-// ZIP içindeki parça adı (ör. parca-01.png)
-export const partFileName = (prefix, index) =>
-    `${prefix}-${String(index + 1).padStart(2, "0")}.png`;
+// ZIP içindeki parça adı (ör. parca-01.png, parca-01.jpg)
+export const partFileName = (prefix, index, extension = "png") =>
+    `${prefix}-${String(index + 1).padStart(2, "0")}.${extension}`;

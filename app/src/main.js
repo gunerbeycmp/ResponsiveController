@@ -941,7 +941,9 @@ const shotDialog = createShotDialog({
     t: i18n.t,
     announce,
     getLanguage: () => i18n.getLanguage(),
+    storage: window.localStorage,
     elements: {
+        formats: [...document.querySelectorAll("[data-shot-format]")],
         dialog: $("shot-dialog"),
         close: $("shot-close"),
         modes: [...document.querySelectorAll("[data-shot-mode]")],

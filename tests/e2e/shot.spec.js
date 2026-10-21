@@ -240,6 +240,123 @@ test("çok uzun sayfada yoğunluk düşer, parçalara bölünür (R-64)", async 
     expect(entries).toEqual(["parca-01.png", "parca-02.png"]);
 });
 
+// İndirilen dosyanın adı ve ilk baytları
+async function downloadFile(page) {
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "İndir" }).click();
+    const file = await download;
+    const bytes = readFileSync(await file.path());
+    return { name: file.suggestedFilename(), bytes };
+}
+
+test("arka plan rengi verilmemiş sayfa beyaz zeminde alınır", async ({
+    page,
+}) => {
+    await uploadProject(
+        page,
+        Buffer.from(
+            zipSync({
+                "index.html": strToU8(
+                    '<!doctype html><meta name="viewport" content="width=device-width"><p>Metin</p>',
+                ),
+            }),
+        ),
+    );
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    const corner = await page.locator("#shot-image").evaluate(async (img) => {
+        await img.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0);
+        return Array.from(
+            context.getImageData(
+                img.naturalWidth - 5,
+                img.naturalHeight - 5,
+                1,
+                1,
+            ).data,
+        );
+    });
+    expect(corner).toEqual([255, 255, 255, 255]);
+});
+
+test("dosya biçimi seçilir ve hatırlanır (FR-4.5)", async ({ page }) => {
+    await uploadProject(page);
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    const png = page.getByRole("button", { name: "PNG", exact: true });
+    const jpeg = page.getByRole("button", { name: "JPEG", exact: true });
+    const webp = page.getByRole("button", { name: "WebP", exact: true });
+    // İlk kullanımda PNG
+    await expect(png).toHaveAttribute("aria-pressed", "true");
+
+    await jpeg.click();
+    await expect(jpeg).toHaveAttribute("aria-pressed", "true");
+    const jpg = await downloadFile(page);
+    expect(jpg.name).toMatch(/^iphone-17-402x874-.+\.jpg$/);
+    // JPEG imzası FF D8 FF
+    expect([...jpg.bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+
+    await webp.click();
+    const webpFile = await downloadFile(page);
+    expect(webpFile.name).toMatch(/\.webp$/);
+    expect(webpFile.bytes.subarray(8, 12).toString()).toBe("WEBP");
+
+    // Pencere kapatılıp açılınca son seçim hatırlanır
+    await page.getByRole("button", { name: "Kapat", exact: true }).click();
+    await page.reload();
+    await uploadProject(page);
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    await expect(webp).toHaveAttribute("aria-pressed", "true");
+});
+
+test("WebP oluşturamayan tarayıcıda PNG indirilir ve açıklanır", async ({
+    page,
+}) => {
+    // WebP desteklemeyen tarayıcı gibi davran: toBlob her zaman PNG verir
+    await page.addInitScript(() => {
+        const original = HTMLCanvasElement.prototype.toBlob;
+        HTMLCanvasElement.prototype.toBlob = function (callback, type, q) {
+            return original.call(
+                this,
+                callback,
+                type === "image/webp" ? "image/png" : type,
+                q,
+            );
+        };
+    });
+    await uploadProject(page);
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    await page.getByRole("button", { name: "WebP", exact: true }).click();
+    const file = await downloadFile(page);
+    expect(file.name).toMatch(/\.png$/);
+    await expect(page.locator("#shot-message")).toHaveText(
+        "Bu tarayıcı WebP dosyası oluşturamıyor; görüntü PNG olarak indirildi.",
+    );
+});
+
+test("parçalar seçilen biçimde ZIP'e girer", async ({ page }) => {
+    test.setTimeout(60000);
+    await uploadProject(page, LONG);
+    await shotButton(page).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    await page.getByRole("button", { name: "Tam sayfa" }).click();
+    await page.getByRole("button", { name: "Parçalara böl" }).click();
+    await expect(page.locator("#shot-parts img")).toHaveCount(2);
+    await page.getByRole("button", { name: "JPEG", exact: true }).click();
+    const file = await downloadFile(page);
+    expect(file.name).toMatch(/\.zip$/);
+    expect(Object.keys(unzipSync(file.bytes))).toEqual([
+        "parca-01.jpg",
+        "parca-02.jpg",
+    ]);
+});
+
 test("ekran görüntüsü penceresinde WCAG 2.1 AA ihlali yok", async ({
     page,
 }) => {

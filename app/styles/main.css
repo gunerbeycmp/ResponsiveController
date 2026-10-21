@@ -1601,3 +1601,8 @@ input {
     opacity: 0.45;
     cursor: default;
 }
+
+/* Dosya biçimi (FR-4.5, v0.4.3) */
+.shot-formats button {
+    padding: 4px 10px;
+}

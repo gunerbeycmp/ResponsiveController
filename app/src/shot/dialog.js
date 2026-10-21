@@ -1,11 +1,18 @@
 import { zipSync } from "fflate";
 import { partFileName, shotFileName } from "./capture.js";
+import { FORMATS, convert, readFormat, writeFormat } from "./format.js";
 
 // FR-4.1: ekran görüntüsü önizleme penceresi. Görünen alan / Tam sayfa
 // seçimi, İndir ve Kopyala; çok uzun sayfada yoğunluğu düşürülmüş tek görsel
 // ya da tam yoğunlukta parçalar (R-64). Aşama 5'teki işaretleme (FR-5.3)
 // bu pencerenin üzerine kurulacak.
-export function createShotDialog({ t, announce, getLanguage, elements }) {
+export function createShotDialog({
+    t,
+    announce,
+    getLanguage,
+    storage,
+    elements,
+}) {
     const {
         dialog,
         close,
@@ -20,7 +27,10 @@ export function createShotDialog({ t, announce, getLanguage, elements }) {
         download,
         copy,
         message,
+        formats,
     } = elements;
+    // FR-4.5: son seçilen biçim hatırlanır, ilk kullanımda PNG
+    let format = readFormat(storage);
     let request = null;
     let mode = "visible";
     let current = null;
@@ -44,6 +54,14 @@ export function createShotDialog({ t, announce, getLanguage, elements }) {
     function setStatus(key) {
         status.textContent = key ? t(key) : "";
         status.hidden = !key;
+    }
+
+    function renderFormats() {
+        for (const button of formats)
+            button.setAttribute(
+                "aria-pressed",
+                String(button.dataset.shotFormat === format),
+            );
     }
 
     function renderModes() {
@@ -126,6 +144,8 @@ export function createShotDialog({ t, announce, getLanguage, elements }) {
     }
 
     // Pencere hemen açılır, varsayılan tür görünen alandır
+    renderFormats();
+
     function open(options) {
         request = options;
         returnFocus = options.opener ?? document.activeElement;
@@ -146,27 +166,41 @@ export function createShotDialog({ t, announce, getLanguage, elements }) {
         download.focus();
     });
 
+    for (const button of formats)
+        button.addEventListener("click", () => {
+            format = button.dataset.shotFormat;
+            writeFormat(storage, format);
+            renderFormats();
+        });
+
     download.addEventListener("click", async () => {
         if (!current) return;
+        message.textContent = "";
+        const converted = await Promise.all(
+            current.blobs.map((blob) => convert(blob, format)),
+        );
+        const used = converted[0].format;
+        const { extension } = FORMATS[used];
         const link = document.createElement("a");
-        if (current.blobs.length === 1) {
-            link.href = urls[0];
-            link.download = fileName("png");
+        if (converted.length === 1) {
+            link.href = URL.createObjectURL(converted[0].blob);
+            link.download = fileName(extension);
         } else {
             // Parçalar numaralı dosyalar hâlinde tek ZIP (R-64)
             const files = {};
-            for (const [index, blob] of current.blobs.entries())
-                files[partFileName(t("shot.partFile"), index)] = new Uint8Array(
-                    await blob.arrayBuffer(),
-                );
+            for (const [index, part] of converted.entries())
+                files[partFileName(t("shot.partFile"), index, extension)] =
+                    new Uint8Array(await part.blob.arrayBuffer());
             const zip = new Blob([zipSync(files, { level: 0 })], {
                 type: "application/zip",
             });
             link.href = URL.createObjectURL(zip);
-            urls.push(link.href);
             link.download = fileName("zip");
         }
+        urls.push(link.href);
         link.click();
+        // Tarayıcı WebP oluşturamazsa PNG indirildi (NFR-1.3)
+        if (used !== format) message.textContent = t("shot.webpUnsupported");
     });
 
     copy.addEventListener("click", async () => {
