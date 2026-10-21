@@ -162,5 +162,15 @@
     "shot.fullPageFile": "full-page",
     "shot.partFile": "part",
     "shot.formatLabel": "File format",
-    "shot.webpUnsupported": "This browser can't create WebP files; the image was downloaded as PNG."
+    "shot.webpUnsupported": "This browser can't create WebP files; the image was downloaded as PNG.",
+    "grid.shotAll": "Screenshot all",
+    "shot.batchLabel": "Batch screenshot type",
+    "shot.separate": "Each device separately (ZIP)",
+    "shot.combined": "Single image (grid)",
+    "shot.takingAll": "Taking screenshots… ({done} of {count})",
+    "shot.separateNote": "Screenshots of {count} devices were taken. Download saves them as a single ZIP file.",
+    "shot.reducedSome": "For some devices the page was too long, so the density was reduced; use the 📷 in that device's box for full resolution.",
+    "shot.failedSome": "Couldn't take screenshots of: {devices}",
+    "shot.combinedAlt": "Screenshot of the grid ({count} devices)",
+    "shot.gridFile": "grid"
 }

@@ -162,5 +162,15 @@
     "shot.fullPageFile": "tam-sayfa",
     "shot.partFile": "parca",
     "shot.formatLabel": "Dosya biçimi",
-    "shot.webpUnsupported": "Bu tarayıcı WebP dosyası oluşturamıyor; görüntü PNG olarak indirildi."
+    "shot.webpUnsupported": "Bu tarayıcı WebP dosyası oluşturamıyor; görüntü PNG olarak indirildi.",
+    "grid.shotAll": "Tümünün ekran görüntüsü",
+    "shot.batchLabel": "Toplu görüntü türü",
+    "shot.separate": "Her cihaz ayrı (ZIP)",
+    "shot.combined": "Tek görsel (ızgara)",
+    "shot.takingAll": "Ekran görüntüleri alınıyor… ({done} / {count})",
+    "shot.separateNote": "{count} cihazın görüntüsü alındı. İndir, hepsini tek bir ZIP dosyası olarak indirir.",
+    "shot.reducedSome": "Bazı cihazlarda sayfa çok uzun olduğu için yoğunluk düşürüldü; tam çözünürlük için o cihazın kutusundaki 📷'u kullanabilirsin.",
+    "shot.failedSome": "Şu cihazların görüntüsü alınamadı: {devices}",
+    "shot.combinedAlt": "Izgaranın ekran görüntüsü ({count} cihaz)",
+    "shot.gridFile": "izgara"
 }

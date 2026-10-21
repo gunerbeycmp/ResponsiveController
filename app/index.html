@@ -171,6 +171,15 @@
                             Izgara
                         </button>
                     </div>
+                    <button
+                        class="rotate-all"
+                        id="shot-all"
+                        type="button"
+                        data-i18n="grid.shotAll"
+                        hidden
+                    >
+                        Tümünün ekran görüntüsü
+                    </button>
                     <div
                         class="segmented"
                         id="size-group"
@@ -519,6 +528,35 @@
             </div>
             <div
                 class="segmented shot-modes"
+                id="shot-batches"
+                role="group"
+                aria-labelledby="shot-batch-label"
+                hidden
+            >
+                <span
+                    class="visually-hidden"
+                    id="shot-batch-label"
+                    data-i18n="shot.batchLabel"
+                    >Toplu görüntü türü</span
+                >
+                <button
+                    type="button"
+                    data-shot-batch="separate"
+                    data-i18n="shot.separate"
+                >
+                    Her cihaz ayrı (ZIP)
+                </button>
+                <button
+                    type="button"
+                    data-shot-batch="combined"
+                    data-i18n="shot.combined"
+                >
+                    Tek görsel (ızgara)
+                </button>
+            </div>
+            <div
+                class="segmented shot-modes"
+                id="shot-modes"
                 role="group"
                 aria-labelledby="shot-mode-label"
             >

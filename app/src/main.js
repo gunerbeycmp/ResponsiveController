@@ -27,6 +27,7 @@ import {
 } from "./grid/zoom.js";
 import { createI18n } from "./i18n/i18n.js";
 import { requestCapture } from "./shot/capture.js";
+import { composeGrid } from "./shot/compose.js";
 import { createShotDialog } from "./shot/dialog.js";
 import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
@@ -110,6 +111,7 @@ const elements = {
     scaleFit: $("scale-fit"),
     rotateAll: $("rotate-all"),
     rotateReset: $("rotate-reset"),
+    shotAll: $("shot-all"),
     frameNameButton: $("frame-name-button"),
     frameRestore: $("frame-restore"),
     frameFold: $("frame-fold"),
@@ -445,6 +447,8 @@ function renderToolbar(isGrid) {
             String(button.dataset.view === gridStore.getMode()),
         );
     elements.sizeGroup.hidden = !isGrid;
+    elements.shotAll.hidden =
+        !isGrid || !state.project || gridStore.list().length === 0;
     for (const button of elements.sizeButtons)
         button.setAttribute(
             "aria-pressed",
@@ -551,6 +555,16 @@ const gridView = createGridView({
     getUrl: () => state.url,
     getExpandedArea: expandedArea,
     onRotate: () => renderScaleControls(isGridActive()),
+    // FR-4.4: ekran görüntüsü şimdilik yalnızca yüklenen projelerde
+    canShoot: () => Boolean(state.project),
+    onShot: (id) => {
+        const parts = gridView.boxFor(id);
+        if (!parts) return;
+        shotDialog.open({
+            ...shotTarget(id, parts.iframe),
+            opener: parts.shot,
+        });
+    },
     // Izgarada Katla / Aç: kutu aynı sırada kalır, hâl değişir. Diğer hâl
     // zaten ızgaradaysa kutu kalkar ama yeri hatırlanır; kalan kutuda tekrar
     // basılınca kaldırılan hâl yerine döner ve ikisi yine yan yana olur
@@ -944,6 +958,9 @@ const shotDialog = createShotDialog({
     storage: window.localStorage,
     elements: {
         formats: [...document.querySelectorAll("[data-shot-format]")],
+        modeGroup: $("shot-modes"),
+        batchGroup: $("shot-batches"),
+        batches: [...document.querySelectorAll("[data-shot-batch]")],
         dialog: $("shot-dialog"),
         close: $("shot-close"),
         modes: [...document.querySelectorAll("[data-shot-mode]")],
@@ -960,19 +977,68 @@ const shotDialog = createShotDialog({
     },
 });
 
-elements.frameShot.addEventListener("click", () => {
-    const device = findDevice(state.deviceId);
-    const size = viewSize(device, viewOptions(device.id));
-    const name = deviceName(device, i18n.getLanguage());
-    shotDialog.open({
+// Bir cihazın ekran görüntüsü isteği; tek cihazda ve ızgarada ortak.
+// Izgara kutularında tarayıcı çubukları uygulanmaz.
+function shotTarget(id, iframe) {
+    const device = findDevice(id);
+    const grid = iframe !== elements.iframe;
+    const size = viewSize(device, {
+        rotated: gridStore.isRotated(id),
+        browserBars: grid ? false : state.browserBars,
+    });
+    return {
+        kind: "single",
+        name: deviceName(device, i18n.getLanguage()),
+        size,
         capture: (mode) =>
-            requestCapture(elements.iframe.contentWindow, {
+            requestCapture(iframe.contentWindow, {
                 scale: device.dpr ?? 1,
                 mode,
             }),
-        name,
-        size,
+    };
+}
+
+elements.frameShot.addEventListener("click", () => {
+    shotDialog.open({
+        ...shotTarget(state.deviceId, elements.iframe),
         opener: elements.frameShot,
+    });
+});
+
+// FR-4.4: ızgaradaki bütün cihazlar; ayrı ayrı (ZIP) ya da ekrandaki
+// düzende tek görsel
+elements.shotAll.addEventListener("click", () => {
+    gridView.collapse();
+    const listRect = elements.gridList.getBoundingClientRect();
+    const relative = (rect) => ({
+        x: rect.left - listRect.left,
+        y: rect.top - listRect.top,
+        width: rect.width,
+        height: rect.height,
+    });
+    const devices = gridStore.list().map((id) => {
+        const parts = gridView.boxFor(id);
+        const target = shotTarget(id, parts.iframe);
+        return {
+            ...target,
+            box: relative(parts.li.getBoundingClientRect()),
+            viewport: relative(parts.viewport.getBoundingClientRect()),
+        };
+    });
+    shotDialog.open({
+        kind: "batch",
+        devices,
+        compose: (done) =>
+            composeGrid(
+                done.map(({ device, result }) => ({
+                    name: device.name,
+                    sizeText: i18n.t("frame.size", device.size),
+                    blob: result.blobs[0],
+                    box: device.box,
+                    viewport: device.viewport,
+                })),
+            ),
+        opener: elements.shotAll,
     });
 });
 

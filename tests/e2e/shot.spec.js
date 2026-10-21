@@ -357,6 +357,126 @@ test("parçalar seçilen biçimde ZIP'e girer", async ({ page }) => {
     ]);
 });
 
+// Izgarayla proje yükler
+async function uploadToGrid(page, ids, buffer = PROJECT) {
+    await page.goto(APP_URL);
+    await page.evaluate(
+        (value) => localStorage.setItem("rc-grid", value),
+        JSON.stringify({ ids, mode: "grid", size: "medium" }),
+    );
+    await uploadProject(page, buffer);
+}
+
+test("ızgarada kutu başına ekran görüntüsü alınır (FR-4.4)", async ({
+    page,
+}) => {
+    await uploadToGrid(page, ["iphone-17", "galaxy-s24"]);
+    const button = page
+        .locator('#device-grid > li[data-grid-id="galaxy-s24"]')
+        .getByRole("button", { name: "Galaxy S24 ekran görüntüsünü al" });
+    await button.click();
+    await expect(
+        page.getByRole("img", {
+            name: "Galaxy S24 ekran görüntüsü (360 × 780)",
+        }),
+    ).toBeVisible();
+    // Toplu seçenekler tek cihazda görünmez
+    await expect(page.locator("#shot-batches")).toBeHidden();
+    await page.getByRole("button", { name: "Kapat", exact: true }).click();
+    await expect(button).toBeFocused();
+});
+
+test("toplu: her cihaz ayrı ZIP (FR-4.4)", async ({ page }) => {
+    await uploadToGrid(page, ["iphone-17", "galaxy-s24"]);
+    await page.getByRole("button", { name: "Tümünün ekran görüntüsü" }).click();
+    await expect(page.locator("#shot-parts img")).toHaveCount(2);
+    await expect(page.locator("#shot-note-text")).toHaveText(
+        "2 cihazın görüntüsü alındı. İndir, hepsini tek bir ZIP dosyası olarak indirir.",
+    );
+    await expect(
+        page.getByRole("img", {
+            name: "iPhone 17 ekran görüntüsü (402 × 874)",
+        }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Kopyala" })).toBeDisabled();
+    const file = await downloadFile(page);
+    expect(file.name).toMatch(/^izgara-\d{4}-\d{2}-\d{2}-\d{4}\.zip$/);
+    expect(Object.keys(unzipSync(file.bytes))).toEqual([
+        "iphone-17-402x874.png",
+        "galaxy-s24-360x780.png",
+    ]);
+
+    // Tam sayfa ile
+    await page.getByRole("button", { name: "Tam sayfa" }).click();
+    await expect(page.locator("#shot-parts img")).toHaveCount(2);
+    const full = await downloadFile(page);
+    expect(full.name).toMatch(/^izgara-tam-sayfa-.+\.zip$/);
+});
+
+test("toplu: ızgara tek görsel (FR-4.4)", async ({ page }) => {
+    await uploadToGrid(page, ["iphone-17", "galaxy-s24", "ipad-11th-gen"]);
+    await page.getByRole("button", { name: "Tümünün ekran görüntüsü" }).click();
+    await expect(page.locator("#shot-parts img")).toHaveCount(3);
+    await page.getByRole("button", { name: "Tek görsel (ızgara)" }).click();
+    // Tek görsel her zaman görünen alanla alınır
+    await expect(page.locator("#shot-modes")).toBeHidden();
+    const image = page.getByRole("img", {
+        name: "Izgaranın ekran görüntüsü (3 cihaz)",
+    });
+    await expect(image).toBeVisible();
+    // Ekrandaki ızgara ile aynı oranda, 2x yoğunlukta
+    const [natural, grid] = await Promise.all([
+        image.evaluate(async (img) => {
+            await img.decode();
+            return [img.naturalWidth, img.naturalHeight];
+        }),
+        page.locator("#device-grid").evaluate((list) => {
+            const boxes = [...list.children].map((li) =>
+                li.getBoundingClientRect(),
+            );
+            return [
+                Math.max(...boxes.map((r) => r.right)) -
+                    Math.min(...boxes.map((r) => r.left)),
+                Math.max(...boxes.map((r) => r.bottom)) -
+                    Math.min(...boxes.map((r) => r.top)),
+            ];
+        }),
+    ]);
+    expect(Math.abs(natural[0] - (grid[0] + 32) * 2)).toBeLessThanOrEqual(2);
+    expect(Math.abs(natural[1] - (grid[1] + 32) * 2)).toBeLessThanOrEqual(2);
+    await expect(page.getByRole("button", { name: "Kopyala" })).toBeEnabled();
+    const file = await downloadFile(page);
+    expect(file.name).toMatch(/^izgara-\d{4}-\d{2}-\d{2}-\d{4}\.png$/);
+});
+
+test("URL ile açılan ızgarada toplu düğme ve kutu 📷 görünmez", async ({
+    page,
+}) => {
+    await page.goto(APP_URL);
+    await page.evaluate(
+        (value) => localStorage.setItem("rc-grid", value),
+        JSON.stringify({ ids: ["iphone-17"], mode: "grid", size: "medium" }),
+    );
+    await page.reload();
+    await page.locator("#url-input").fill("localhost:5174");
+    await page.getByRole("button", { name: "Aç", exact: true }).click();
+    await expect(page.locator("#device-grid > li")).toHaveCount(1);
+    await expect(page.locator("#shot-all")).toBeHidden();
+    await expect(page.locator("#device-grid .box-shot")).toBeHidden();
+});
+
+test("toplu ekran görüntüsü penceresinde WCAG 2.1 AA ihlali yok", async ({
+    page,
+}) => {
+    await uploadToGrid(page, ["iphone-17", "galaxy-s24"]);
+    await page.getByRole("button", { name: "Tümünün ekran görüntüsü" }).click();
+    await expect(page.locator("#shot-parts img")).toHaveCount(2);
+    const results = await new AxeBuilder({ page })
+        .withTags(WCAG_21_AA)
+        .analyze();
+    expect(results.violations).toEqual([]);
+});
+
 test("ekran görüntüsü penceresinde WCAG 2.1 AA ihlali yok", async ({
     page,
 }) => {

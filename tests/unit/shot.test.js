@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { shotFileName } from "../../app/src/shot/capture.js";
+import {
+    batchFileName,
+    entryFileName,
+    shotFileName,
+} from "../../app/src/shot/capture.js";
 
 describe("ekran görüntüsü dosya adı (FR-4.1)", () => {
     const date = new Date(2026, 9, 21, 9, 5);
@@ -32,5 +36,36 @@ describe("ekran görüntüsü dosya adı (FR-4.1)", () => {
                 { date },
             ),
         ).toBe("ic-ekran-isigi-100x100-2026-10-21-0905.png");
+    });
+});
+
+describe("toplu dosya adları (FR-4.4)", () => {
+    const date = new Date(2026, 9, 21, 23, 30);
+
+    it("önek, tam sayfa eki, tarih ve saat", () => {
+        expect(batchFileName("izgara", { date })).toBe(
+            "izgara-2026-10-21-2330.zip",
+        );
+        expect(batchFileName("izgara", { date, suffix: "tam-sayfa" })).toBe(
+            "izgara-tam-sayfa-2026-10-21-2330.zip",
+        );
+        expect(batchFileName("grid", { date, extension: "png" })).toBe(
+            "grid-2026-10-21-2330.png",
+        );
+    });
+
+    it("ZIP içindeki adlar tekrar etmez", () => {
+        const taken = {};
+        const first = entryFileName(
+            "Kiosk",
+            { width: 500, height: 700 },
+            "png",
+            taken,
+        );
+        taken[first] = true;
+        expect(first).toBe("kiosk-500x700.png");
+        expect(
+            entryFileName("Kiosk", { width: 500, height: 700 }, "png", taken),
+        ).toBe("kiosk-500x700-2.png");
     });
 });

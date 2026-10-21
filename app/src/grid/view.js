@@ -43,6 +43,8 @@ export function createGridView({
     onEmpty,
     onRotate,
     onFold,
+    onShot,
+    canShoot = () => false,
 }) {
     const boxes = new Map();
     const zooms = new Map();
@@ -86,6 +88,7 @@ export function createGridView({
             scale: el("span", { className: "box-scale" }),
             in: iconButton("box-zoom-in", "+"),
             fit: iconButton("box-fit", ""),
+            shot: iconButton("box-shot", "📷"),
             rotate: iconButton("box-rotate", "⟳"),
             fold: iconButton("box-fold", ""),
             expand: iconButton("box-expand", ""),
@@ -121,6 +124,7 @@ export function createGridView({
                     p.scale,
                     p.in,
                     p.fit,
+                    p.shot,
                     p.rotate,
                     p.fold,
                     p.expand,
@@ -165,6 +169,8 @@ export function createGridView({
         });
         // FR-3.5: kutu aynı yerde kalır, içindeki hâl değişir
         p.fold.addEventListener("click", () => onFold?.(id));
+        // FR-4.4: kutu başına ekran görüntüsü
+        p.shot.addEventListener("click", () => onShot?.(id));
         p.expand.addEventListener("click", () => {
             expanded = expanded === id ? null : id;
             render();
@@ -314,6 +320,11 @@ export function createGridView({
             }),
         );
         const device = findDevice(id);
+        p.shot.hidden = !canShoot();
+        p.shot.setAttribute(
+            "aria-label",
+            i18n.t("shot.take", { device: name }),
+        );
         p.fold.hidden = !foldSibling(device);
         if (device.foldable) {
             const folded = device.foldable.state === "folded";

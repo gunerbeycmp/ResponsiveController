@@ -67,6 +67,28 @@ export function shotFileName(
     return `${parts.filter(Boolean).join("-")}.${extension}`;
 }
 
+// Toplu dosya adı: önek, (tam sayfa eki), tarih ve saat
+// (ör. izgara-2026-10-21-2330.zip, izgara-tam-sayfa-2026-10-21-2330.zip)
+export function batchFileName(
+    prefix,
+    { date = new Date(), suffix = "", extension = "zip" } = {},
+) {
+    const stamp = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate(),
+    )}-${pad(date.getHours())}${pad(date.getMinutes())}`;
+    return `${[slug(prefix), suffix, stamp].filter(Boolean).join("-")}.${extension}`;
+}
+
+// Toplu ZIP içindeki cihaz dosyası (ör. iphone-17-402x874.png); aynı ad
+// tekrar ederse sonuna sayı eklenir
+export function entryFileName(name, { width, height }, extension, taken = {}) {
+    const base = `${slug(name)}-${width}x${height}`;
+    let candidate = `${base}.${extension}`;
+    for (let number = 2; Object.hasOwn(taken, candidate); number += 1)
+        candidate = `${base}-${number}.${extension}`;
+    return candidate;
+}
+
 // ZIP içindeki parça adı (ör. parca-01.png, parca-01.jpg)
 export const partFileName = (prefix, index, extension = "png") =>
     `${prefix}-${String(index + 1).padStart(2, "0")}.${extension}`;
