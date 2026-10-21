@@ -60,15 +60,6 @@ const inspect = (page) =>
         };
     });
 
-test("URL ile açılan sitede ekran görüntüsü düğmesi görünmez (v0.4.5'e kadar)", async ({
-    page,
-}) => {
-    await page.goto(APP_URL);
-    await page.locator("#url-input").fill("localhost:5174");
-    await page.getByRole("button", { name: "Aç", exact: true }).click();
-    await expect(page.locator("#frame-shot")).toBeHidden();
-});
-
 test("yüklenen projede görünen alanın ekran görüntüsü alınır (FR-4.1)", async ({
     page,
 }) => {
@@ -447,22 +438,6 @@ test("toplu: ızgara tek görsel (FR-4.4)", async ({ page }) => {
     await expect(page.getByRole("button", { name: "Kopyala" })).toBeEnabled();
     const file = await downloadFile(page);
     expect(file.name).toMatch(/^izgara-\d{4}-\d{2}-\d{2}-\d{4}\.png$/);
-});
-
-test("URL ile açılan ızgarada toplu düğme ve kutu 📷 görünmez", async ({
-    page,
-}) => {
-    await page.goto(APP_URL);
-    await page.evaluate(
-        (value) => localStorage.setItem("rc-grid", value),
-        JSON.stringify({ ids: ["iphone-17"], mode: "grid", size: "medium" }),
-    );
-    await page.reload();
-    await page.locator("#url-input").fill("localhost:5174");
-    await page.getByRole("button", { name: "Aç", exact: true }).click();
-    await expect(page.locator("#device-grid > li")).toHaveCount(1);
-    await expect(page.locator("#shot-all")).toBeHidden();
-    await expect(page.locator("#device-grid .box-shot")).toBeHidden();
 });
 
 test("toplu ekran görüntüsü penceresinde WCAG 2.1 AA ihlali yok", async ({

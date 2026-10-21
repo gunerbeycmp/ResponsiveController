@@ -4,6 +4,7 @@ import {
     fitScale,
     partPlan,
 } from "../../preview/public/__rc/shot-plan.js";
+import { matchesWindow, visibleRect } from "../../app/src/shot/screen.js";
 
 const CHROME =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36";
@@ -58,5 +59,30 @@ describe("tam sayfa çizim sınırı (R-64)", () => {
         for (const part of parts)
             expect(402 * 3 * part.height * 3).toBeLessThanOrEqual(16777216);
         expect(parts.reduce((sum, part) => sum + part.height, 0)).toBe(20000);
+    });
+});
+
+describe("ekran paylaşımı (FR-4.2)", () => {
+    it("paylaşılan karenin bu sekmeye ait olup olmadığını oranla anlar", () => {
+        const view = { width: 1280, height: 800 };
+        expect(matchesWindow({ width: 2560, height: 1600 }, view)).toBe(true);
+        expect(matchesWindow({ width: 1280, height: 790 }, view)).toBe(true);
+        expect(matchesWindow({ width: 1920, height: 1080 }, view)).toBe(false);
+    });
+
+    it("kesilecek alan pencerenin içinde kalır", () => {
+        const view = { width: 1280, height: 800 };
+        expect(
+            visibleRect(
+                { left: 100, top: 700, right: 400, bottom: 1200 },
+                view,
+            ),
+        ).toEqual({ left: 100, top: 700, width: 300, height: 100 });
+        expect(
+            visibleRect(
+                { left: 100, top: 900, right: 400, bottom: 1200 },
+                view,
+            ),
+        ).toBe(null);
     });
 });

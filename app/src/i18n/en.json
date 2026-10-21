@@ -172,5 +172,9 @@
     "shot.reducedSome": "For some devices the page was too long, so the density was reduced; use the 📷 in that device's box for full resolution.",
     "shot.failedSome": "Couldn't take screenshots of: {devices}",
     "shot.combinedAlt": "Screenshot of the grid ({count} devices)",
-    "shot.gridFile": "grid"
+    "shot.gridFile": "grid",
+    "shot.shareUnsupported": "This browser doesn't support screen sharing (e.g. iPhone and iPad). Screenshots of sites opened by URL can be taken on a computer with Chrome, Edge or Firefox.",
+    "shot.shareDenied": "Screen sharing wasn't allowed. Try again and allow sharing to take the screenshot.",
+    "shot.wrongSurface": "You need to share this tab to take the screenshot. Try again and choose this tab in the sharing window.",
+    "shot.screenScaleNote": "The screenshot was taken at its on-screen size ({scale}%). Increase the scale and try again for a sharper image."
 }

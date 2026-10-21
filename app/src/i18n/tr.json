@@ -172,5 +172,9 @@
     "shot.reducedSome": "Bazı cihazlarda sayfa çok uzun olduğu için yoğunluk düşürüldü; tam çözünürlük için o cihazın kutusundaki 📷'u kullanabilirsin.",
     "shot.failedSome": "Şu cihazların görüntüsü alınamadı: {devices}",
     "shot.combinedAlt": "Izgaranın ekran görüntüsü ({count} cihaz)",
-    "shot.gridFile": "izgara"
+    "shot.gridFile": "izgara",
+    "shot.shareUnsupported": "Bu tarayıcı ekran paylaşımını desteklemiyor (ör. iPhone ve iPad). URL ile açılan sitelerin ekran görüntüsü masaüstünde Chrome, Edge veya Firefox ile alınabilir.",
+    "shot.shareDenied": "Ekran paylaşımına izin verilmedi. Görüntü almak için tekrar dene ve paylaşıma izin ver.",
+    "shot.wrongSurface": "Ekran görüntüsü için bu sekmeyi paylaşmalısın. Tekrar dene ve paylaşım penceresinde bu sekmeyi seç.",
+    "shot.screenScaleNote": "Görüntü ekrandaki boyutunda (%{scale}) alındı. Daha keskin görüntü için ölçeği büyütüp tekrar dene."
 }

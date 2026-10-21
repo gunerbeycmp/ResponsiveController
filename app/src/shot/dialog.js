@@ -82,8 +82,10 @@ export function createShotDialog({
         setPressed(modes, "shotMode", mode === "parts" ? "full" : mode);
         setPressed(batches, "shotBatch", batch);
         batchGroup.hidden = !isBatch();
-        // Tek görsel her zaman görünen alanla alınır (Aşama 4 kararları)
-        modeGroup.hidden = isBatch() && batch === "combined";
+        // Tek görsel her zaman görünen alanla alınır (Aşama 4 kararları);
+        // ekran paylaşımı yalnızca görünen alanı yakalar (FR-4.2)
+        modeGroup.hidden =
+            Boolean(request?.screen) || (isBatch() && batch === "combined");
     }
 
     function showNote(text, { canSplit = false } = {}) {
@@ -104,6 +106,14 @@ export function createShotDialog({
             }),
         );
         parts.hidden = false;
+    }
+
+    // Ekran paylaşımında görüntü ekrandaki boyutta alınır (R-05)
+    function screenScaleNote() {
+        const scale = request?.screenScale;
+        return request?.screen && scale < 0.995
+            ? t("shot.screenScaleNote", { scale: Math.round(scale * 100) })
+            : "";
     }
 
     function showImage(url, alt) {
@@ -131,6 +141,7 @@ export function createShotDialog({
                 }),
             );
             copy.disabled = false;
+            showNote(screenScaleNote());
             if (result.reduced)
                 showNote(
                     t("shot.reducedNote", {
@@ -172,14 +183,14 @@ export function createShotDialog({
                     device,
                     result: await device.capture(shotMode),
                 });
-            } catch {
-                results.push({ device, error: true });
+            } catch (cause) {
+                results.push({ device, error: true, cause });
             }
             if (token !== run) return;
         }
         const done = results.filter((item) => item.result);
         const failed = results.filter((item) => item.error);
-        if (done.length === 0) throw new Error("all failed");
+        if (done.length === 0) throw failed[0]?.cause ?? new Error("failed");
         const failedText =
             failed.length > 0
                 ? t("shot.failedSome", {
@@ -197,7 +208,7 @@ export function createShotDialog({
             setStatus(null);
             showImage(urls[0], t("shot.combinedAlt", { count: done.length }));
             copy.disabled = false;
-            showNote(failedText);
+            showNote([failedText, screenScaleNote()].filter(Boolean).join(" "));
             return;
         }
 
@@ -226,6 +237,7 @@ export function createShotDialog({
                 t("shot.separateNote", { count: done.length }),
                 reduced ? t("shot.reducedSome") : "",
                 failedText,
+                screenScaleNote(),
             ]
                 .filter(Boolean)
                 .join(" "),
@@ -240,8 +252,9 @@ export function createShotDialog({
             if (isBatch()) await captureBatch(token);
             else await captureSingle(token);
             if (token === run && current) actions.hidden = false;
-        } catch {
-            if (token === run) setStatus(t("shot.error"));
+        } catch (error) {
+            // Ekran paylaşımı hataları kendi açıklamasını taşır (FR-4.2)
+            if (token === run) setStatus(t(error?.messageKey ?? "shot.error"));
         }
     }
 

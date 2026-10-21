@@ -28,6 +28,7 @@ import {
 import { createI18n } from "./i18n/i18n.js";
 import { requestCapture } from "./shot/capture.js";
 import { composeGrid } from "./shot/compose.js";
+import { ShareError, crop, grabTab, visibleRect } from "./shot/screen.js";
 import { createShotDialog } from "./shot/dialog.js";
 import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
@@ -260,7 +261,8 @@ function layoutFrame() {
         : "";
     // FR-4.1: ekran görüntüsü şimdilik yalnızca yüklenen projelerde;
     // URL ile açılan siteler v0.4.5'te ekran paylaşımıyla (Aşama 4 kararları)
-    elements.frameShot.hidden = !state.project;
+    // URL ile açılan sitelerde ekran paylaşımıyla (FR-4.2, v0.4.5)
+    elements.frameShot.hidden = !state.url;
     elements.frameShot.setAttribute(
         "aria-label",
         i18n.t("shot.take", { device: name }),
@@ -447,8 +449,7 @@ function renderToolbar(isGrid) {
             String(button.dataset.view === gridStore.getMode()),
         );
     elements.sizeGroup.hidden = !isGrid;
-    elements.shotAll.hidden =
-        !isGrid || !state.project || gridStore.list().length === 0;
+    elements.shotAll.hidden = !isGrid || gridStore.list().length === 0;
     for (const button of elements.sizeButtons)
         button.setAttribute(
             "aria-pressed",
@@ -556,14 +557,26 @@ const gridView = createGridView({
     getExpandedArea: expandedArea,
     onRotate: () => renderScaleControls(isGridActive()),
     // FR-4.4: ekran görüntüsü şimdilik yalnızca yüklenen projelerde
-    canShoot: () => Boolean(state.project),
-    onShot: (id) => {
+    canShoot: () => Boolean(state.url),
+    onShot: async (id) => {
         const parts = gridView.boxFor(id);
         if (!parts) return;
-        shotDialog.open({
-            ...shotTarget(id, parts.iframe),
-            opener: parts.shot,
-        });
+        const target = shotTarget(id, parts.iframe);
+        if (!state.project) {
+            const grabbed = await grabScreen();
+            Object.assign(target, {
+                screen: true,
+                screenScale: gridView.zoomOf(id),
+                capture: () =>
+                    screenCrop(
+                        grabbed,
+                        parts.viewport,
+                        parts.canvas,
+                        target.size,
+                    ),
+            });
+        }
+        shotDialog.open({ ...target, opener: parts.shot });
     },
     // Izgarada Katla / Aç: kutu aynı sırada kalır, hâl değişir. Diğer hâl
     // zaten ızgaradaysa kutu kalkar ama yeri hatırlanır; kalan kutuda tekrar
@@ -998,16 +1011,68 @@ function shotTarget(id, iframe) {
     };
 }
 
-elements.frameShot.addEventListener("click", () => {
-    shotDialog.open({
-        ...shotTarget(state.deviceId, elements.iframe),
-        opener: elements.frameShot,
-    });
+// FR-4.2: URL ile açılan sitede sekmenin tek karesi alınır; hata olursa
+// pencerede açıklaması gösterilir
+async function grabScreen() {
+    try {
+        return await grabTab();
+    } catch (error) {
+        return { error };
+    }
+}
+
+// Cihaz alanının ekranda görünen kısmı kesilir
+function screenCrop(grabbed, viewport, canvas, size) {
+    if (grabbed.error) return Promise.reject(grabbed.error);
+    const area = viewport.getBoundingClientRect();
+    const inner = {
+        left: area.left + viewport.clientLeft,
+        top: area.top + viewport.clientTop,
+        right: area.left + viewport.clientLeft + viewport.clientWidth,
+        bottom: area.top + viewport.clientTop + viewport.clientHeight,
+    };
+    const content = canvas.getBoundingClientRect();
+    const rect = visibleRect(
+        {
+            left: Math.max(inner.left, content.left),
+            top: Math.max(inner.top, content.top),
+            right: Math.min(inner.right, content.right),
+            bottom: Math.min(inner.bottom, content.bottom),
+        },
+        { width: window.innerWidth, height: window.innerHeight },
+    );
+    if (!rect) return Promise.reject(new ShareError("shot.error"));
+    return crop(grabbed, rect).then((blob) => ({
+        blobs: [blob],
+        width: size.width,
+        height: size.height,
+        scale: 1,
+        reduced: false,
+    }));
+}
+
+elements.frameShot.addEventListener("click", async () => {
+    const target = shotTarget(state.deviceId, elements.iframe);
+    if (!state.project) {
+        const grabbed = await grabScreen();
+        Object.assign(target, {
+            screen: true,
+            screenScale: frameScale,
+            capture: () =>
+                screenCrop(
+                    grabbed,
+                    elements.viewport,
+                    elements.frameCanvas,
+                    target.size,
+                ),
+        });
+    }
+    shotDialog.open({ ...target, opener: elements.frameShot });
 });
 
 // FR-4.4: ızgaradaki bütün cihazlar; ayrı ayrı (ZIP) ya da ekrandaki
 // düzende tek görsel
-elements.shotAll.addEventListener("click", () => {
+elements.shotAll.addEventListener("click", async () => {
     gridView.collapse();
     const listRect = elements.gridList.getBoundingClientRect();
     const relative = (rect) => ({
@@ -1025,6 +1090,51 @@ elements.shotAll.addEventListener("click", () => {
             viewport: relative(parts.viewport.getBoundingClientRect()),
         };
     });
+    // URL ile açılan sitelerde tek izinle bütün kutular aynı kareden;
+    // tek görsel ızgaranın ekrandaki gerçek görüntüsüdür (FR-4.2, FR-4.4)
+    if (!state.project) {
+        const grabbed = await grabScreen();
+        const ids = gridStore.list();
+        shotDialog.open({
+            kind: "batch",
+            screen: true,
+            screenScale: Math.min(...ids.map((id) => gridView.zoomOf(id))),
+            devices: ids.map((id, index) => {
+                const parts = gridView.boxFor(id);
+                return {
+                    ...devices[index],
+                    capture: () =>
+                        screenCrop(
+                            grabbed,
+                            parts.viewport,
+                            parts.canvas,
+                            devices[index].size,
+                        ),
+                };
+            }),
+            compose: () => {
+                if (grabbed.error) return Promise.reject(grabbed.error);
+                const boxes = ids.map((id) =>
+                    gridView.boxFor(id).li.getBoundingClientRect(),
+                );
+                const pad = 16;
+                const rect = visibleRect(
+                    {
+                        left: Math.min(...boxes.map((r) => r.left)) - pad,
+                        top: Math.min(...boxes.map((r) => r.top)) - pad,
+                        right: Math.max(...boxes.map((r) => r.right)) + pad,
+                        bottom: Math.max(...boxes.map((r) => r.bottom)) + pad,
+                    },
+                    { width: window.innerWidth, height: window.innerHeight },
+                );
+                return rect
+                    ? crop(grabbed, rect)
+                    : Promise.reject(new ShareError("shot.error"));
+            },
+            opener: elements.shotAll,
+        });
+        return;
+    }
     shotDialog.open({
         kind: "batch",
         devices,

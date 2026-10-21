@@ -449,6 +449,8 @@ export function createGridView({
 
     return {
         render,
+        // Kutunun o anki ölçeği (ekran paylaşımı notu için)
+        zoomOf: (id) => geometry(id).zoom,
         // Genel ölçek değişince kutuların kendi ayarları sıfırlanır (FR-3.9)
         resetZooms() {
             zooms.clear();
