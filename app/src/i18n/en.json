@@ -187,5 +187,22 @@
     "notes.storage": "Notes are stored only in this browser.",
     "notes.clear": "Clear notes",
     "notes.cleared": "Notes cleared.",
-    "notes.undo": "Undo"
+    "notes.undo": "Undo",
+    "shot.addToReport": "Add to report",
+    "shot.addedToReport": "Added to report.",
+    "mark.tools": "Markup tools",
+    "mark.arrow": "Arrow",
+    "mark.circle": "Circle",
+    "mark.text": "Text",
+    "mark.undo": "Undo",
+    "mark.clear": "Clear",
+    "mark.color": "Color",
+    "mark.red": "Red",
+    "mark.yellow": "Yellow",
+    "mark.blue": "Blue",
+    "mark.black": "Black",
+    "mark.textLabel": "Markup text",
+    "mark.hint": "Drag on the image for arrows and circles; for text, click, type and press Enter.",
+    "notes.generalShots": "General images",
+    "notes.removeShot": "Remove image from report"
 }

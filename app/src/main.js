@@ -15,6 +15,7 @@ import Sortable from "sortablejs";
 import { clampSize, createCustomSizes, isValidSize } from "./devices/custom.js";
 import { createFavorites } from "./devices/favorites.js";
 import { createNotesPanel } from "./notes/panel.js";
+import { createShotStore } from "./notes/shots.js";
 import { contextKey, createNotesStore } from "./notes/store.js";
 import { createSidebar } from "./devices/sidebar.js";
 import { createFpsMonitor } from "./grid/fps.js";
@@ -146,6 +147,33 @@ const mergedFolds = new Map();
 // FR-5.3: notlar adrese ya da proje adına göre tarayıcıda saklanır
 const notesStore = createNotesStore({ storage: window.localStorage });
 let notesContext = null;
+// FR-5.1: rapora eklenen görüntüler (IndexedDB, bağlama göre); açık
+// bağlamın görüntüleri bellekte de tutulur
+const shotStore = createShotStore();
+let reportShots = [];
+
+async function loadShots() {
+    const context = notesContext;
+    const list = await (await shotStore).list(context);
+    if (context !== notesContext) return;
+    reportShots = list;
+    syncNotes();
+}
+
+async function addShots(items) {
+    const store = await shotStore;
+    for (const item of items) {
+        const bitmap = await createImageBitmap(item.blob);
+        await store.add({
+            ...item,
+            context: notesContext,
+            width: bitmap.width,
+            height: bitmap.height,
+        });
+        bitmap.close?.();
+    }
+    await loadShots();
+}
 let deviceNoteOpen = false;
 
 // FR-3.11: özel boyutlar yalnızca bu oturumda tutulur (R-19)
@@ -507,6 +535,8 @@ function render() {
         notesContext = nextContext;
         notesStore.setContext(nextContext);
         notesPanel.resetUndo();
+        reportShots = [];
+        loadShots();
     }
     elements.notesOpen.hidden = !state.url;
     renderProject();
@@ -635,7 +665,7 @@ const gridView = createGridView({
                     ),
             });
         }
-        shotDialog.open({ ...target, opener: parts.shot });
+        openShot({ ...target, opener: parts.shot });
     },
     // Izgarada Katla / Aç: kutu aynı sırada kalır, hâl değişir. Diğer hâl
     // zaten ızgaradaysa kutu kalkar ama yeri hatırlanır; kalan kutuda tekrar
@@ -1029,6 +1059,18 @@ const shotDialog = createShotDialog({
     getLanguage: () => i18n.getLanguage(),
     storage: window.localStorage,
     elements: {
+        add: $("shot-add"),
+        markup: {
+            stage: $("shot-stage"),
+            image: $("shot-image"),
+            layer: $("mark-layer"),
+            tools: $("mark-tools"),
+            toolButtons: [...document.querySelectorAll("[data-mark-tool]")],
+            colorButtons: [...document.querySelectorAll("[data-mark-color]")],
+            undo: $("mark-undo"),
+            clear: $("mark-clear"),
+            textInput: $("mark-text"),
+        },
         formats: [...document.querySelectorAll("[data-shot-format]")],
         modeGroup: $("shot-modes"),
         batchGroup: $("shot-batches"),
@@ -1060,6 +1102,7 @@ function shotTarget(id, iframe) {
     });
     return {
         kind: "single",
+        id,
         name: deviceName(device, i18n.getLanguage()),
         size,
         capture: (mode) =>
@@ -1068,6 +1111,11 @@ function shotTarget(id, iframe) {
                 mode,
             }),
     };
+}
+
+// Ekran görüntüsü penceresi; "Rapora ekle" görüntüleri bu bağlama ekler
+function openShot(options) {
+    shotDialog.open({ ...options, onAdd: addShots });
 }
 
 // FR-5.3: Notlar paneli (sağdan açılan yan panel)
@@ -1084,6 +1132,8 @@ const notesPanel = createNotesPanel({
         clear: $("notes-clear"),
         cleared: $("notes-cleared"),
         undo: $("notes-undo"),
+        general: $("notes-general"),
+        generalShots: $("notes-general-shots"),
     },
     getDevices: () => {
         const ids = isGridActive() ? gridStore.list() : [state.deviceId];
@@ -1100,6 +1150,22 @@ const notesPanel = createNotesPanel({
             : null;
     },
     onChange: () => syncNotes(),
+    shots: {
+        list: () => reportShots,
+        async remove(id) {
+            await (await shotStore).remove(id);
+            await loadShots();
+        },
+        async clear() {
+            const removed = await (await shotStore).clear(notesContext);
+            reportShots = [];
+            return removed;
+        },
+        async restore(records) {
+            await (await shotStore).restore(records);
+            await loadShots();
+        },
+    },
 });
 
 elements.noteToggle.addEventListener("click", () => {
@@ -1173,7 +1239,7 @@ elements.frameShot.addEventListener("click", async () => {
                 ),
         });
     }
-    shotDialog.open({ ...target, opener: elements.frameShot });
+    openShot({ ...target, opener: elements.frameShot });
 });
 
 // FR-4.4: ızgaradaki bütün cihazlar; ayrı ayrı (ZIP) ya da ekrandaki
@@ -1201,7 +1267,7 @@ elements.shotAll.addEventListener("click", async () => {
     if (!state.project) {
         const grabbed = await grabScreen();
         const ids = gridStore.list();
-        shotDialog.open({
+        openShot({
             kind: "batch",
             screen: true,
             screenScale: Math.min(...ids.map((id) => gridView.zoomOf(id))),
@@ -1241,7 +1307,7 @@ elements.shotAll.addEventListener("click", async () => {
         });
         return;
     }
-    shotDialog.open({
+    openShot({
         kind: "batch",
         devices,
         compose: (done) =>

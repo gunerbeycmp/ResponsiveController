@@ -11,9 +11,22 @@ export function createNotesPanel({
     getDevices,
     describeDevice,
     onChange,
+    shots,
 }) {
-    const { panel, open, close, session, list, clear, cleared, undo } =
-        elements;
+    const {
+        panel,
+        open,
+        close,
+        session,
+        list,
+        clear,
+        cleared,
+        undo,
+        general,
+        generalShots,
+    } = elements;
+    // Rapordaki görüntülerin önizleme adresleri (görüntü kalkınca bırakılır)
+    const shotUrls = new Map();
     let snapshot = null;
     let undoTimer = 0;
     let shownIds = "";
@@ -27,8 +40,11 @@ export function createNotesPanel({
     function deviceList() {
         const visible = getDevices();
         const known = new Set(visible.map((device) => device.id));
-        const extra = store
-            .deviceIds()
+        const withShots = shots
+            .list()
+            .map((shot) => shot.deviceId)
+            .filter(Boolean);
+        const extra = [...new Set([...store.deviceIds(), ...withShots])]
             .filter((id) => !known.has(id))
             .map((id) => describeDevice(id))
             .filter(Boolean);
@@ -51,7 +67,10 @@ export function createNotesPanel({
                     textarea.id = `notes-device-${device.id}`;
                     textarea.rows = 3;
                     textarea.dataset.noteDevice = device.id;
-                    field.append(label, textarea);
+                    const gallery = document.createElement("ul");
+                    gallery.className = "notes-shots";
+                    gallery.dataset.shotsFor = device.id;
+                    field.append(label, textarea, gallery);
                     return field;
                 }),
             );
@@ -66,14 +85,59 @@ export function createNotesPanel({
             );
             textarea.placeholder = i18n.t("notes.devicePlaceholder");
             setValue(textarea, store.getDevice(device.id));
+            renderShots(
+                textarea.nextElementSibling,
+                shots.list().filter((shot) => shot.deviceId === device.id),
+            );
         }
+    }
+
+    // FR-5.1: rapora eklenen görüntüler küçük görseller olarak listelenir
+    function renderShots(gallery, items) {
+        gallery.replaceChildren(
+            ...items.map((shot) => {
+                if (!shotUrls.has(shot.id))
+                    shotUrls.set(shot.id, URL.createObjectURL(shot.blob));
+                const img = document.createElement("img");
+                img.src = shotUrls.get(shot.id);
+                img.alt = shot.name
+                    ? i18n.t("shot.imageAlt", {
+                          device: shot.name,
+                          width: shot.width,
+                          height: shot.height,
+                      })
+                    : i18n.t("notes.generalShots");
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "✕";
+                remove.dataset.removeShot = shot.id;
+                remove.setAttribute("aria-label", i18n.t("notes.removeShot"));
+                const item = document.createElement("li");
+                item.append(img, remove);
+                return item;
+            }),
+        );
+        gallery.hidden = items.length === 0;
+    }
+
+    function releaseUrls() {
+        const ids = new Set(shots.list().map((shot) => shot.id));
+        for (const [id, url] of shotUrls)
+            if (!ids.has(id)) {
+                URL.revokeObjectURL(url);
+                shotUrls.delete(id);
+            }
     }
 
     function sync() {
         open.setAttribute("aria-expanded", String(!panel.hidden));
         if (panel.hidden) return;
         setValue(session, store.getSession());
+        const generalItems = shots.list().filter((shot) => !shot.deviceId);
+        renderShots(generalShots, generalItems);
+        general.hidden = generalItems.length === 0;
         renderDevices();
+        releaseUrls();
     }
 
     function show() {
@@ -119,8 +183,18 @@ export function createNotesPanel({
         onChange?.();
     });
 
-    clear.addEventListener("click", () => {
-        snapshot = store.clear();
+    panel.addEventListener("click", async (event) => {
+        const id =
+            event.target.closest("[data-remove-shot]")?.dataset.removeShot;
+        if (!id) return;
+        await shots.remove(id);
+        shownIds = "";
+        onChange?.();
+        session.focus();
+    });
+
+    clear.addEventListener("click", async () => {
+        snapshot = { notes: store.clear(), shots: await shots.clear() };
         clear.hidden = true;
         cleared.hidden = false;
         undo.hidden = false;
@@ -136,8 +210,11 @@ export function createNotesPanel({
         }, UNDO_TIME);
     });
 
-    undo.addEventListener("click", () => {
-        if (snapshot) store.restore(snapshot);
+    undo.addEventListener("click", async () => {
+        if (snapshot) {
+            store.restore(snapshot.notes);
+            await shots.restore(snapshot.shots);
+        }
         endUndo();
         shownIds = "";
         onChange?.();

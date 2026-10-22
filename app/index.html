@@ -561,6 +561,12 @@
                         data-i18n-placeholder="notes.sessionPlaceholder"
                     ></textarea>
                 </div>
+                <div class="notes-general" id="notes-general" hidden>
+                    <p class="notes-subtitle" data-i18n="notes.generalShots">
+                        Genel görüntüler
+                    </p>
+                    <ul class="notes-shots" id="notes-general-shots"></ul>
+                </div>
                 <div id="notes-devices"></div>
                 <p class="notes-storage" data-i18n="notes.storage"></p>
                 <div class="notes-actions">
@@ -677,8 +683,108 @@
                     Parçalara böl
                 </button>
             </div>
+            <div
+                class="mark-tools"
+                id="mark-tools"
+                role="group"
+                aria-labelledby="mark-tools-label"
+                hidden
+            >
+                <span
+                    class="visually-hidden"
+                    id="mark-tools-label"
+                    data-i18n="mark.tools"
+                    >İşaretleme araçları</span
+                >
+                <div class="segmented">
+                    <button
+                        type="button"
+                        data-mark-tool="arrow"
+                        data-i18n="mark.arrow"
+                    >
+                        Ok
+                    </button>
+                    <button
+                        type="button"
+                        data-mark-tool="circle"
+                        data-i18n="mark.circle"
+                    >
+                        Daire
+                    </button>
+                    <button
+                        type="button"
+                        data-mark-tool="text"
+                        data-i18n="mark.text"
+                    >
+                        Yazı
+                    </button>
+                </div>
+                <div
+                    class="segmented mark-colors"
+                    role="group"
+                    aria-labelledby="mark-color-label"
+                >
+                    <span
+                        class="toolbar-label"
+                        id="mark-color-label"
+                        data-i18n="mark.color"
+                        >Renk</span
+                    >
+                    <button
+                        type="button"
+                        class="mark-color mark-red"
+                        data-mark-color="red"
+                        data-i18n-label="mark.red"
+                    ></button>
+                    <button
+                        type="button"
+                        class="mark-color mark-yellow"
+                        data-mark-color="yellow"
+                        data-i18n-label="mark.yellow"
+                    ></button>
+                    <button
+                        type="button"
+                        class="mark-color mark-blue"
+                        data-mark-color="blue"
+                        data-i18n-label="mark.blue"
+                    ></button>
+                    <button
+                        type="button"
+                        class="mark-color mark-black"
+                        data-mark-color="black"
+                        data-i18n-label="mark.black"
+                    ></button>
+                </div>
+                <button
+                    class="button-ghost mark-action"
+                    id="mark-undo"
+                    type="button"
+                    data-i18n="mark.undo"
+                >
+                    Geri al
+                </button>
+                <button
+                    class="button-ghost mark-action"
+                    id="mark-clear"
+                    type="button"
+                    data-i18n="mark.clear"
+                >
+                    Temizle
+                </button>
+                <p class="mark-hint" data-i18n="mark.hint"></p>
+            </div>
             <div class="shot-preview">
-                <img id="shot-image" alt="" hidden />
+                <div class="shot-stage" id="shot-stage">
+                    <img id="shot-image" alt="" hidden />
+                    <canvas class="mark-layer" id="mark-layer" hidden></canvas>
+                    <input
+                        class="mark-text"
+                        id="mark-text"
+                        type="text"
+                        data-i18n-label="mark.textLabel"
+                        hidden
+                    />
+                </div>
                 <ol class="shot-parts" id="shot-parts" hidden></ol>
             </div>
             <div class="upload-actions" id="shot-actions" hidden>
@@ -712,6 +818,14 @@
                     data-i18n="shot.copy"
                 >
                     Kopyala
+                </button>
+                <button
+                    class="button-ghost"
+                    id="shot-add"
+                    type="button"
+                    data-i18n="shot.addToReport"
+                >
+                    Rapora ekle
                 </button>
             </div>
             <p class="shot-message" id="shot-message" aria-live="polite"></p>

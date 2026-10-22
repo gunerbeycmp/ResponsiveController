@@ -6,6 +6,7 @@ import {
     shotFileName,
 } from "./capture.js";
 import { FORMATS, convert, readFormat, writeFormat } from "./format.js";
+import { createMarkup, renderMarked } from "./markup.js";
 
 // FR-4.1, FR-4.4: ekran görüntüsü önizleme penceresi.
 // Tek cihaz: Görünen alan / Tam sayfa; çok uzun sayfada yoğunluğu düşürülmüş
@@ -37,7 +38,17 @@ export function createShotDialog({
         copy,
         message,
         formats,
+        add,
+        markup: markupElements,
     } = elements;
+    // FR-5.3: tek görselde işaretleme; işaret değişince yeniden eklenebilir
+    const markup = createMarkup({
+        t,
+        elements: markupElements,
+        onChange: () => {
+            add.disabled = false;
+        },
+    });
     // FR-4.5: son seçilen biçim hatırlanır, ilk kullanımda PNG
     let format = readFormat(storage);
     let request = null;
@@ -62,6 +73,8 @@ export function createShotDialog({
         note.hidden = true;
         split.hidden = true;
         message.textContent = "";
+        markup.reset(false);
+        add.disabled = false;
     }
 
     function setStatus(text) {
@@ -141,6 +154,7 @@ export function createShotDialog({
                 }),
             );
             copy.disabled = false;
+            markup.reset(true);
             showNote(screenScaleNote());
             if (result.reduced)
                 showNote(
@@ -208,6 +222,7 @@ export function createShotDialog({
             setStatus(null);
             showImage(urls[0], t("shot.combinedAlt", { count: done.length }));
             copy.disabled = false;
+            markup.reset(true);
             showNote([failedText, screenScaleNote()].filter(Boolean).join(" "));
             return;
         }
@@ -310,11 +325,39 @@ export function createShotDialog({
             renderOptions();
         });
 
+    // Tek görselde işaretler görsele çizilir (indirme, kopyalama, rapor)
+    const isSingleImage = () =>
+        current && current.blobs.length === 1 && current.kind !== "separate";
+    async function finalBlobs() {
+        if (!isSingleImage()) return current.blobs;
+        return [await renderMarked(current.blobs[0], markup.shapes())];
+    }
+
+    // FR-5.1: rapora ekleme. Parçalar ve "Her cihaz ayrı" hepsi birden
+    // eklenir; ızgara tek görseli genel görüntüdür (Aşama 5 kararları)
+    add.addEventListener("click", async () => {
+        if (!current) return;
+        const blobs = await finalBlobs();
+        const items = blobs.map((blob, index) => {
+            if (current.kind === "separate") {
+                const device = current.devices[index];
+                return { deviceId: device.id, name: device.name, blob };
+            }
+            if (current.kind === "combined")
+                return { deviceId: null, name: null, blob };
+            return { deviceId: request.id, name: request.name, blob };
+        });
+        await request.onAdd?.(items);
+        add.disabled = true;
+        message.textContent = t("shot.addedToReport");
+        announce(t("shot.addedToReport"));
+    });
+
     download.addEventListener("click", async () => {
         if (!current) return;
         message.textContent = "";
         const converted = await Promise.all(
-            current.blobs.map((blob) => convert(blob, format)),
+            (await finalBlobs()).map((blob) => convert(blob, format)),
         );
         const used = converted[0].format;
         const { extension } = FORMATS[used];
@@ -351,7 +394,7 @@ export function createShotDialog({
 
     copy.addEventListener("click", async () => {
         if (!current || current.blobs.length !== 1) return;
-        const [blob] = current.blobs;
+        const [blob] = await finalBlobs();
         try {
             await navigator.clipboard.write([
                 new ClipboardItem({ [blob.type]: blob }),

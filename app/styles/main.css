@@ -1541,7 +1541,7 @@ input {
     margin-bottom: 16px;
 }
 
-.shot-preview > img {
+.shot-stage > img {
     max-width: 100%;
     max-height: 60vh;
     object-fit: contain;
@@ -1711,4 +1711,138 @@ input {
     border-color: var(--accent);
     color: var(--on-accent);
     font-weight: 500;
+}
+
+/* İşaretleme (FR-5.3, v0.5.2) */
+.shot-stage {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    line-height: 0;
+}
+
+.mark-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.mark-text {
+    position: absolute;
+    min-width: 120px;
+    color: var(--text);
+    height: 32px;
+    padding: 0 8px;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: normal;
+}
+
+.mark-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.mark-color {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+}
+
+.segmented .mark-color[aria-pressed="true"] {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+}
+
+.segmented .mark-red,
+.segmented .mark-red[aria-pressed="true"] {
+    background: #e11d48;
+    border-color: #e11d48;
+}
+
+.segmented .mark-yellow,
+.segmented .mark-yellow[aria-pressed="true"] {
+    background: #facc15;
+    border-color: #facc15;
+}
+
+.segmented .mark-blue,
+.segmented .mark-blue[aria-pressed="true"] {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.segmented .mark-black,
+.segmented .mark-black[aria-pressed="true"] {
+    background: #111111;
+    border-color: #666c80;
+}
+
+.mark-action {
+    height: 30px;
+    padding: 0 12px;
+}
+
+.mark-action:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.mark-hint {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Rapordaki görüntüler (Notlar paneli) */
+.notes-shots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.notes-shots li {
+    position: relative;
+}
+
+.notes-shots img {
+    display: block;
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    object-position: top;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.notes-shots button {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.notes-subtitle {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 13px;
 }

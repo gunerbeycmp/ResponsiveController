@@ -187,5 +187,22 @@
     "notes.storage": "Notlar yalnızca bu tarayıcıda saklanır.",
     "notes.clear": "Notları temizle",
     "notes.cleared": "Notlar temizlendi.",
-    "notes.undo": "Geri al"
+    "notes.undo": "Geri al",
+    "shot.addToReport": "Rapora ekle",
+    "shot.addedToReport": "Rapora eklendi.",
+    "mark.tools": "İşaretleme araçları",
+    "mark.arrow": "Ok",
+    "mark.circle": "Daire",
+    "mark.text": "Yazı",
+    "mark.undo": "Geri al",
+    "mark.clear": "Temizle",
+    "mark.color": "Renk",
+    "mark.red": "Kırmızı",
+    "mark.yellow": "Sarı",
+    "mark.blue": "Mavi",
+    "mark.black": "Siyah",
+    "mark.textLabel": "İşaret yazısı",
+    "mark.hint": "Ok ve daire için görselin üzerinde sürükle; yazı için tıklayıp yaz ve Enter'a bas.",
+    "notes.generalShots": "Genel görüntüler",
+    "notes.removeShot": "Görüntüyü rapordan çıkar"
 }
