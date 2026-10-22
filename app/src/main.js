@@ -44,6 +44,7 @@ import { normalizeUrl } from "./url/normalize.js";
 import { PREVIEW_ORIGIN } from "./config.js";
 import { openSizedWindow } from "./url/popup.js";
 import { createReportDialog } from "./report/dialog.js";
+import { trackLoading } from "./ui/loading.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -149,6 +150,13 @@ const gridStore = createGridStore({
 // Izgarada iki hâl yan yanayken Katla / Aç ile kaldırılan hâl ve yeri
 // (katlanabilir grubu → { removedId, index }); yalnızca bu oturumda
 const mergedFolds = new Map();
+
+// Tek cihaz önizlemesi yüklenirken gösterge (Aşama 6 revizyonu)
+const frameLoading = trackLoading({
+    iframe: elements.iframe,
+    overlay: $("preview-loading"),
+    region: elements.viewport,
+});
 
 // FR-5.3: notlar adrese ya da proje adına göre tarayıcıda saklanır
 const notesStore = createNotesStore({ storage: window.localStorage });
@@ -949,6 +957,7 @@ const upload = createUploadDialog({
         // Aynı adres yeniden yüklense de iframe tazelenir
         elements.iframe.src = "about:blank";
         elements.iframe.src = state.url;
+        frameLoading.start();
         gridView.clear();
         render();
     },
@@ -959,6 +968,7 @@ function openProjectPath(value) {
     elements.input.value = path;
     state.url = bridge.previewUrl(path);
     elements.iframe.src = state.url;
+    frameLoading.start();
     render();
 }
 
@@ -967,6 +977,7 @@ function closeProject() {
     state.url = null;
     elements.input.value = "";
     elements.iframe.src = "about:blank";
+    frameLoading.stop();
     bridge.clearProject();
     render();
     elements.input.focus();
@@ -1580,6 +1591,7 @@ elements.form.addEventListener("submit", (event) => {
     state.url = result.url;
     elements.input.value = result.url;
     elements.iframe.src = result.url;
+    frameLoading.start();
     render();
 });
 

@@ -229,5 +229,6 @@
     "frame.realistic": "Realistic frame for {device}",
     "frame.realisticOn": "{device} is shown with a realistic frame.",
     "frame.realisticOff": "{device} is shown with a plain frame.",
-    "shot.withFrame": "With frame"
+    "shot.withFrame": "With frame",
+    "preview.loading": "Loading…"
 }

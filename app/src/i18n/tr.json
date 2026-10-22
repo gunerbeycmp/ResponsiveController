@@ -229,5 +229,6 @@
     "frame.realistic": "{device} için gerçekçi çerçeve",
     "frame.realisticOn": "{device} gerçekçi çerçeveyle gösteriliyor.",
     "frame.realisticOff": "{device} sade çerçeveyle gösteriliyor.",
-    "shot.withFrame": "Çerçeveyle"
+    "shot.withFrame": "Çerçeveyle",
+    "preview.loading": "Yükleniyor…"
 }

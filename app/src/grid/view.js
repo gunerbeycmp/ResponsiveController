@@ -11,6 +11,7 @@ import {
 } from "../devices/devices.js";
 import { frameSpec, hasFrame, outerSize } from "../devices/frames.js";
 import { applyShell, buildShell } from "../devices/shell.js";
+import { buildLoading, trackLoading } from "../ui/loading.js";
 import { MAX_ZOOM, clampZoom, minZoom, zoomIn, zoomOut } from "./zoom.js";
 
 // Eşit büyüklükteki kutuların cihaz alanı (Aşama 3 Tasarım Kararları)
@@ -138,7 +139,15 @@ export function createGridView({
         p.viewport.setAttribute("role", "region");
         p.handle.dataset.boxHandle = id;
         p.handle.setAttribute("aria-haspopup", "menu");
-        p.canvas.append(p.iframe);
+        // Kutunun sayfası yüklenirken gösterge (Aşama 6 revizyonu)
+        const loading = buildLoading();
+        p.loadingText = loading.text;
+        p.canvas.append(p.iframe, loading.overlay);
+        p.loading = trackLoading({
+            iframe: p.iframe,
+            overlay: loading.overlay,
+            region: p.viewport,
+        });
         Object.assign(p, buildShell(p.canvas));
         p.viewport.append(p.shell);
         p.li.append(
@@ -354,8 +363,10 @@ export function createGridView({
         if (url && p.iframe.dataset.src !== url) {
             p.iframe.dataset.src = url;
             p.iframe.src = url;
+            p.loading.start();
         }
 
+        p.loadingText.textContent = i18n.t("preview.loading");
         p.name.textContent = name;
         p.size.textContent = i18n.t("frame.size", size);
         p.scale.textContent = i18n.t("frame.scale", {
