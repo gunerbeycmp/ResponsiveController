@@ -46,6 +46,7 @@ describe("ızgara deposu (FR-3.7)", () => {
             mode: "grid",
             size: "large",
             rotated: [],
+            framed: [],
             scale: null,
         });
         expect(store.has("a")).toBe(true);

@@ -225,5 +225,8 @@
     "report.imagesFolder": "gorseller",
     "report.qualityLabel": "PDF görsel kalitesi",
     "report.qualitySmall": "Küçük dosya",
-    "report.qualityHigh": "Yüksek kalite"
+    "report.qualityHigh": "Yüksek kalite",
+    "frame.realistic": "{device} için gerçekçi çerçeve",
+    "frame.realisticOn": "{device} gerçekçi çerçeveyle gösteriliyor.",
+    "frame.realisticOff": "{device} sade çerçeveyle gösteriliyor."
 }

@@ -11,6 +11,8 @@ import {
     viewRenderSize,
     viewSize,
 } from "./devices/devices.js";
+import { frameSpec, hasFrame, outerSize } from "./devices/frames.js";
+import { applyShell, shellSize } from "./devices/shell.js";
 import Sortable from "sortablejs";
 import { clampSize, createCustomSizes, isValidSize } from "./devices/custom.js";
 import { createFavorites } from "./devices/favorites.js";
@@ -107,6 +109,9 @@ const elements = {
     gridList: $("device-grid"),
     gridDrop: $("grid-drop"),
     frameCanvas: $("frame-canvas"),
+    frameShell: $("frame-shell"),
+    frameHousing: $("frame-housing"),
+    frameRealistic: $("frame-realistic"),
     frameRotate: $("frame-rotate"),
     scaleToolbar: $("scale-toolbar"),
     scaleOut: $("scale-out"),
@@ -213,6 +218,12 @@ const viewOptions = (id) => ({
     browserBars: state.browserBars,
 });
 
+// FR-3.13: açık gerçekçi çerçevenin ölçüleri; çerçevesi olmayan cihazda null
+const frameOf = (device) =>
+    gridStore.isFramed(device.id)
+        ? frameSpec(device, { rotated: gridStore.isRotated(device.id) })
+        : null;
+
 function layoutFrame() {
     if (!state.url || isGridActive()) return;
     const device = findDevice(state.deviceId);
@@ -255,7 +266,10 @@ function layoutFrame() {
                 ? withHelp
                 : height - elements.helpToggle.offsetHeight,
     };
-    frameFit = fitScale(size, available);
+    // Çerçeve açıkken kasa ve ekler de alana sığdırılır; ölçek ekranındır
+    const spec = frameOf(device);
+    const outer = outerSize(size, spec);
+    frameFit = fitScale(outer, available);
     // Sürüklerken ölçek sabit kalır; aksi hâlde Sığdır'da cihaz büyüdükçe
     // küçülür ve tutamaç imleçten kaçar
     const scale =
@@ -277,8 +291,26 @@ function layoutFrame() {
     // Yakınlaştırılan cihaz alanı aşmaz, çerçevenin içinde kayar
     elements.frameCanvas.style.width = `${scaled.width}px`;
     elements.frameCanvas.style.height = `${scaled.height}px`;
-    elements.viewport.style.width = `${Math.min(scaled.width, Math.floor(available.width)) + 2}px`;
-    elements.viewport.style.height = `${Math.min(scaled.height, Math.floor(available.height)) + 2}px`;
+    applyShell(
+        {
+            shell: elements.frameShell,
+            housing: elements.frameHousing,
+            screen: elements.frameCanvas,
+            viewport: elements.viewport,
+        },
+        spec,
+        scale,
+    );
+    const scaledOuter = shellSize(size, spec, scale);
+    // Sığdır'da alan cihazın kendi boyutundadır: kasa ve ekranın ayrı ayrı
+    // yuvarlanmasından kalan bir piksel kaydırma çubuğu açmasın
+    const fits = scale <= frameFit + EPSILON;
+    const viewportSize = (key) =>
+        (fits
+            ? scaledOuter[key]
+            : Math.min(scaledOuter[key], Math.floor(available[key]))) + 2;
+    elements.viewport.style.width = `${viewportSize("width")}px`;
+    elements.viewport.style.height = `${viewportSize("height")}px`;
 
     const name = deviceName(device, i18n.getLanguage());
     elements.frameName.textContent = name;
@@ -343,6 +375,15 @@ function layoutFrame() {
         i18n.t(isLandscape(size) ? "rotate.toPortrait" : "rotate.toLandscape", {
             device: name,
         }),
+    );
+    elements.frameRealistic.hidden = !hasFrame(device);
+    elements.frameRealistic.setAttribute(
+        "aria-pressed",
+        String(gridStore.isFramed(device.id)),
+    );
+    elements.frameRealistic.setAttribute(
+        "aria-label",
+        i18n.t("frame.realistic", { device: name }),
     );
     elements.iframe.title = i18n.t("frame.title", {
         device: name,
@@ -967,6 +1008,19 @@ elements.frameRotate.addEventListener("click", () => {
                 : "rotate.portrait",
             { device: deviceName(device, i18n.getLanguage()) },
         ),
+    );
+});
+
+// FR-3.13: tek cihazda gerçekçi çerçeve; seçim cihaza bağlıdır
+elements.frameRealistic.addEventListener("click", () => {
+    const device = findDevice(state.deviceId);
+    const framed = !gridStore.isFramed(device.id);
+    gridStore.setFramed(device.id, framed);
+    renderView();
+    announce(
+        i18n.t(framed ? "frame.realisticOn" : "frame.realisticOff", {
+            device: deviceName(device, i18n.getLanguage()),
+        }),
     );
 });
 

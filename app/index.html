@@ -376,6 +376,15 @@
                             ⟳
                         </button>
                         <button
+                            class="frame-rotate frame-toggle"
+                            id="frame-realistic"
+                            type="button"
+                            aria-pressed="false"
+                            hidden
+                        >
+                            ▯
+                        </button>
+                        <button
                             class="frame-rotate"
                             id="frame-shot"
                             type="button"
@@ -463,8 +472,13 @@
                             role="region"
                             tabindex="0"
                         >
-                            <div class="frame-canvas" id="frame-canvas">
-                                <iframe id="preview-iframe"></iframe>
+                            <!-- FR-3.13: kabuk ve kasa gerçekçi çerçeve için -->
+                            <div class="device-shell" id="frame-shell">
+                                <div class="device-housing" id="frame-housing">
+                                    <div class="frame-canvas" id="frame-canvas">
+                                        <iframe id="preview-iframe"></iframe>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- FR-3.10: fare ve dokunma için; klavye karşılığı başlıktaki alanlar -->

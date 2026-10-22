@@ -225,5 +225,8 @@
     "report.imagesFolder": "images",
     "report.qualityLabel": "PDF image quality",
     "report.qualitySmall": "Smaller file",
-    "report.qualityHigh": "High quality"
+    "report.qualityHigh": "High quality",
+    "frame.realistic": "Realistic frame for {device}",
+    "frame.realisticOn": "{device} is shown with a realistic frame.",
+    "frame.realisticOff": "{device} is shown with a plain frame."
 }

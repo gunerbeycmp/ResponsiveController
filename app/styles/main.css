@@ -312,13 +312,181 @@ input {
     border-radius: 12px;
 }
 
-/* margin: auto küçük cihazı ortalar, büyütülmüş cihazda kaydırmayı bozmaz */
 .frame-canvas {
     position: relative;
-    flex-shrink: 0;
-    margin: auto;
     overflow: hidden;
     background: #ffffff;
+}
+
+/* FR-3.13: cihaz kabuğu. margin: auto küçük cihazı ortalar, büyütülmüş
+   cihazda kaydırmayı bozmaz. Çerçeve kapalıyken kabuk ve kasa görünmez. */
+.device-shell {
+    --frame-body: #17191e;
+    --frame-edge: #4a4e58;
+    --frame-metal: #c9ccd4;
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    margin: auto;
+}
+
+.device-housing {
+    position: relative;
+    border: 0 solid var(--frame-body);
+}
+
+.device-shell.is-framed .device-housing {
+    background: var(--frame-body);
+    box-shadow: 0 0 0 1px var(--frame-edge);
+}
+
+.frame-viewport.is-framed,
+.box-viewport.is-framed {
+    background: transparent;
+    border-color: transparent;
+}
+
+/* Kamera biçimleri ekranın üstünde (yatayda solunda) */
+.device-shell.is-framed .device-housing[data-cutout]::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    background: var(--frame-body);
+    pointer-events: none;
+}
+
+.device-housing[data-cutout="island"]::before {
+    top: calc(var(--z) * 11px);
+    left: 50%;
+    width: calc(var(--z) * 124px);
+    height: calc(var(--z) * 36px);
+    border-radius: calc(var(--z) * 18px);
+    transform: translateX(-50%);
+}
+
+.device-housing[data-cutout="notch"]::before {
+    top: 0;
+    left: 50%;
+    width: calc(var(--z) * 160px);
+    height: calc(var(--z) * 32px);
+    border-radius: 0 0 calc(var(--z) * 18px) calc(var(--z) * 18px);
+    transform: translateX(-50%);
+}
+
+[data-frame="laptop"] .device-housing[data-cutout="notch"]::before {
+    width: calc(var(--z) * 190px);
+    height: calc(var(--z) * 30px);
+    border-radius: 0 0 calc(var(--z) * 10px) calc(var(--z) * 10px);
+}
+
+.device-housing[data-cutout="hole"]::before {
+    top: calc(var(--z) * 12px);
+    left: 50%;
+    width: calc(var(--z) * 12px);
+    height: calc(var(--z) * 12px);
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+/* Dizüstü kamerası ve ana ekran tuşu kasanın üzerinde */
+.device-housing[data-cutout="camera"]::before {
+    top: calc(var(--z) * -17px);
+    left: 50%;
+    width: calc(var(--z) * 6px);
+    height: calc(var(--z) * 6px);
+    border-radius: 50%;
+    background: #33363d;
+    transform: translateX(-50%);
+}
+
+.device-housing[data-cutout="home"]::before {
+    top: calc(100% + var(--z) * 9px);
+    left: 50%;
+    width: calc(var(--z) * 52px);
+    height: calc(var(--z) * 52px);
+    border: calc(var(--z) * 2px) solid #3a3d45;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+}
+
+.is-rotated .device-housing[data-cutout="island"]::before,
+.is-rotated .device-housing[data-cutout="notch"]::before,
+.is-rotated .device-housing[data-cutout="hole"]::before {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.is-rotated .device-housing[data-cutout="island"]::before {
+    left: calc(var(--z) * 11px);
+    width: calc(var(--z) * 36px);
+    height: calc(var(--z) * 124px);
+}
+
+.is-rotated .device-housing[data-cutout="notch"]::before {
+    width: calc(var(--z) * 32px);
+    height: calc(var(--z) * 160px);
+    border-radius: 0 calc(var(--z) * 18px) calc(var(--z) * 18px) 0;
+}
+
+.is-rotated .device-housing[data-cutout="hole"]::before {
+    left: calc(var(--z) * 12px);
+}
+
+.is-rotated .device-housing[data-cutout="home"]::before {
+    top: 50%;
+    left: calc(100% + var(--z) * 9px);
+    transform: translateY(-50%);
+}
+
+/* Saat kayışları, TV ayağı ve klavye tabanı kabuğun boşluğunda */
+.device-shell.is-framed::before,
+.device-shell.is-framed::after {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+[data-frame="watch"]:not(.is-rotated)::before,
+[data-frame="watch"]:not(.is-rotated)::after {
+    content: "";
+    width: 62%;
+    height: calc(var(--z) * 70px);
+    background: #2b2f37;
+}
+
+[data-frame="watch"]:not(.is-rotated)::before {
+    top: 0;
+    border-radius: calc(var(--z) * 16px) calc(var(--z) * 16px) 0 0;
+}
+
+[data-frame="watch"]:not(.is-rotated)::after {
+    bottom: 0;
+    border-radius: 0 0 calc(var(--z) * 16px) calc(var(--z) * 16px);
+}
+
+[data-frame="tv"]:not(.is-rotated)::after {
+    content: "";
+    bottom: 0;
+    width: 36%;
+    height: calc(var(--z) * 64px);
+    background:
+        linear-gradient(var(--frame-body), var(--frame-body)) center top / 12%
+            calc(100% - var(--z) * 12px) no-repeat,
+        linear-gradient(var(--frame-body), var(--frame-body)) center bottom /
+            100% calc(var(--z) * 12px) no-repeat;
+}
+
+[data-frame="laptop"]:not(.is-rotated)::after {
+    content: "";
+    bottom: 0;
+    width: 100%;
+    height: calc(var(--z) * 26px);
+    background: linear-gradient(var(--frame-metal), #9a9ea8);
+    border-radius: 0 0 calc(var(--z) * 40px) calc(var(--z) * 40px);
+    box-shadow: 0 0 0 1px var(--frame-edge);
 }
 
 .frame-canvas iframe {
@@ -1147,11 +1315,8 @@ input {
     border-radius: var(--radius);
 }
 
-/* margin: auto küçük cihazı ortalar, büyütülmüş cihazda kaydırmayı bozmaz */
 .box-canvas {
     position: relative;
-    flex-shrink: 0;
-    margin: auto;
     overflow: hidden;
 }
 
@@ -1239,6 +1404,13 @@ input {
     font-size: 14px;
     line-height: 1;
     cursor: pointer;
+}
+
+/* FR-3.13: çerçeve açıkken düğme vurgulu (açık / kapalı belli olsun) */
+.frame-toggle[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
 }
 
 .scale-step:disabled {

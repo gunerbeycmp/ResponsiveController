@@ -28,6 +28,7 @@ function readStored(storage, isKnown) {
             mode: MODES.includes(stored?.mode) ? stored.mode : "single",
             size: BOX_SIZES.includes(stored?.size) ? stored.size : "medium",
             rotated: knownIds(stored?.rotated, isKnown),
+            framed: knownIds(stored?.framed, isKnown),
             scale: validScale(stored?.scale),
         };
     } catch {
@@ -36,6 +37,7 @@ function readStored(storage, isKnown) {
             mode: "single",
             size: "medium",
             rotated: [],
+            framed: [],
             scale: null,
         };
     }
@@ -43,15 +45,20 @@ function readStored(storage, isKnown) {
 
 // FR-3.7: ızgaradaki cihazlar, sıraları, kutu büyüklüğü ve son mod tarayıcıda
 // saklanır. FR-3.6 / FR-3.9: döndürülen cihazlar ve genel ölçek de saklanır
-// (null = Sığdır). Kutu içi yakınlaştırma ve büyütülmüş kutu geçicidir.
+// (null = Sığdır). FR-3.13: gerçekçi çerçevesi açık cihazlar da saklanır;
+// döndürme gibi cihaza bağlıdır, tek görünümde ve ızgarada aynıdır.
+// Kutu içi yakınlaştırma ve büyütülmüş kutu geçicidir.
 export function createGridStore({ storage, isKnown = () => true } = {}) {
-    let { ids, mode, size, rotated, scale } = readStored(storage, isKnown);
+    let { ids, mode, size, rotated, framed, scale } = readStored(
+        storage,
+        isKnown,
+    );
 
     function save() {
         try {
             storage?.setItem(
                 GRID_STORAGE_KEY,
-                JSON.stringify({ ids, mode, size, rotated, scale }),
+                JSON.stringify({ ids, mode, size, rotated, framed, scale }),
             );
         } catch {
             // Depolama kapalıysa ayarlar yalnızca bu oturumda kalır
@@ -68,6 +75,7 @@ export function createGridStore({ storage, isKnown = () => true } = {}) {
         getSize: () => size,
         getScale: () => scale,
         isRotated: (id) => rotated.includes(id),
+        isFramed: (id) => framed.includes(id),
         setMode(next) {
             if (!MODES.includes(next)) return;
             mode = next;
@@ -91,6 +99,12 @@ export function createGridStore({ storage, isKnown = () => true } = {}) {
             rotated = value
                 ? [...new Set([...rotated, id])]
                 : rotated.filter((x) => x !== id);
+            save();
+        },
+        setFramed(id, value) {
+            framed = value
+                ? [...new Set([...framed, id])]
+                : framed.filter((x) => x !== id);
             save();
         },
         // Ekler ya da zaten varsa verilen sıraya taşır

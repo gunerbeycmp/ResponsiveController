@@ -9,6 +9,8 @@ import {
     viewRenderSize,
     viewSize,
 } from "../devices/devices.js";
+import { frameSpec, hasFrame, outerSize } from "../devices/frames.js";
+import { applyShell, buildShell } from "../devices/shell.js";
 import { MAX_ZOOM, clampZoom, minZoom, zoomIn, zoomOut } from "./zoom.js";
 
 // Eşit büyüklükteki kutuların cihaz alanı (Aşama 3 Tasarım Kararları)
@@ -83,13 +85,19 @@ export function createGridView({
         const render = viewRenderSize(device, { rotated });
         const area =
             expanded === id ? getExpandedArea() : BOX_AREAS[store.getSize()];
-        const fit = fitScale(size, area);
+        // FR-3.13: çerçeve açıkken kasa ve ekler de kutuya sığdırılır
+        const spec = store.isFramed(id) ? frameSpec(device, { rotated }) : null;
+        // Kasa ve ekran ayrı yuvarlanır; küçük pay kutuda kaydırma açmaz
+        const fit = fitScale(
+            outerSize(size, spec),
+            spec ? { width: area.width - 4, height: area.height - 4 } : area,
+        );
         const own = zooms.get(id);
         const zoom =
             own === "fit"
                 ? fit
                 : clampZoom(own ?? store.getScale() ?? fit, fit);
-        return { device, size, render, area, fit, zoom };
+        return { device, size, render, area, fit, zoom, spec };
     }
 
     function setZoom(id, value) {
@@ -114,6 +122,7 @@ export function createGridView({
             noteArea: el("div", { className: "box-note", hidden: true }),
             noteLabel: el("label"),
             noteText: el("textarea", { rows: 3 }),
+            frame: iconButton("box-rotate frame-toggle", "▯"),
             rotate: iconButton("box-rotate", "⟳"),
             fold: iconButton("box-fold", ""),
             expand: iconButton("box-expand", ""),
@@ -130,7 +139,8 @@ export function createGridView({
         p.handle.dataset.boxHandle = id;
         p.handle.setAttribute("aria-haspopup", "menu");
         p.canvas.append(p.iframe);
-        p.viewport.append(p.canvas);
+        Object.assign(p, buildShell(p.canvas));
+        p.viewport.append(p.shell);
         p.li.append(
             el(
                 "div",
@@ -151,6 +161,7 @@ export function createGridView({
                     p.fit,
                     p.shot,
                     p.note,
+                    p.frame,
                     p.rotate,
                     p.fold,
                     p.expand,
@@ -178,6 +189,17 @@ export function createGridView({
         p.fit.addEventListener("click", () => {
             zooms.set(id, "fit");
             update(id);
+        });
+        // FR-3.13: gerçekçi çerçeve cihaza bağlıdır, tek görünümde de geçerli
+        p.frame.addEventListener("click", () => {
+            const framed = !store.isFramed(id);
+            store.setFramed(id, framed);
+            update(id);
+            announce(
+                i18n.t(framed ? "frame.realisticOn" : "frame.realisticOff", {
+                    device: nameOf(id),
+                }),
+            );
         });
         p.rotate.addEventListener("click", () => {
             store.setRotated(id, !store.isRotated(id));
@@ -302,7 +324,7 @@ export function createGridView({
     function update(id) {
         const p = boxes.get(id);
         if (!p) return;
-        const { size, render, area, fit, zoom } = geometry(id);
+        const { device, size, render, area, fit, zoom, spec } = geometry(id);
         const name = nameOf(id);
         const ids = store.list();
         const index = ids.indexOf(id);
@@ -313,6 +335,16 @@ export function createGridView({
         p.viewport.style.height = `${area.height}px`;
         p.canvas.style.width = `${Math.round(size.width * zoom)}px`;
         p.canvas.style.height = `${Math.round(size.height * zoom)}px`;
+        applyShell(
+            {
+                shell: p.shell,
+                housing: p.housing,
+                screen: p.canvas,
+                viewport: p.viewport,
+            },
+            spec,
+            zoom,
+        );
         p.iframe.style.width = `${render.width}px`;
         p.iframe.style.height = `${render.height}px`;
         p.iframe.style.transform = `scale(${(zoom * size.width) / render.width})`;
@@ -362,7 +394,12 @@ export function createGridView({
                 device: name,
             }),
         );
-        const device = findDevice(id);
+        p.frame.hidden = !hasFrame(device);
+        p.frame.setAttribute("aria-pressed", String(store.isFramed(id)));
+        p.frame.setAttribute(
+            "aria-label",
+            i18n.t("frame.realistic", { device: name }),
+        );
         p.shot.hidden = !canShoot();
         updateNote(id);
         p.shot.setAttribute(
