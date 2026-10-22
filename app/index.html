@@ -881,11 +881,39 @@
                         data-i18n="report.formatLabel"
                         >Rapor biçimi</span
                     >
+                    <button type="button" data-report-format="pdf">PDF</button>
                     <button type="button" data-report-format="html">
                         HTML
                     </button>
                     <button type="button" data-report-format="markdown">
                         Markdown
+                    </button>
+                </div>
+                <div
+                    class="segmented"
+                    id="report-quality"
+                    role="group"
+                    aria-labelledby="report-quality-label"
+                >
+                    <span
+                        class="visually-hidden"
+                        id="report-quality-label"
+                        data-i18n="report.qualityLabel"
+                        >PDF görsel kalitesi</span
+                    >
+                    <button
+                        type="button"
+                        data-report-quality="small"
+                        data-i18n="report.qualitySmall"
+                    >
+                        Küçük dosya
+                    </button>
+                    <button
+                        type="button"
+                        data-report-quality="high"
+                        data-i18n="report.qualityHigh"
+                    >
+                        Yüksek kalite
                     </button>
                 </div>
             </div>

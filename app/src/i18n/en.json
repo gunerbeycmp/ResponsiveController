@@ -222,5 +222,8 @@
     "report.details": "Device details",
     "report.footer": "Created with ResponsiveController.",
     "report.file": "report",
-    "report.imagesFolder": "images"
+    "report.imagesFolder": "images",
+    "report.qualityLabel": "PDF image quality",
+    "report.qualitySmall": "Smaller file",
+    "report.qualityHigh": "High quality"
 }

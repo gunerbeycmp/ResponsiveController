@@ -222,5 +222,8 @@
     "report.details": "Cihaz ayrıntıları",
     "report.footer": "ResponsiveController ile oluşturuldu.",
     "report.file": "rapor",
-    "report.imagesFolder": "gorseller"
+    "report.imagesFolder": "gorseller",
+    "report.qualityLabel": "PDF görsel kalitesi",
+    "report.qualitySmall": "Küçük dosya",
+    "report.qualityHigh": "Yüksek kalite"
 }

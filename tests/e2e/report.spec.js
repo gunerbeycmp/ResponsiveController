@@ -51,11 +51,14 @@ test("rapor önizlenir ve HTML olarak görseller gömülü iner (FR-5.1, FR-5.2)
     const dialog = page.getByRole("dialog", { name: "Test raporu" });
     await expect(dialog).toBeVisible();
     await expect(page.getByRole("button", { name: "İndir" })).toBeFocused();
+    await page.getByRole("button", { name: "HTML", exact: true }).click();
     await expect(
         page.getByRole("button", { name: "HTML", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
-    // PDF v0.5.4'e kadar gösterilmez
-    await expect(dialog.getByRole("button", { name: "PDF" })).toHaveCount(0);
+    // Kalite yalnızca PDF'te
+    await expect(
+        page.getByRole("group", { name: "PDF görsel kalitesi" }),
+    ).toBeHidden();
 
     await expect(page.locator("#report-preview")).toHaveAccessibleName(
         "Rapor önizlemesi",
@@ -172,6 +175,7 @@ test("rapor penceresi ve rapor dosyası erişilebilirlik denetiminden geçer (NF
         .analyze();
     expect(results.violations).toEqual([]);
 
+    await page.getByRole("button", { name: "HTML", exact: true }).click();
     const download = page.waitForEvent("download");
     await page.getByRole("button", { name: "İndir" }).click();
     const html = readFileSync(await (await download).path(), "utf8");
@@ -181,4 +185,49 @@ test("rapor penceresi ve rapor dosyası erişilebilirlik denetiminden geçer (NF
         .withTags(WCAG_21_AA)
         .analyze();
     expect(fileResults.violations).toEqual([]);
+});
+
+test("PDF varsayılandır; görsel kalitesi seçilir ve hatırlanır (FR-5.2, R-17, R-41)", async ({
+    page,
+}) => {
+    await prepare(page);
+    await page.getByRole("button", { name: "Rapor oluştur" }).click();
+    await expect(
+        page.getByRole("button", { name: "PDF", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    const quality = page.getByRole("group", { name: "PDF görsel kalitesi" });
+    await expect(quality).toBeVisible();
+    const small = quality.getByRole("button", { name: "Küçük dosya" });
+    const high = quality.getByRole("button", { name: "Yüksek kalite" });
+    await expect(small).toHaveAttribute("aria-pressed", "true");
+
+    const pdfOf = async () => {
+        const download = page.waitForEvent("download");
+        await page.getByRole("button", { name: "İndir" }).click();
+        const file = await download;
+        expect(file.suggestedFilename()).toMatch(
+            /^rapor-\d{4}-\d{2}-\d{2}-\d{4}\.pdf$/,
+        );
+        return readFileSync(await file.path());
+    };
+    const smallPdf = await pdfOf();
+    expect(smallPdf.subarray(0, 5).toString()).toBe("%PDF-");
+    const text = smallPdf.toString("latin1");
+    // Inter gömülü; küçük dosyada görsel JPEG
+    expect(text).toContain("Inter");
+    expect(text).toContain("/DCTDecode");
+    expect(text).toMatch(/\/Type \/Page\b/);
+
+    await high.click();
+    await expect(high).toHaveAttribute("aria-pressed", "true");
+    const highPdf = (await pdfOf()).toString("latin1");
+    expect(highPdf).not.toContain("/DCTDecode");
+    expect(highPdf).toContain("/FlateDecode");
+
+    // Seçim hatırlanır
+    await page.keyboard.press("Escape");
+    await page.reload();
+    expect(
+        await page.evaluate(() => localStorage.getItem("rc-report-quality")),
+    ).toBe("high");
 });

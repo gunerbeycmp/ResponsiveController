@@ -1700,6 +1700,18 @@ input {
     width: min(100% - 32px, 880px);
 }
 
+/* PDF hazırlanırken İndir düğmesi meşgul görünür (v0.5.4) */
+.report-dialog [aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* Biçim ve kalite grupları birbirinden ayrı görünür */
+#report-quality {
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+}
+
 .report-preview {
     display: block;
     width: 100%;

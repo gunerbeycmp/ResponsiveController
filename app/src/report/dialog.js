@@ -1,11 +1,13 @@
 import { strToU8, zipSync } from "fflate";
 import { batchFileName, entryFileName } from "../shot/capture.js";
 import { buildReport, toHtml, toMarkdown } from "./build.js";
+import { readQuality, toPdf, writeQuality } from "./pdf.js";
 
-// FR-5.1, FR-5.2: rapor penceresi. Önizleme, biçim seçimi (HTML / Markdown;
-// PDF v0.5.4'te) ve İndir. HTML görselleri gömülü tek dosyadır; Markdown
-// rapor dosyası ve görseller klasörüyle ZIP olarak iner (Aşama 5 kararları).
-export const REPORT_FORMATS = ["html", "markdown"];
+// FR-5.1, FR-5.2: rapor penceresi. Önizleme, biçim seçimi (PDF / HTML /
+// Markdown) ve İndir. PDF varsayılandır, görsel kalitesi seçilir; HTML
+// görselleri gömülü tek dosyadır; Markdown rapor dosyası ve görseller
+// klasörüyle ZIP olarak iner (Aşama 5 kararları).
+export const REPORT_FORMATS = ["pdf", "html", "markdown"];
 
 const toDataUrl = (blob) =>
     new Promise((resolve, reject) => {
@@ -18,9 +20,24 @@ const toDataUrl = (blob) =>
 const extensionOf = (blob) =>
     ({ "image/jpeg": "jpg", "image/webp": "webp" })[blob.type] ?? "png";
 
-export function createReportDialog({ t, getLanguage, elements, getData }) {
-    const { dialog, close, preview, download, formats } = elements;
-    let format = "html";
+export function createReportDialog({
+    t,
+    getLanguage,
+    storage,
+    elements,
+    getData,
+}) {
+    const {
+        dialog,
+        close,
+        preview,
+        download,
+        formats,
+        qualityGroup,
+        qualities,
+    } = elements;
+    let format = "pdf";
+    let quality = readQuality(storage);
     let model = null;
     let info = null;
     let returnFocus = null;
@@ -90,6 +107,13 @@ export function createReportDialog({ t, getLanguage, elements, getData }) {
                 "aria-pressed",
                 String(button.dataset.reportFormat === format),
             );
+        for (const button of qualities)
+            button.setAttribute(
+                "aria-pressed",
+                String(button.dataset.reportQuality === quality),
+            );
+        // Kalite yalnızca PDF'te seçilir
+        qualityGroup.hidden = format !== "pdf";
     }
 
     function open({ opener } = {}) {
@@ -136,6 +160,12 @@ export function createReportDialog({ t, getLanguage, elements, getData }) {
     }
 
     async function build() {
+        if (format === "pdf") {
+            return {
+                blob: await toPdf(model, info, { quality }),
+                name: batchFileName(t("report.file"), { extension: "pdf" }),
+            };
+        }
         if (format === "html") {
             const sources = new Map();
             for (const { shot } of imageFiles("img").values())
@@ -168,10 +198,28 @@ export function createReportDialog({ t, getLanguage, elements, getData }) {
             format = button.dataset.reportFormat;
             renderFormats();
         });
+    for (const button of qualities)
+        button.addEventListener("click", () => {
+            quality = button.dataset.reportQuality;
+            writeQuality(storage, quality);
+            renderFormats();
+        });
 
     download.addEventListener("click", async () => {
-        if (!model) return;
-        const { blob, name } = await build();
+        if (!model || download.getAttribute("aria-disabled") === "true") return;
+        // PDF birkaç saniye sürebilir; ikinci tıklama yeni dosya başlatmaz.
+        // Odak düğmede kalsın diye disabled yerine aria-disabled
+        download.setAttribute("aria-disabled", "true");
+        dialog.setAttribute("aria-busy", "true");
+        let result;
+        try {
+            result = await build();
+        } finally {
+            download.removeAttribute("aria-disabled");
+            dialog.removeAttribute("aria-busy");
+        }
+        if (!dialog.open) return;
+        const { blob, name } = result;
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = name;

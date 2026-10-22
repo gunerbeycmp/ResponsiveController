@@ -1174,12 +1174,15 @@ const notesPanel = createNotesPanel({
 const reportDialog = createReportDialog({
     t: i18n.t,
     getLanguage: () => i18n.getLanguage(),
+    storage: window.localStorage,
     elements: {
         dialog: $("report-dialog"),
         close: $("report-close"),
         preview: $("report-preview"),
         download: $("report-download"),
         formats: [...document.querySelectorAll("[data-report-format]")],
+        qualityGroup: $("report-quality"),
+        qualities: [...document.querySelectorAll("[data-report-quality]")],
     },
     getData: () => ({
         url: state.url,
