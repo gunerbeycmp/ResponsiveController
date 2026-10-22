@@ -1014,10 +1014,15 @@ function shotTarget(id, iframe) {
 // FR-4.2: URL ile açılan sitede sekmenin tek karesi alınır; hata olursa
 // pencerede açıklaması gösterilir
 async function grabScreen() {
+    // Kare alınırken çerçeve köşeleri düzleşir; yuvarlak köşelerde
+    // görüntüye arka plan rengi giriyordu
+    document.body.classList.add("is-capturing");
     try {
         return await grabTab();
     } catch (error) {
         return { error };
+    } finally {
+        document.body.classList.remove("is-capturing");
     }
 }
 

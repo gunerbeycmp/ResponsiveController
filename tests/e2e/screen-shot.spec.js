@@ -20,6 +20,10 @@ async function fakeShare(page, mode = "ok") {
         }
         navigator.mediaDevices.getDisplayMedia = async () => {
             window.__shares += 1;
+            // Kare alınırken çerçeve köşeleri düz mü
+            window.__radius = getComputedStyle(
+                document.querySelector("#frame-viewport"),
+            ).borderTopLeftRadius;
             if (mode === "denied")
                 throw new DOMException("denied", "NotAllowedError");
             const ratio = 2;
@@ -93,6 +97,12 @@ test("URL ile açılan sitede görünen alan ekran paylaşımıyla alınır (FR-
     // Paylaşım hemen kapatıldı
     expect(await page.evaluate(() => window.__lastTrack.readyState)).toBe(
         "ended",
+    );
+    // Kare alınırken köşeler düzdü, sonra eski hâline döndü
+    expect(await page.evaluate(() => window.__radius)).toBe("0px");
+    await expect(page.locator("#frame-viewport")).toHaveCSS(
+        "border-top-left-radius",
+        "12px",
     );
 });
 

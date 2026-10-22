@@ -1606,3 +1606,9 @@ input {
 .shot-formats button {
     padding: 4px 10px;
 }
+
+/* Ekran paylaşımıyla kare alınırken köşeler düz (v0.4.5) */
+.is-capturing .frame-viewport,
+.is-capturing .box-viewport {
+    border-radius: 0;
+}
