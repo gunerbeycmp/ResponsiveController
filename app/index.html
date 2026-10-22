@@ -571,6 +571,14 @@
                 <p class="notes-storage" data-i18n="notes.storage"></p>
                 <div class="notes-actions">
                     <button
+                        class="button-primary"
+                        id="notes-report"
+                        type="button"
+                        data-i18n="notes.report"
+                    >
+                        Rapor oluştur
+                    </button>
+                    <button
                         class="button-ghost"
                         id="notes-clear"
                         type="button"
@@ -829,6 +837,58 @@
                 </button>
             </div>
             <p class="shot-message" id="shot-message" aria-live="polite"></p>
+        </dialog>
+
+        <dialog
+            class="upload-dialog report-dialog"
+            id="report-dialog"
+            aria-labelledby="report-title"
+        >
+            <div class="dialog-header">
+                <h2 id="report-title" data-i18n="report.title">Test raporu</h2>
+                <button
+                    class="button-icon"
+                    id="report-close"
+                    type="button"
+                    data-i18n-label="shot.close"
+                >
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </div>
+            <iframe
+                class="report-preview"
+                id="report-preview"
+                sandbox="allow-same-origin"
+                data-i18n-label="report.preview"
+            ></iframe>
+            <div class="upload-actions">
+                <button
+                    class="button-primary"
+                    id="report-download"
+                    type="button"
+                    data-i18n="shot.download"
+                >
+                    İndir
+                </button>
+                <div
+                    class="segmented"
+                    role="group"
+                    aria-labelledby="report-format-label"
+                >
+                    <span
+                        class="visually-hidden"
+                        id="report-format-label"
+                        data-i18n="report.formatLabel"
+                        >Rapor biçimi</span
+                    >
+                    <button type="button" data-report-format="html">
+                        HTML
+                    </button>
+                    <button type="button" data-report-format="markdown">
+                        Markdown
+                    </button>
+                </div>
+            </div>
         </dialog>
 
         <dialog

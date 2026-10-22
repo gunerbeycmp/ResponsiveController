@@ -226,5 +226,7 @@ export function createNotesPanel({
         // Bağlam (adres / proje) değişince geri alma geçersiz olur
         resetUndo: endUndo,
         isOpen: () => !panel.hidden,
+        // Rapordaki cihazlar paneldeki sırayla
+        devices: deviceList,
     };
 }

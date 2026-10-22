@@ -1695,6 +1695,20 @@ input {
     font-size: 13px;
 }
 
+/* Rapor penceresi (FR-5.1, FR-5.2, v0.5.3) */
+.report-dialog {
+    width: min(100% - 32px, 880px);
+}
+
+.report-preview {
+    display: block;
+    width: 100%;
+    height: 60vh;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #ffffff;
+}
+
 @media (max-width: 767px) {
     /* Telefonda panel ekranın tamamını kaplar */
     .notes-panel {

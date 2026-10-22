@@ -41,6 +41,7 @@ import { createTheme } from "./ui/theme.js";
 import { normalizeUrl } from "./url/normalize.js";
 import { PREVIEW_ORIGIN } from "./config.js";
 import { openSizedWindow } from "./url/popup.js";
+import { createReportDialog } from "./report/dialog.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -1167,6 +1168,48 @@ const notesPanel = createNotesPanel({
         },
     },
 });
+
+// FR-5.1, FR-5.2: rapor; notlar panelindeki cihazlar (açık olanlar ve notu /
+// görüntüsü olanlar) konumları ve piksel yoğunluklarıyla listelenir
+const reportDialog = createReportDialog({
+    t: i18n.t,
+    getLanguage: () => i18n.getLanguage(),
+    elements: {
+        dialog: $("report-dialog"),
+        close: $("report-close"),
+        preview: $("report-preview"),
+        download: $("report-download"),
+        formats: [...document.querySelectorAll("[data-report-format]")],
+    },
+    getData: () => ({
+        url: state.url,
+        project: state.project?.name ?? null,
+        date: new Date(),
+        notes: {
+            session: notesStore.getSession(),
+            devices: Object.fromEntries(
+                notesStore
+                    .deviceIds()
+                    .map((id) => [id, notesStore.getDevice(id)]),
+            ),
+        },
+        shots: reportShots,
+        devices: notesPanel.devices().map(({ id, name }) => {
+            const device = findDevice(id);
+            const size = viewSize(device, { rotated: gridStore.isRotated(id) });
+            return {
+                id,
+                name,
+                size,
+                dpr: device.dpr ?? 1,
+                landscape: isLandscape(size),
+            };
+        }),
+    }),
+});
+$("notes-report").addEventListener("click", (event) =>
+    reportDialog.open({ opener: event.currentTarget }),
+);
 
 elements.noteToggle.addEventListener("click", () => {
     deviceNoteOpen = !deviceNoteOpen;
