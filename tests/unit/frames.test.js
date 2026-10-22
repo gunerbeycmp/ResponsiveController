@@ -139,3 +139,36 @@ describe("ızgara deposu: gerçekçi çerçeve", () => {
         expect(createGridStore({ storage }).isFramed("iphone-17")).toBe(false);
     });
 });
+
+describe("cutoutRect (Çerçeveyle)", async () => {
+    const { cutoutRect } = await import("../../app/src/shot/frame-image.js");
+    const screen = { x: 36, y: 36, width: 1206, height: 2622 };
+
+    it("Dynamic Island ekranın üstünde ortada, döndürülünce solda", () => {
+        const spec = frameSpec(device("iphone-17"));
+        const island = cutoutRect(spec, screen, 3);
+        expect(island.width).toBe(124 * 3);
+        expect(island.y).toBe(36 + 11 * 3);
+        expect(island.x + island.width / 2).toBe(36 + 1206 / 2);
+        const turned = cutoutRect(
+            frameSpec(device("iphone-17"), { rotated: true }),
+            { x: 36, y: 36, width: 2622, height: 1206 },
+            3,
+        );
+        expect(turned.x).toBe(36 + 11 * 3);
+        expect(turned.height).toBe(124 * 3);
+    });
+
+    it("ana ekran tuşu ekranın altında halka, kamerasızda yok", () => {
+        const home = cutoutRect(
+            frameSpec(device("iphone-se-3rd-gen")),
+            screen,
+            2,
+        );
+        expect(home.ring).toBe(true);
+        expect(home.y).toBe(36 + 2622 + 9 * 2);
+        expect(cutoutRect(frameSpec(device("ipad-pro-11-m4")), screen, 2)).toBe(
+            null,
+        );
+    });
+});

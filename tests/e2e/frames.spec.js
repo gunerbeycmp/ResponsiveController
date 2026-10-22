@@ -1,5 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
+import { readFileSync, writeFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+import { strToU8, unzipSync, zipSync } from "fflate";
 
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -158,4 +160,155 @@ test("çerçeve düğmesi erişilebilirlik denetiminden geçer (NFR-5.1)", async
         .withTags(WCAG_21_AA)
         .analyze();
     expect(results.violations).toEqual([]);
+});
+
+// Beyaz sayfalı proje: ekran görüntüsü yardımcı betikle alınır
+const PROJECT = Buffer.from(
+    zipSync({
+        "index.html": strToU8(
+            '<!doctype html><meta name="viewport" content="width=device-width"><style>body{margin:0;background:#fff}</style><p>Kafe</p>',
+        ),
+    }),
+);
+
+async function upload(page, grid) {
+    await page.goto(APP_URL);
+    if (grid) {
+        await page.evaluate(
+            (value) => localStorage.setItem("rc-grid", value),
+            JSON.stringify(grid),
+        );
+        await page.reload();
+    }
+    await page.getByRole("button", { name: "Yükle" }).click();
+    await page.locator("#file-input").setInputFiles({
+        name: "kafe.zip",
+        mimeType: "application/zip",
+        buffer: PROJECT,
+    });
+    await expect(page.locator("#upload-dialog")).not.toBeVisible();
+}
+
+const naturalSize = (page) =>
+    page
+        .locator("#shot-image")
+        .evaluate((img) => [img.naturalWidth, img.naturalHeight]);
+
+// Görselin bir noktasının saydamlığı (köşe kasanın dışında kalır)
+const alphaAt = (page, x, y) =>
+    page.locator("#shot-image").evaluate(
+        (img, [px, py]) => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(img, 0, 0);
+            return context.getImageData(px, py, 1, 1).data[3];
+        },
+        [x, y],
+    );
+
+test("Çerçeveyle: ekran görüntüsüne kasa çizilir, seçilebilir (FR-3.13)", async ({
+    page,
+}, testInfo) => {
+    await upload(page, {
+        ids: [],
+        mode: "single",
+        size: "medium",
+        framed: ["iphone-17"],
+    });
+    await page
+        .getByRole("button", { name: "iPhone 17 ekran görüntüsünü al" })
+        .click();
+    const option = page.getByRole("checkbox", { name: "Çerçeveyle" });
+    // Çerçeve ekranda açık olduğu için işaretli gelir
+    await expect(option).toBeChecked();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    // 402 × 874 ekran + 12 piksel kasa, 3x yoğunluk
+    await expect.poll(() => naturalSize(page)).toEqual([426 * 3, 898 * 3]);
+    expect(await alphaAt(page, 2, 2)).toBe(0);
+    if (testInfo.project.name === "chromium")
+        writeFileSync(
+            testInfo.outputPath("framed.png"),
+            Buffer.from(
+                await page.locator("#shot-image").evaluate((img) =>
+                    fetch(img.src)
+                        .then((r) => r.arrayBuffer())
+                        .then((b) => [...new Uint8Array(b)]),
+                ),
+            ),
+        );
+
+    // İndirilen dosya da çerçeveli
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "İndir" }).click();
+    const bytes = readFileSync(await (await download).path());
+    expect(bytes.readUInt32BE(16)).toBe(426 * 3);
+
+    await option.uncheck();
+    await expect.poll(() => naturalSize(page)).toEqual([402 * 3, 874 * 3]);
+
+    // Tam sayfada seçenek yok
+    await page.getByRole("button", { name: "Tam sayfa" }).click();
+    await expect(option).toBeHidden();
+    await page.getByRole("button", { name: "Görünen alan" }).click();
+    await expect(option).toBeVisible();
+    await expect(option).not.toBeChecked();
+});
+
+test("Çerçeveyle: çerçeve kapalıyken işaretsiz; çerçevesiz cihazda yok (FR-3.13)", async ({
+    page,
+}) => {
+    await upload(page);
+    await page
+        .getByRole("button", { name: "iPhone 17 ekran görüntüsünü al" })
+        .click();
+    const option = page.getByRole("checkbox", { name: "Çerçeveyle" });
+    await expect(option).toBeVisible();
+    await expect(option).not.toBeChecked();
+    await page.getByRole("button", { name: "Kapat", exact: true }).click();
+
+    await page.getByLabel("Cihaz ara").fill("Küçük telefon");
+    await page
+        .locator('.device-button[data-device-id="small-phone"]')
+        .first()
+        .click();
+    await page
+        .getByRole("button", { name: "Küçük telefon ekran görüntüsünü al" })
+        .click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    await expect(option).toBeHidden();
+});
+
+test("Çerçeveyle: toplu görüntüde çerçevesi olan her cihaza (FR-3.13, FR-4.4)", async ({
+    page,
+}) => {
+    await upload(page, {
+        ids: ["iphone-17", "small-phone"],
+        mode: "grid",
+        size: "medium",
+        framed: ["iphone-17"],
+    });
+    await page.getByRole("button", { name: "Tümünün ekran görüntüsü" }).click();
+    await expect(page.locator("#shot-parts img")).toHaveCount(2);
+    await expect(
+        page.getByRole("checkbox", { name: "Çerçeveyle" }),
+    ).toBeChecked();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "İndir" }).click();
+    const files = unzipSync(readFileSync(await (await download).path()));
+    const width = (name) => Buffer.from(files[name]).readUInt32BE(16);
+    const names = Object.keys(files);
+    const phone = names.find((name) => name.startsWith("iphone-17"));
+    const generic = names.find((name) => name.startsWith("kucuk-telefon"));
+    // iPhone kasalı, genel boyut olduğu gibi
+    expect(width(phone)).toBe(426 * 3);
+    expect(width(generic)).toBe(360);
+
+    // Tek görsel (ızgara) de aynı seçenekle
+    await page.getByRole("button", { name: "Tek görsel (ızgara)" }).click();
+    await expect(page.locator("#shot-image")).toBeVisible();
+    await expect(
+        page.getByRole("checkbox", { name: "Çerçeveyle" }),
+    ).toBeVisible();
 });

@@ -1128,6 +1128,8 @@ const shotDialog = createShotDialog({
         },
         formats: [...document.querySelectorAll("[data-shot-format]")],
         modeGroup: $("shot-modes"),
+        frameOption: $("shot-frame-option"),
+        frameInput: $("shot-frame"),
         batchGroup: $("shot-batches"),
         batches: [...document.querySelectorAll("[data-shot-batch]")],
         dialog: $("shot-dialog"),
@@ -1160,6 +1162,9 @@ function shotTarget(id, iframe) {
         id,
         name: deviceName(device, i18n.getLanguage()),
         size,
+        // FR-3.13: "Çerçeveyle" için kasa ölçüleri; ekranda açıksa işaretli
+        frame: frameSpec(device, { rotated: gridStore.isRotated(id) }),
+        framed: gridStore.isFramed(id) && hasFrame(device),
         capture: (mode) =>
             requestCapture(iframe.contentWindow, {
                 scale: device.dpr ?? 1,

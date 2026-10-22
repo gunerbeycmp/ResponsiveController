@@ -6,6 +6,7 @@ import {
     shotFileName,
 } from "./capture.js";
 import { FORMATS, convert, readFormat, writeFormat } from "./format.js";
+import { drawFramed } from "./frame-image.js";
 import { createMarkup, renderMarked } from "./markup.js";
 
 // FR-4.1, FR-4.4: ekran görüntüsü önizleme penceresi.
@@ -25,6 +26,8 @@ export function createShotDialog({
         close,
         modeGroup,
         modes,
+        frameOption,
+        frameInput,
         batchGroup,
         batches,
         note,
@@ -54,6 +57,8 @@ export function createShotDialog({
     let request = null;
     let mode = "visible";
     let batch = "separate";
+    // FR-3.13: "Çerçeveyle"; saklanmaz, cihazın ekrandaki çerçevesinden gelir
+    let withFrame = false;
     let current = null;
     let urls = [];
     let returnFocus = null;
@@ -99,6 +104,23 @@ export function createShotDialog({
         // ekran paylaşımı yalnızca görünen alanı yakalar (FR-4.2)
         modeGroup.hidden =
             Boolean(request?.screen) || (isBatch() && batch === "combined");
+        frameOption.hidden = !frameAvailable();
+        frameInput.checked = withFrame;
+    }
+
+    // Çerçeve yalnızca görünen alana çizilir. Ekran paylaşımında ızgaranın
+    // tek görseli ekranın kendisidir; ekrandaki çerçeveler olduğu gibi girer
+    function frameAvailable() {
+        if (!request) return false;
+        if (!isBatch()) return mode === "visible" && Boolean(request.frame);
+        const visible =
+            batch === "combined" ? !request.screen : mode === "visible";
+        return visible && request.devices.some((device) => device.frame);
+    }
+
+    async function framed(blob, target) {
+        if (!withFrame || !frameAvailable() || !target.frame) return blob;
+        return drawFramed(blob, target.frame, target.size);
     }
 
     function showNote(text, { canSplit = false } = {}) {
@@ -140,6 +162,9 @@ export function createShotDialog({
         setStatus(t("shot.taking"));
         announce(t("shot.taking"));
         const result = await request.capture(mode);
+        if (token !== run) return;
+        if (result.blobs.length === 1)
+            result.blobs = [await framed(result.blobs[0], request)];
         if (token !== run) return;
         urls = result.blobs.map((blob) => URL.createObjectURL(blob));
         current = { blobs: result.blobs, kind: "single" };
@@ -202,7 +227,12 @@ export function createShotDialog({
             }
             if (token !== run) return;
         }
-        const done = results.filter((item) => item.result);
+        const done = [];
+        for (const item of results.filter((entry) => entry.result)) {
+            const blob = await framed(item.result.blobs[0], item.device);
+            done.push({ ...item, result: { ...item.result, blobs: [blob] } });
+        }
+        if (token !== run) return;
         const failed = results.filter((item) => item.error);
         if (done.length === 0) throw failed[0]?.cause ?? new Error("failed");
         const failedText =
@@ -291,6 +321,10 @@ export function createShotDialog({
         request = options;
         mode = "visible";
         batch = "separate";
+        withFrame =
+            options.kind === "batch"
+                ? options.devices.some((device) => device.framed)
+                : Boolean(options.framed);
         returnFocus = options.opener ?? document.activeElement;
         if (!dialog.open) dialog.showModal();
         capture().then(() => {
@@ -311,6 +345,11 @@ export function createShotDialog({
             batch = button.dataset.shotBatch;
             capture();
         });
+
+    frameInput.addEventListener("change", () => {
+        withFrame = frameInput.checked;
+        capture();
+    });
 
     split.addEventListener("click", async () => {
         mode = "parts";

@@ -1785,6 +1785,22 @@ input {
     border-radius: 0;
 }
 
+/* Ekran paylaşımında yalnızca sayfa alınır: kamera biçimi ve ekranın
+   yuvarlak köşeleri görüntüye girmez; "Çerçeveyle" kasayı ayrıca çizer */
+.is-capturing .device-housing::before {
+    display: none;
+}
+
+.is-capturing .frame-canvas,
+.is-capturing .box-canvas {
+    border-radius: 0 !important;
+}
+
+.shot-frame {
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
 /* Notlar (FR-5.3, v0.5.1) */
 .note-toggle {
     position: relative;
