@@ -176,5 +176,16 @@
     "shot.shareUnsupported": "Bu tarayıcı ekran paylaşımını desteklemiyor (ör. iPhone ve iPad). URL ile açılan sitelerin ekran görüntüsü masaüstünde Chrome, Edge veya Firefox ile alınabilir.",
     "shot.shareDenied": "Ekran paylaşımına izin verilmedi. Görüntü almak için tekrar dene ve paylaşıma izin ver.",
     "shot.wrongSurface": "Ekran görüntüsü için bu sekmeyi paylaşmalısın. Tekrar dene ve paylaşım penceresinde bu sekmeyi seç.",
-    "shot.screenScaleNote": "Görüntü ekrandaki boyutunda (%{scale}) alındı. Daha keskin görüntü için ölçeği büyütüp tekrar dene."
+    "shot.screenScaleNote": "Görüntü ekrandaki boyutunda (%{scale}) alındı. Daha keskin görüntü için ölçeği büyütüp tekrar dene.",
+    "notes.open": "Notlar",
+    "notes.title": "Notlar",
+    "notes.close": "Notları kapat",
+    "notes.session": "Genel not",
+    "notes.sessionPlaceholder": "Bu test oturumu hakkında genel notların…",
+    "notes.device": "{device} notu",
+    "notes.devicePlaceholder": "Bu cihazda gördüklerin…",
+    "notes.storage": "Notlar yalnızca bu tarayıcıda saklanır.",
+    "notes.clear": "Notları temizle",
+    "notes.cleared": "Notlar temizlendi.",
+    "notes.undo": "Geri al"
 }

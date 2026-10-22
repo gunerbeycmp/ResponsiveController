@@ -173,6 +173,16 @@
                     </div>
                     <button
                         class="rotate-all"
+                        id="notes-open"
+                        type="button"
+                        aria-controls="notes-panel"
+                        aria-expanded="false"
+                        data-i18n="notes.open"
+                    >
+                        Notlar
+                    </button>
+                    <button
+                        class="rotate-all"
                         id="shot-all"
                         type="button"
                         data-i18n="grid.shotAll"
@@ -374,6 +384,15 @@
                             📷
                         </button>
                         <button
+                            class="frame-rotate note-toggle"
+                            id="device-note-toggle"
+                            type="button"
+                            aria-controls="device-note"
+                            aria-expanded="false"
+                        >
+                            📝
+                        </button>
+                        <button
                             class="frame-fold"
                             id="frame-fold"
                             type="button"
@@ -413,6 +432,17 @@
                                 >▾</span
                             >
                         </button>
+                    </div>
+                    <div class="device-note" id="device-note" hidden>
+                        <label
+                            for="device-note-text"
+                            id="device-note-label"
+                        ></label>
+                        <textarea
+                            id="device-note-text"
+                            rows="3"
+                            data-i18n-placeholder="notes.devicePlaceholder"
+                        ></textarea>
                     </div>
                     <p
                         class="frame-size-error"
@@ -504,6 +534,60 @@
                     <ul class="device-grid" id="device-grid"></ul>
                 </section>
             </main>
+            <aside
+                class="notes-panel"
+                id="notes-panel"
+                aria-labelledby="notes-title"
+                hidden
+            >
+                <div class="dialog-header">
+                    <h2 id="notes-title" data-i18n="notes.title">Notlar</h2>
+                    <button
+                        class="button-icon"
+                        id="notes-close"
+                        type="button"
+                        data-i18n-label="notes.close"
+                    >
+                        <span aria-hidden="true">✕</span>
+                    </button>
+                </div>
+                <div class="notes-field">
+                    <label for="notes-session" data-i18n="notes.session"
+                        >Genel not</label
+                    >
+                    <textarea
+                        id="notes-session"
+                        rows="4"
+                        data-i18n-placeholder="notes.sessionPlaceholder"
+                    ></textarea>
+                </div>
+                <div id="notes-devices"></div>
+                <p class="notes-storage" data-i18n="notes.storage"></p>
+                <div class="notes-actions">
+                    <button
+                        class="button-ghost"
+                        id="notes-clear"
+                        type="button"
+                        data-i18n="notes.clear"
+                    >
+                        Notları temizle
+                    </button>
+                    <span
+                        id="notes-cleared"
+                        data-i18n="notes.cleared"
+                        hidden
+                    ></span>
+                    <button
+                        class="button-ghost"
+                        id="notes-undo"
+                        type="button"
+                        data-i18n="notes.undo"
+                        hidden
+                    >
+                        Geri al
+                    </button>
+                </div>
+            </aside>
             <div class="grid-drop-zone" id="grid-drop-zone">
                 <p data-i18n="grid.dropHint"></p>
                 <ul id="grid-drop"></ul>

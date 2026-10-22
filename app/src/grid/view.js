@@ -45,8 +45,29 @@ export function createGridView({
     onFold,
     onShot,
     canShoot = () => false,
+    notes,
 }) {
     const boxes = new Map();
+    const noteOpen = new Set();
+
+    // Not düğmesi, alanı ve değeri; odaktaki alanın değeri üzerine yazılmaz
+    function updateNote(id) {
+        const p = boxes.get(id);
+        if (!p || !notes) return;
+        const name = nameOf(id);
+        const text = notes.get(id);
+        p.note.setAttribute(
+            "aria-label",
+            i18n.t("notes.device", { device: name }),
+        );
+        p.note.setAttribute("aria-expanded", String(noteOpen.has(id)));
+        p.note.classList.toggle("has-note", Boolean(text.trim()));
+        p.noteArea.hidden = !noteOpen.has(id);
+        p.noteLabel.textContent = i18n.t("notes.device", { device: name });
+        p.noteText.placeholder = i18n.t("notes.devicePlaceholder");
+        if (document.activeElement !== p.noteText && p.noteText.value !== text)
+            p.noteText.value = text;
+    }
     const zooms = new Map();
     let expanded = null;
     let openMenu = null;
@@ -89,6 +110,10 @@ export function createGridView({
             in: iconButton("box-zoom-in", "+"),
             fit: iconButton("box-fit", ""),
             shot: iconButton("box-shot", "📷"),
+            note: iconButton("box-shot note-toggle", "📝"),
+            noteArea: el("div", { className: "box-note", hidden: true }),
+            noteLabel: el("label"),
+            noteText: el("textarea", { rows: 3 }),
             rotate: iconButton("box-rotate", "⟳"),
             fold: iconButton("box-fold", ""),
             expand: iconButton("box-expand", ""),
@@ -125,12 +150,14 @@ export function createGridView({
                     p.in,
                     p.fit,
                     p.shot,
+                    p.note,
                     p.rotate,
                     p.fold,
                     p.expand,
                 ),
             ),
             p.menuSlot,
+            p.noteArea,
             el(
                 "div",
                 { className: "box-stage" },
@@ -171,6 +198,22 @@ export function createGridView({
         p.fold.addEventListener("click", () => onFold?.(id));
         // FR-4.4: kutu başına ekran görüntüsü
         p.shot.addEventListener("click", () => onShot?.(id));
+
+        // FR-5.3: kutunun not alanı başlığın altında açılır
+        p.noteText.id = `box-note-${id}`;
+        p.noteLabel.htmlFor = p.noteText.id;
+        p.noteArea.id = `box-note-area-${id}`;
+        p.noteArea.append(p.noteLabel, p.noteText);
+        p.note.setAttribute("aria-controls", p.noteArea.id);
+        p.note.addEventListener("click", () => {
+            if (noteOpen.has(id)) noteOpen.delete(id);
+            else noteOpen.add(id);
+            updateNote(id);
+            if (noteOpen.has(id)) p.noteText.focus();
+        });
+        p.noteText.addEventListener("input", () =>
+            notes?.set(id, p.noteText.value),
+        );
         p.expand.addEventListener("click", () => {
             expanded = expanded === id ? null : id;
             render();
@@ -321,6 +364,7 @@ export function createGridView({
         );
         const device = findDevice(id);
         p.shot.hidden = !canShoot();
+        updateNote(id);
         p.shot.setAttribute(
             "aria-label",
             i18n.t("shot.take", { device: name }),
@@ -451,6 +495,10 @@ export function createGridView({
         render,
         // Kutunun o anki ölçeği (ekran paylaşımı notu için)
         zoomOf: (id) => geometry(id).zoom,
+        // Not değişince yalnızca not parçaları güncellenir
+        syncNotes() {
+            for (const id of boxes.keys()) updateNote(id);
+        },
         // Genel ölçek değişince kutuların kendi ayarları sıfırlanır (FR-3.9)
         resetZooms() {
             zooms.clear();

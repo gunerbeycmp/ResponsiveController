@@ -14,6 +14,8 @@ import {
 import Sortable from "sortablejs";
 import { clampSize, createCustomSizes, isValidSize } from "./devices/custom.js";
 import { createFavorites } from "./devices/favorites.js";
+import { createNotesPanel } from "./notes/panel.js";
+import { contextKey, createNotesStore } from "./notes/store.js";
 import { createSidebar } from "./devices/sidebar.js";
 import { createFpsMonitor } from "./grid/fps.js";
 import { createGridStore } from "./grid/store.js";
@@ -117,6 +119,11 @@ const elements = {
     frameRestore: $("frame-restore"),
     frameFold: $("frame-fold"),
     frameShot: $("frame-shot"),
+    noteToggle: $("device-note-toggle"),
+    deviceNote: $("device-note"),
+    deviceNoteLabel: $("device-note-label"),
+    deviceNoteText: $("device-note-text"),
+    notesOpen: $("notes-open"),
     frameSideBySide: $("frame-side-by-side"),
     frameRestoreDescription: $("frame-restore-description"),
     frameNameInput: $("frame-name-input"),
@@ -135,6 +142,11 @@ const gridStore = createGridStore({
 // Izgarada iki hâl yan yanayken Katla / Aç ile kaldırılan hâl ve yeri
 // (katlanabilir grubu → { removedId, index }); yalnızca bu oturumda
 const mergedFolds = new Map();
+
+// FR-5.3: notlar adrese ya da proje adına göre tarayıcıda saklanır
+const notesStore = createNotesStore({ storage: window.localStorage });
+let notesContext = null;
+let deviceNoteOpen = false;
 
 // FR-3.11: özel boyutlar yalnızca bu oturumda tutulur (R-19)
 const custom = createCustomSizes();
@@ -188,6 +200,8 @@ function layoutFrame() {
             : elements.warningsPanel.offsetHeight) +
         // Görünüm ve ölçek araç çubukları çerçevenin üstünde yer kaplar
         blockHeight(elements.toolbar) +
+        // Açık cihaz notu da çerçevenin üstünde yer kaplar (v0.5.1)
+        blockHeight(elements.deviceNote) +
         blockHeight(elements.scaleToolbar) +
         20;
     // Pencere yüksekliğinden hesaplanır: dar ekranda önizleme alanı içeriğe
@@ -267,6 +281,7 @@ function layoutFrame() {
         "aria-label",
         i18n.t("shot.take", { device: name }),
     );
+    renderDeviceNote(device, name);
     // FR-3.5: katlanabilir cihazlarda Katla / Aç ve Yan yana göster
     const sibling = foldSibling(device);
     elements.frameFold.hidden = !sibling;
@@ -457,7 +472,43 @@ function renderToolbar(isGrid) {
         );
 }
 
+// Tek cihaz çerçevesindeki not alanı
+function renderDeviceNote(device, name) {
+    const text = notesStore.getDevice(device.id);
+    const label = i18n.t("notes.device", { device: name });
+    elements.noteToggle.setAttribute("aria-label", label);
+    elements.noteToggle.setAttribute("aria-expanded", String(deviceNoteOpen));
+    elements.noteToggle.classList.toggle("has-note", Boolean(text.trim()));
+    elements.deviceNote.hidden = !deviceNoteOpen;
+    elements.deviceNoteLabel.textContent = label;
+    if (
+        document.activeElement !== elements.deviceNoteText &&
+        elements.deviceNoteText.value !== text
+    )
+        elements.deviceNoteText.value = text;
+}
+
+// Notlar değişince bütün kopyalar güncellenir (panel, çerçeve, kutular)
+function syncNotes() {
+    notesPanel.sync();
+    gridView.syncNotes();
+    if (state.url && !isGridActive()) {
+        const device = findDevice(state.deviceId);
+        renderDeviceNote(device, deviceName(device, i18n.getLanguage()));
+    }
+}
+
 function render() {
+    const nextContext = contextKey({
+        url: state.url,
+        project: state.project?.name,
+    });
+    if (nextContext !== notesContext) {
+        notesContext = nextContext;
+        notesStore.setContext(nextContext);
+        notesPanel.resetUndo();
+    }
+    elements.notesOpen.hidden = !state.url;
     renderProject();
     renderWarnings();
     const hasUrl = Boolean(state.url);
@@ -480,6 +531,7 @@ function render() {
     layoutFrame();
     renderScaleControls(isGrid);
     updateMonitor();
+    notesPanel.sync();
 }
 
 // FR-3.7: ızgaraya ekleme. Tek cihaz modunda ızgaraya geçilir; o an açık
@@ -556,6 +608,13 @@ const gridView = createGridView({
     getUrl: () => state.url,
     getExpandedArea: expandedArea,
     onRotate: () => renderScaleControls(isGridActive()),
+    notes: {
+        get: (id) => notesStore.getDevice(id),
+        set: (id, text) => {
+            notesStore.setDevice(id, text);
+            syncNotes();
+        },
+    },
     // FR-4.4: ekran görüntüsü şimdilik yalnızca yüklenen projelerde
     canShoot: () => Boolean(state.url),
     onShot: async (id) => {
@@ -1010,6 +1069,48 @@ function shotTarget(id, iframe) {
             }),
     };
 }
+
+// FR-5.3: Notlar paneli (sağdan açılan yan panel)
+const notesPanel = createNotesPanel({
+    store: notesStore,
+    i18n,
+    announce,
+    elements: {
+        panel: $("notes-panel"),
+        open: elements.notesOpen,
+        close: $("notes-close"),
+        session: $("notes-session"),
+        list: $("notes-devices"),
+        clear: $("notes-clear"),
+        cleared: $("notes-cleared"),
+        undo: $("notes-undo"),
+    },
+    getDevices: () => {
+        const ids = isGridActive() ? gridStore.list() : [state.deviceId];
+        return ids.map((id) => ({
+            id,
+            name: deviceName(findDevice(id), i18n.getLanguage()),
+        }));
+    },
+    // Daha önce not yazılmış, şu an açık olmayan cihazlar
+    describeDevice: (id) => {
+        const device = findDevice(id);
+        return device.id === id
+            ? { id, name: deviceName(device, i18n.getLanguage()) }
+            : null;
+    },
+    onChange: () => syncNotes(),
+});
+
+elements.noteToggle.addEventListener("click", () => {
+    deviceNoteOpen = !deviceNoteOpen;
+    layoutFrame();
+    if (deviceNoteOpen) elements.deviceNoteText.focus();
+});
+elements.deviceNoteText.addEventListener("input", () => {
+    notesStore.setDevice(state.deviceId, elements.deviceNoteText.value);
+    syncNotes();
+});
 
 // FR-4.2: URL ile açılan sitede sekmenin tek karesi alınır; hata olursa
 // pencerede açıklaması gösterilir
