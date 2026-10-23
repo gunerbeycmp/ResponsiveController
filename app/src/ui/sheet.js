@@ -9,7 +9,11 @@ export function createSheet({ toggle, panel, onToggle }) {
         panel.dataset.open = String(open);
         onToggle?.(open);
         if (open) {
-            panel.querySelector("button, [href], input")?.focus();
+            // İlk görünen öğe; masaüstüne özgü gizli düğmeler (panel daraltma)
+            // atlanır. Görünen öğe yoksa odak açma düğmesinde kalır
+            [...panel.querySelectorAll("button, [href], input")]
+                .find((element) => element.getClientRects().length > 0)
+                ?.focus();
         } else if (restoreFocus) {
             toggle.focus();
         }

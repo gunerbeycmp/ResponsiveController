@@ -37,6 +37,7 @@ import { ShareError, crop, grabTab, visibleRect } from "./shot/screen.js";
 import { createShotDialog } from "./shot/dialog.js";
 import { createAnnouncer } from "./ui/announce.js";
 import { createSheet } from "./ui/sheet.js";
+import { createPanels } from "./ui/panels.js";
 import { createPreviewBridge } from "./upload/bridge.js";
 import { createUploadDialog } from "./upload/dialog.js";
 import { createTheme } from "./ui/theme.js";
@@ -194,6 +195,8 @@ let deviceNoteOpen = false;
 const custom = createCustomSizes();
 const isGridActive = () => Boolean(state.url) && gridStore.getMode() === "grid";
 
+// Telefonda Cihazlar ve Görünüm alttan açılan sayfalardır; aynı anda yalnızca
+// biri açık olur (Aşama 6 revizyonu)
 const sheet = createSheet({
     toggle: elements.sheetToggle,
     panel: $("sidebar-panel"),
@@ -201,6 +204,37 @@ const sheet = createSheet({
         elements.sheetLabel.textContent = i18n.t(
             open ? "sheet.hide" : "sheet.show",
         );
+        document.body.classList.toggle("sheet-devices-open", open);
+        if (open) viewSheet.close();
+    },
+});
+const viewSheet = createSheet({
+    toggle: $("view-sheet-toggle"),
+    panel: $("view-panel-body"),
+    onToggle: (open) => {
+        $("view-sheet-label").textContent = i18n.t(
+            open ? "sheet.hideView" : "sheet.showView",
+        );
+        document.body.classList.toggle("sheet-view-open", open);
+        if (open) sheet.close();
+    },
+});
+
+// Masaüstünde paneller daraltılır; durum hatırlanır (Aşama 6 revizyonu)
+const panels = createPanels({
+    storage: window.localStorage,
+    t: i18n.t,
+    panels: {
+        devices: {
+            root: $("sidebar"),
+            collapse: $("devices-collapse"),
+            expand: $("devices-expand"),
+        },
+        view: {
+            root: $("view-panel"),
+            collapse: $("view-collapse"),
+            expand: $("view-expand"),
+        },
     },
 });
 
@@ -915,6 +949,10 @@ function renderChrome() {
     elements.sheetLabel.textContent = i18n.t(
         sheet.isOpen() ? "sheet.hide" : "sheet.show",
     );
+    $("view-sheet-label").textContent = i18n.t(
+        viewSheet.isOpen() ? "sheet.hideView" : "sheet.showView",
+    );
+    panels.translate();
     showError(elements.error.dataset.reason);
     upload?.retranslate();
     render();

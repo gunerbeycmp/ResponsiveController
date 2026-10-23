@@ -102,13 +102,24 @@
                     >
                 </button>
                 <div class="sidebar-panel" id="sidebar-panel">
-                    <h2
-                        class="sidebar-title"
-                        id="sidebar-title"
-                        data-i18n="sidebar.title"
-                    >
-                        Cihazlar
-                    </h2>
+                    <div class="panel-header">
+                        <h2
+                            class="sidebar-title"
+                            id="sidebar-title"
+                            data-i18n="sidebar.title"
+                        >
+                            Cihazlar
+                        </h2>
+                        <!-- Aşama 6 revizyonu: masaüstünde panel daraltılır -->
+                        <button
+                            class="panel-collapse"
+                            id="devices-collapse"
+                            type="button"
+                            aria-controls="sidebar-panel"
+                        >
+                            <span aria-hidden="true">«</span>
+                        </button>
+                    </div>
                     <label
                         class="visually-hidden"
                         for="device-search"
@@ -140,6 +151,22 @@
                         role="status"
                         aria-live="polite"
                     ></p>
+                </div>
+                <div class="panel-rail">
+                    <button
+                        class="panel-expand"
+                        id="devices-expand"
+                        type="button"
+                        aria-controls="sidebar-panel"
+                    >
+                        <span aria-hidden="true">»</span>
+                    </button>
+                    <span
+                        class="rail-title"
+                        aria-hidden="true"
+                        data-i18n="sidebar.title"
+                        >Cihazlar</span
+                    >
                 </div>
             </aside>
 
@@ -561,6 +588,59 @@
                     <ul class="device-grid" id="device-grid"></ul>
                 </section>
             </main>
+            <!-- Aşama 6 revizyonu: Görünüm paneli; araçlar adım adım taşınacak -->
+            <aside
+                class="view-panel"
+                id="view-panel"
+                aria-labelledby="view-title"
+            >
+                <button
+                    class="sheet-toggle"
+                    id="view-sheet-toggle"
+                    type="button"
+                    aria-controls="view-panel-body"
+                >
+                    <span class="sheet-handle" aria-hidden="true"></span>
+                    <span id="view-sheet-label" data-i18n="sheet.showView"
+                        >Görünümü göster</span
+                    >
+                </button>
+                <div class="sidebar-panel view-panel-body" id="view-panel-body">
+                    <div class="panel-header">
+                        <h2
+                            class="sidebar-title"
+                            id="view-title"
+                            data-i18n="view.title"
+                        >
+                            Görünüm
+                        </h2>
+                        <button
+                            class="panel-collapse"
+                            id="view-collapse"
+                            type="button"
+                            aria-controls="view-panel-body"
+                        >
+                            <span aria-hidden="true">»</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-rail">
+                    <button
+                        class="panel-expand"
+                        id="view-expand"
+                        type="button"
+                        aria-controls="view-panel-body"
+                    >
+                        <span aria-hidden="true">«</span>
+                    </button>
+                    <span
+                        class="rail-title"
+                        aria-hidden="true"
+                        data-i18n="view.title"
+                        >Görünüm</span
+                    >
+                </div>
+            </aside>
             <aside
                 class="notes-panel"
                 id="notes-panel"

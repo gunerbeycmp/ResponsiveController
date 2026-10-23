@@ -230,5 +230,12 @@
     "frame.realisticOn": "{device} gerçekçi çerçeveyle gösteriliyor.",
     "frame.realisticOff": "{device} sade çerçeveyle gösteriliyor.",
     "shot.withFrame": "Çerçeveyle",
-    "preview.loading": "Yükleniyor…"
+    "preview.loading": "Yükleniyor…",
+    "view.title": "Görünüm",
+    "panel.collapseDevices": "Cihazlar panelini kapat",
+    "panel.expandDevices": "Cihazlar panelini aç",
+    "panel.collapseView": "Görünüm panelini kapat",
+    "panel.expandView": "Görünüm panelini aç",
+    "sheet.showView": "Görünümü göster",
+    "sheet.hideView": "Görünümü gizle"
 }

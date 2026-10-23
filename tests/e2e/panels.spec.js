@@ -1,0 +1,108 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test } from "@playwright/test";
+
+const APP_URL = "http://localhost:5173/";
+const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
+test.use({ locale: "tr-TR", viewport: { width: 1280, height: 800 } });
+
+async function openPreview(page) {
+    await page.locator("#url-input").fill("localhost:5174");
+    await page.getByRole("button", { name: "Aç", exact: true }).click();
+}
+
+test("Görünüm paneli sağda; paneller daraltılır, şerit kalır, durum hatırlanır (Aşama 6 revizyonu)", async ({
+    page,
+}) => {
+    await page.goto(APP_URL);
+    await openPreview(page);
+    const view = page.getByRole("complementary", { name: "Görünüm" });
+    await expect(view).toBeVisible();
+    const sidebar = page.locator("#sidebar");
+    const stage = page.locator("#stage");
+    const before = (await stage.boundingBox()).width;
+
+    const collapseDevices = page.getByRole("button", {
+        name: "Cihazlar panelini kapat",
+    });
+    await expect(collapseDevices).toHaveAttribute("aria-expanded", "true");
+    await collapseDevices.click();
+    const expandDevices = page.getByRole("button", {
+        name: "Cihazlar panelini aç",
+    });
+    // Odak şeritteki açma düğmesine geçer
+    await expect(expandDevices).toBeFocused();
+    await expect(expandDevices).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#device-search")).toBeHidden();
+    await expect(sidebar.locator(".rail-title")).toHaveText("Cihazlar");
+    expect((await sidebar.boundingBox()).width).toBeLessThan(50);
+
+    await page.getByRole("button", { name: "Görünüm panelini kapat" }).click();
+    await expect(
+        page.getByRole("button", { name: "Görünüm panelini aç" }),
+    ).toBeFocused();
+    // Önizleme alanı genişler
+    await expect
+        .poll(async () => (await stage.boundingBox()).width)
+        .toBeGreaterThan(before + 400);
+
+    await page.reload();
+    await expect(page.locator("#device-search")).toBeHidden();
+    await expandDevices.click();
+    await expect(collapseDevices).toBeFocused();
+    await expect(page.locator("#device-search")).toBeVisible();
+    await page.getByRole("button", { name: "Görünüm panelini aç" }).click();
+    await expect(view.locator(".sidebar-title")).toBeVisible();
+
+    const results = await new AxeBuilder({ page })
+        .include("#sidebar")
+        .include("#view-panel")
+        .withTags(WCAG_21_AA)
+        .analyze();
+    expect(results.violations).toEqual([]);
+});
+
+test("Notlar açılınca Görünüm panelinin yerini alır (Aşama 6 revizyonu)", async ({
+    page,
+}) => {
+    await page.goto(APP_URL);
+    await openPreview(page);
+    const view = page.locator("#view-panel");
+    await page.getByRole("button", { name: "Notlar", exact: true }).click();
+    await expect(page.locator("#notes-panel")).toBeVisible();
+    await expect(view).toBeHidden();
+    await page.getByRole("button", { name: "Notları kapat" }).click();
+    await expect(view).toBeVisible();
+});
+
+test.describe("telefon", () => {
+    test.use({ viewport: { width: 375, height: 812 } });
+
+    test("iki alt sayfa; aynı anda yalnızca biri açık (Aşama 6 revizyonu)", async ({
+        page,
+    }) => {
+        await page.goto(APP_URL);
+        const devices = page.getByRole("button", { name: "Cihazları göster" });
+        const view = page.getByRole("button", { name: "Görünümü göster" });
+        await expect(devices).toBeVisible();
+        await expect(view).toBeVisible();
+        // Daraltma düğmeleri telefonda yok
+        await expect(page.locator("#devices-collapse")).toBeHidden();
+
+        await view.click();
+        const hideView = page.getByRole("button", { name: "Görünümü gizle" });
+        await expect(hideView).toHaveAttribute("aria-expanded", "true");
+        await expect(devices).toBeHidden();
+        await hideView.click();
+        await devices.click();
+        await expect(
+            page.getByRole("button", { name: "Cihazları gizle" }),
+        ).toHaveAttribute("aria-expanded", "true");
+        await expect(view).toBeHidden();
+        await expect(page.locator("#device-search")).toBeVisible();
+        expect(
+            await page.evaluate(
+                () => document.documentElement.scrollWidth <= innerWidth,
+            ),
+        ).toBe(true);
+    });
+});

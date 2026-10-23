@@ -230,5 +230,12 @@
     "frame.realisticOn": "{device} is shown with a realistic frame.",
     "frame.realisticOff": "{device} is shown with a plain frame.",
     "shot.withFrame": "With frame",
-    "preview.loading": "Loading…"
+    "preview.loading": "Loading…",
+    "view.title": "View",
+    "panel.collapseDevices": "Collapse devices panel",
+    "panel.expandDevices": "Expand devices panel",
+    "panel.collapseView": "Collapse view panel",
+    "panel.expandView": "Expand view panel",
+    "sheet.showView": "Show view",
+    "sheet.hideView": "Hide view"
 }
