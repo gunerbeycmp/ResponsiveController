@@ -102,7 +102,7 @@ const elements = {
     frameHeader: $("device-frame").querySelector(".frame-header"),
     toolbar: $("view-toolbar"),
     viewButtons: [...document.querySelectorAll("[data-view]")],
-    sizeGroup: $("size-group"),
+    sizeGroup: $("size-section"),
     sizeButtons: [...document.querySelectorAll("[data-size]")],
     slowWarning: $("slow-warning"),
     slowDismiss: $("slow-dismiss"),
@@ -572,7 +572,9 @@ function setGlobalScale(value) {
 // Görünüm panelindeki geçiş; site açılmadan önce pasif (Aşama 6 revizyonu)
 function renderViewSwitch(hasUrl) {
     const mode = gridStore.getMode();
-    $("view-switch").dataset.active = mode;
+    const viewSwitch = $("view-switch");
+    viewSwitch.dataset.active = mode;
+    viewSwitch.style.setProperty("--index", mode === "grid" ? "1" : "0");
     for (const button of elements.viewButtons) {
         button.setAttribute(
             "aria-pressed",
@@ -590,6 +592,14 @@ function renderToolbar(isGrid) {
             "aria-pressed",
             String(button.dataset.size === gridStore.getSize()),
         );
+    // Kayan zemin seçilen boyutun altına (v0.6.8)
+    const sizes = elements.sizeButtons.map((button) => button.dataset.size);
+    const sizeGroup = $("size-group");
+    sizeGroup.dataset.active = gridStore.getSize();
+    sizeGroup.style.setProperty(
+        "--index",
+        String(Math.max(0, sizes.indexOf(gridStore.getSize()))),
+    );
 }
 
 // Tek cihaz çerçevesindeki not alanı
@@ -1685,12 +1695,32 @@ theme.onChange(renderChrome);
 // Boyutlandırma bir sonraki çizim karesine ertelenir; aksi hâlde çerçevenin
 // boyutu değişince gözlemci kendini yeniden tetikler (ResizeObserver loop)
 let layoutRequest = 0;
-new ResizeObserver(() => {
+// Panel kayarken önizleme yeniden sığdırılmaz; animasyon bitince bir kez
+// sığar (Aşama 6 revizyonu, v0.6.8: önizlemede animasyon yok)
+const animatingPanels = new Set();
+function relayout() {
     cancelAnimationFrame(layoutRequest);
     layoutRequest = requestAnimationFrame(() => {
         layoutFrame();
         if (isGridActive()) gridView.render();
     });
+}
+for (const panel of [$("sidebar"), $("view-panel")]) {
+    panel.addEventListener("transitionrun", (event) => {
+        if (event.target === panel && event.propertyName === "width")
+            animatingPanels.add(panel);
+    });
+    for (const type of ["transitionend", "transitioncancel"])
+        panel.addEventListener(type, (event) => {
+            if (event.target !== panel || event.propertyName !== "width")
+                return;
+            animatingPanels.delete(panel);
+            if (animatingPanels.size === 0) relayout();
+        });
+}
+new ResizeObserver(() => {
+    if (animatingPanels.size > 0) return;
+    relayout();
 }).observe(elements.stage);
 
 renderChrome();

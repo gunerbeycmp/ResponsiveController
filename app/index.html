@@ -191,40 +191,6 @@
                     >
                         Tümünün ekran görüntüsü
                     </button>
-                    <div
-                        class="segmented"
-                        id="size-group"
-                        role="group"
-                        aria-labelledby="size-label"
-                    >
-                        <span
-                            class="toolbar-label"
-                            id="size-label"
-                            data-i18n="grid.sizeLabel"
-                            >Kutu boyutu</span
-                        >
-                        <button
-                            type="button"
-                            data-size="small"
-                            data-i18n="grid.sizeSmall"
-                        >
-                            Küçük
-                        </button>
-                        <button
-                            type="button"
-                            data-size="medium"
-                            data-i18n="grid.sizeMedium"
-                        >
-                            Orta
-                        </button>
-                        <button
-                            type="button"
-                            data-size="large"
-                            data-i18n="grid.sizeLarge"
-                        >
-                            Büyük
-                        </button>
-                    </div>
                 </div>
                 <div
                     class="view-toolbar scale-toolbar"
@@ -629,6 +595,48 @@
                         >
                             Izgara
                         </button>
+                    </div>
+                    <!-- Kutu boyutu yalnızca Izgara seçiliyken (v0.6.8) -->
+                    <div class="panel-section" id="size-section" hidden>
+                        <span
+                            class="panel-label"
+                            id="size-label"
+                            data-i18n="grid.sizeLabel"
+                            >Kutu boyutu</span
+                        >
+                        <div
+                            class="view-switch"
+                            id="size-group"
+                            role="group"
+                            aria-labelledby="size-label"
+                            style="--count: 3"
+                        >
+                            <span
+                                class="view-switch-thumb"
+                                aria-hidden="true"
+                            ></span>
+                            <button
+                                type="button"
+                                data-size="small"
+                                data-i18n="grid.sizeSmall"
+                            >
+                                Küçük
+                            </button>
+                            <button
+                                type="button"
+                                data-size="medium"
+                                data-i18n="grid.sizeMedium"
+                            >
+                                Orta
+                            </button>
+                            <button
+                                type="button"
+                                data-size="large"
+                                data-i18n="grid.sizeLarge"
+                            >
+                                Büyük
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="panel-rail">

@@ -229,28 +229,47 @@ input {
 /* Tek cihaz / Izgara: vurgulu zemin seçilen seçeneğin altına kayar
    (Aşama 6 revizyonu, v0.6.7); animasyon yalnızca bu düğmelerde */
 .view-switch {
+    --count: 2;
+    --index: 0;
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(var(--count), 1fr);
     padding: 3px;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 999px;
 }
 
+/* Zeminin genişliği seçenek sayısına, konumu seçilen sıraya göre (--index) */
 .view-switch-thumb {
     position: absolute;
     top: 3px;
     bottom: 3px;
     left: 3px;
-    width: calc(50% - 3px);
+    width: calc((100% - 6px) / var(--count));
     background: var(--accent);
     border-radius: 999px;
+    transform: translateX(calc(100% * var(--index)));
     transition: transform 0.25s ease;
 }
 
-.view-switch[data-active="grid"] .view-switch-thumb {
-    transform: translateX(100%);
+.view-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.panel-label {
+    margin: 0 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .view-switch button {
@@ -621,6 +640,31 @@ input {
         position: relative;
         overflow-y: auto;
         overscroll-behavior: contain;
+    }
+
+    /* Paneller açılıp kapanırken genişlik kayar (v0.6.8); içerik
+       daralırken satır kaydırmasın diye kendi genişliğinde kalır */
+    .sidebar,
+    .view-panel {
+        overflow-x: hidden;
+        transition: width 0.25s ease;
+    }
+
+    .sidebar > .sidebar-panel {
+        min-width: var(--sidebar-width);
+    }
+
+    .view-panel > .sidebar-panel {
+        min-width: var(--view-width);
+    }
+
+    /* Bu kural yukarıdaki genel hareket azaltma kuralından sonra gelir;
+       aynı koşul burada da uygulanır */
+    @media (prefers-reduced-motion: reduce) {
+        .sidebar,
+        .view-panel {
+            transition: none;
+        }
     }
 
     /* Kapalı panel kenarda ince şerit: açma düğmesi ve dikey ad */
