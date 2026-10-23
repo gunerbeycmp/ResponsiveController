@@ -329,11 +329,16 @@ export function createSidebar({
                 }),
             ];
         const frequent = groups[0].type === "frequent" ? groups.shift() : null;
+        // Favoriler sekmesindeki gruplar başta her zaman açıktır
         const top = frequent
-            ? group(
-                  i18n.t("group.frequent"),
-                  favoriteList(frequent.items, "frequent"),
-              )
+            ? collapsible({
+                  tab: "favorites",
+                  id: "#frequent",
+                  title: i18n.t("group.frequent"),
+                  items: frequent.items,
+                  content: favoriteList(frequent.items, "frequent"),
+                  open: true,
+              })
             : // Grup yokken bırakma alanı yalnızca sürükleme sırasında görünür
               el(
                   "section",
@@ -347,14 +352,20 @@ export function createSidebar({
         return [
             top,
             ...groups.map((g) =>
-                group(
-                    i18n.t(
+                collapsible({
+                    tab: "favorites",
+                    id: `#${g.category}`,
+                    title: i18n.t(
                         g.category === "generic"
                             ? "group.generic"
                             : `category.${g.category}`,
                     ),
-                    favoriteList(g.items, "category"),
-                ),
+                    items: g.items,
+                    content: favoriteList(g.items, "category"),
+                    // Favoriler kısa ve kullanıcının seçtiği listedir; bir
+                    // cihaz çıkarılınca grup kendiliğinden kapanmasın
+                    open: true,
+                }),
             ),
         ];
     }
@@ -404,56 +415,73 @@ export function createSidebar({
     }
 
     function tabPanel() {
-        return buildTab(DEVICES, activeTab).map((g) => {
+        const tab = activeTab;
+        return buildTab(DEVICES, tab).map((g) => {
             if (g.type === "popular")
-                return group(
-                    i18n.t("group.popular"),
-                    list(g.items, { showPopular: false }),
-                );
+                return collapsible({
+                    tab,
+                    id: "#popular",
+                    title: i18n.t("group.popular"),
+                    items: g.items,
+                    content: list(g.items, { showPopular: false }),
+                });
             if (g.type === "generic")
-                return group(i18n.t("group.generic"), list(g.items));
+                return collapsible({
+                    tab,
+                    id: "#generic",
+                    title: i18n.t("group.generic"),
+                    items: g.items,
+                    content: list(g.items),
+                });
             if (g.type === "resolutions") return resolutionList(g.rows);
             // Markası olmayan cihazlar (ör. TV) başlıksız tek grup
             if (!g.brand) return group(g.brand, list(g.items));
-            return brandGroup(g);
+            return collapsible({
+                tab,
+                id: g.brand,
+                title: g.brand,
+                items: g.items,
+                content: list(g.items),
+            });
         });
     }
 
-    // Açılır-kapanır marka grubu; başlıkta ok, ad ve cihaz sayısı. Durum
-    // değişince yalnızca bu grup güncellenir, odak düğmede kalır
-    function brandGroup({ brand, items }) {
-        const key = groupKey(activeTab, brand);
-        const selectedHere = items.some((d) => d.id === getSelectedId());
-        const content = list(items);
-        content.id = `group-${activeTab}-${brand
+    // Açılır-kapanır grup (Aşama 6 revizyonu); başlıkta ok, ad ve cihaz
+    // sayısı. Kullanıcının dokunmadığı grupta seçili cihazı içeren grup
+    // açıktır. Durum değişince yalnızca bu grup güncellenir, odak düğmede kalır
+    function collapsible({ tab, id, title, items, content, open }) {
+        const key = groupKey(tab, id);
+        const fallback = open ?? items.some((d) => d.id === getSelectedId());
+        content.id = `group-${tab}-${id
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")}`;
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+/, "")}`;
         const chevron = el("span", { className: "group-chevron" });
         chevron.setAttribute("aria-hidden", "true");
         const toggle = el(
             "button",
             { type: "button", className: "group-toggle" },
             chevron,
-            el("span", { className: "group-name", textContent: brand }),
+            el("span", { className: "group-name", textContent: title }),
             el("span", {
                 className: "group-count",
                 textContent: String(items.length),
             }),
         );
         toggle.setAttribute("aria-controls", content.id);
-        const apply = (open) => {
-            toggle.setAttribute("aria-expanded", String(open));
-            content.hidden = !open;
+        const apply = (value) => {
+            toggle.setAttribute("aria-expanded", String(value));
+            content.hidden = !value;
         };
-        apply(groupState.isOpen(key, selectedHere));
+        apply(groupState.isOpen(key, fallback));
         toggle.addEventListener("click", () => {
-            const open = toggle.getAttribute("aria-expanded") !== "true";
-            groupState.setOpen(key, open);
-            apply(open);
+            const value = toggle.getAttribute("aria-expanded") !== "true";
+            groupState.setOpen(key, value);
+            apply(value);
         });
         return el(
             "section",
-            { className: "device-group brand-group" },
+            { className: "device-group collapsible-group" },
             el("h3", { className: "group-title" }, toggle),
             content,
         );
@@ -619,6 +647,8 @@ export function createSidebar({
         const toFrequent = to.dataset.zone === "frequent";
         if (toFrequent && (from !== to || oldIndex !== newIndex)) {
             favorites.moveToFrequent(id, newIndex);
+            // Bırakılan cihaz görünsün: grup açık kalır
+            groupState.setOpen(groupKey("favorites", "#frequent"), true);
             announceMoved(id);
         } else if (!toFrequent && from.dataset.zone === "frequent") {
             favorites.removeFromFrequent(id);

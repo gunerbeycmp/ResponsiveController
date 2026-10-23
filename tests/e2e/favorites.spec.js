@@ -1,12 +1,17 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { openAllGroups } from "./menu.js";
 
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 test.use({ locale: "tr-TR" });
 
 const tab = (page, name) => page.getByRole("tab", { name, exact: true });
-const groupTitles = (page) => page.locator("#device-list .group-title");
+// Grup adları; açılır-kapanır başlıklarda sayı hariç (Aşama 6 revizyonu)
+const groupTitles = (page) =>
+    page.locator(
+        "#device-list .group-name, #device-list .group-title:not(:has(.group-name))",
+    );
 const star = (page, id) =>
     page.locator(`#device-list .favorite-toggle[data-favorite-id="${id}"]`);
 const handle = (page, id) => page.locator(`[data-handle-id="${id}"]`);
@@ -88,6 +93,7 @@ test("yıldız üzerine gelince görünür, favori eklenir ve hatırlanır (FR-3
         expect(await opacity(s)).toBe("1");
 
     await tab(page, "Tablet").click();
+    await openAllGroups(page);
     await star(page, "ipad-11th-gen").first().click();
     await page.getByRole("searchbox").fill("s24");
     await star(page, "galaxy-s24").click();
@@ -268,4 +274,35 @@ test("Favoriler sekmesinde WCAG 2.1 AA ihlali yok", async ({ page }) => {
         .withTags(WCAG_21_AA)
         .analyze();
     expect(results.violations).toEqual([]);
+});
+
+test("Favoriler grupları başta açık; kapalı Sık kullanılanlara sürüklenebilir (Aşama 6 revizyonu)", async ({
+    page,
+}) => {
+    await withFavorites(
+        page,
+        ["iphone-17", "galaxy-s24", "ipad-11th-gen"],
+        ["iphone-17"],
+    );
+    const toggles = page.locator("#device-list .group-toggle");
+    // Seçili cihaz Tablet'te olmasa da Favoriler'deki bütün gruplar açık
+    await expect(toggles).toHaveCount(3);
+    for (const toggle of await toggles.all())
+        await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    const frequentToggle = toggles.filter({
+        hasText: "Sık kullanılan favoriler",
+    });
+    await frequentToggle.click();
+    await expect(frequentToggle).toHaveAttribute("aria-expanded", "false");
+    const frequentList = page.locator('ul[data-zone="frequent"]');
+    await expect(frequentList).toBeHidden();
+
+    // Sürüklerken kapalı grup bırakma alanı olarak açılır; bırakınca açık kalır
+    await drag(page, handle(page, "galaxy-s24"), frequentList);
+    await expect(frequentToggle).toHaveAttribute("aria-expanded", "true");
+    // Sıra bırakılan noktaya bağlı; ikisi de grupta olmalı
+    const frequent = page.locator('ul[data-zone="frequent"] [data-device-id]');
+    await expect(frequent).toHaveCount(2);
+    await expect(frequent.filter({ hasText: "Galaxy S24" })).toHaveCount(1);
 });

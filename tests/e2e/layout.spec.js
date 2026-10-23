@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { pickDevice } from "./menu.js";
 
 const expectFrameSize = async (page, text) => {
     const [width, height] = text.split(" × ");
@@ -53,11 +54,11 @@ test("cihaz seçimi ve tarayıcı çubukları görünümü (FR-3.14)", async ({
         .check();
     await expectFrameSize(page, "402 × 681");
 
-    await page.locator('[data-device-id="full-hd"]').click();
+    await pickDevice(page, "full-hd");
     await expectFrameSize(page, "1920 × 1080");
     await expect(page.locator("#browser-bars-option")).toBeHidden();
 
-    await page.locator('[data-device-id="galaxy-s24"]').first().click();
+    await pickDevice(page, "galaxy-s24");
     await expect(page.locator("#browser-bars-estimated")).toHaveText("tahmini");
 });
 

@@ -138,7 +138,7 @@ test("rapor İngilizce arayüzde İngilizce oluşur (FR-5.2, FR-1.4)", async ({
 }) => {
     await prepare(page);
     await page.getByRole("button", { name: "Notları kapat" }).click();
-    await page.getByRole("button", { name: "EN" }).click();
+    await page.locator("#language-toggle").click();
     await page.getByRole("button", { name: "Notes", exact: true }).click();
     await page.getByRole("button", { name: "Create report" }).click();
     const doc = preview(page);

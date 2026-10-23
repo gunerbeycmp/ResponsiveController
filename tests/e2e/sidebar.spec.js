@@ -13,7 +13,11 @@ const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 test.use({ locale: "tr-TR" });
 
 const tab = (page, name) => page.getByRole("tab", { name, exact: true });
-const groupTitles = (page) => page.locator("#device-list .group-title");
+// Grup adları; açılır-kapanır başlıklarda sayı hariç (Aşama 6 revizyonu)
+const groupTitles = (page) =>
+    page.locator(
+        "#device-list .group-name, #device-list .group-title:not(:has(.group-name))",
+    );
 const device = (page, id) =>
     page.locator(`#device-list [data-device-id="${id}"]`).first();
 
@@ -35,13 +39,12 @@ test("sekmeler ve gruplar (FR-3.1, FR-3.3, FR-3.4)", async ({ page }) => {
         "Özel",
     ]);
     await expect(tab(page, "Telefon")).toHaveAttribute("aria-selected", "true");
-    // Marka başlıklarında cihaz sayısı (Aşama 6 revizyonu)
     await expect(groupTitles(page)).toHaveText([
         "Popüler",
-        "Apple23",
-        "Samsung18",
-        "Google11",
-        "OnePlus2",
+        "Apple",
+        "Samsung",
+        "Google",
+        "OnePlus",
         "Genel boyutlar",
     ]);
     // Popüler etiketi marka grubunda görünür, Popüler grubunda tekrar edilmez
@@ -146,9 +149,7 @@ test("ad İngilizcede çevrilir", async ({ browser }) => {
     await expect(device(page, "ipad-11th-gen")).toContainText(
         "iPad (11th gen)",
     );
-    await expect(page.locator("#device-list .group-title").last()).toHaveText(
-        "Generic sizes",
-    );
+    await expect(groupTitles(page).last()).toHaveText("Generic sizes");
     await page.close();
 });
 
@@ -207,4 +208,31 @@ test("marka grupları açılır-kapanır; seçili cihazın markası açık, seç
         .withTags(WCAG_21_AA)
         .analyze();
     expect(results.violations).toEqual([]);
+});
+
+test("Popüler ve Genel boyutlar da açılır-kapanır (Aşama 6 revizyonu)", async ({
+    page,
+}) => {
+    await page.goto(APP_URL);
+    const toggle = (name) =>
+        page
+            .locator("#device-list .group-toggle")
+            .filter({ hasText: new RegExp(`^${name}\\d+$`) });
+    // iPhone 17 Popüler grubunda: Popüler açık, Genel boyutlar kapalı
+    await expect(toggle("Popüler")).toHaveAttribute("aria-expanded", "true");
+    await expect(toggle("Genel boyutlar")).toHaveAttribute(
+        "aria-expanded",
+        "false",
+    );
+    await toggle("Genel boyutlar").click();
+    await expect(
+        page.locator('#device-list [data-device-id="small-phone"]').first(),
+    ).toBeVisible();
+    await toggle("Popüler").click();
+    await page.reload();
+    await expect(toggle("Popüler")).toHaveAttribute("aria-expanded", "false");
+    await expect(toggle("Genel boyutlar")).toHaveAttribute(
+        "aria-expanded",
+        "true",
+    );
 });

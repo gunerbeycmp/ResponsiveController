@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { pickDevice } from "./menu.js";
 
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -113,10 +114,7 @@ test("başlıktaki alanlar hazır cihazdan özel boyut türetir (FR-3.10, NFR-5.
 
     // Aynı cihazdan ikinci türetme numaralanır
     await tab(page, "Telefon").click();
-    await page
-        .locator('#device-list [data-device-id="iphone-17"]')
-        .first()
-        .click();
+    await pickDevice(page, "iphone-17");
     await height(page).fill("700");
     await height(page).press("Enter");
     await expect(page.locator("#frame-name-button")).toHaveText(

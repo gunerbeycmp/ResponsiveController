@@ -944,7 +944,7 @@ input {
     cursor: pointer;
 }
 
-.brand-group .group-title {
+.collapsible-group .group-title {
     margin: 6px 0 2px;
     color: var(--text);
     font-size: 13px;
@@ -1119,6 +1119,11 @@ input {
     padding: 6px;
     border: 1px dashed var(--border);
     border-radius: var(--radius);
+}
+
+/* Sürüklerken kapalı Favoriler grupları da bırakma alanı olarak açılır */
+.is-dragging .collapsible-group > ul[data-zone][hidden] {
+    display: block !important;
 }
 
 .is-dragging .frequent-drop {
