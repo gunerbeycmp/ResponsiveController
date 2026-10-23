@@ -74,7 +74,7 @@ test("Yan yana göster boş ızgarada iki hâli ekler ve ızgaraya geçer", asyn
     await page.getByRole("button", { name: "Yan yana göster" }).click();
     await expect(
         page
-            .locator(".view-toolbar")
+            .locator("#view-switch")
             .getByRole("button", { name: "Izgara", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
     expect(await boxIds(page)).toEqual([
@@ -179,11 +179,23 @@ test("iki hâl yan yanayken Katla / Aç ikisini geri getirir", async ({
 
 test("katlanabilir cihazda WCAG 2.1 AA ihlali yok", async ({ page }) => {
     await openWith(page, "galaxy-z-fold-7-open");
+    // Görünüm geçişinin kayan zemini ve yazı rengi yerine otursun
+    await page.waitForFunction(() =>
+        document
+            .getAnimations()
+            .every((animation) => animation.playState !== "running"),
+    );
     const single = await new AxeBuilder({ page })
         .withTags(WCAG_21_AA)
         .analyze();
     expect(single.violations).toEqual([]);
     await page.getByRole("button", { name: "Yan yana göster" }).click();
+    // Görünüm geçişinin kayan zemini ve yazı rengi yerine otursun
+    await page.waitForFunction(() =>
+        document
+            .getAnimations()
+            .every((animation) => animation.playState !== "running"),
+    );
     const grid = await new AxeBuilder({ page }).withTags(WCAG_21_AA).analyze();
     expect(grid.violations).toEqual([]);
 });

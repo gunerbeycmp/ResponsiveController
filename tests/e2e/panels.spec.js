@@ -74,6 +74,46 @@ test("Notlar açılınca Görünüm panelinin yerini alır (Aşama 6 revizyonu)"
     await expect(view).toBeVisible();
 });
 
+test("Tek cihaz / Izgara Görünüm panelinde; zemin seçilene kayar (Aşama 6 revizyonu)", async ({
+    page,
+}) => {
+    await page.goto(APP_URL);
+    const view = page.locator("#view-panel");
+    const single = view.getByRole("button", { name: "Tek cihaz" });
+    const grid = view.getByRole("button", { name: "Izgara" });
+    // Site açılmadan pasif; önizlemenin araç çubuğunda yok
+    await expect(grid).toBeDisabled();
+    await openPreview(page);
+    await expect(
+        page.locator("#view-toolbar").getByRole("button", { name: "Izgara" }),
+    ).toHaveCount(0);
+    await expect(single).toHaveAttribute("aria-pressed", "true");
+
+    await grid.click();
+    await expect(grid).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("#grid-section")).toBeVisible();
+    const thumb = page.locator(".view-switch-thumb");
+    // Kayma bitince zemin Izgara'nın tam altında
+    await expect
+        .poll(async () => {
+            const [a, b] = [
+                await thumb.boundingBox(),
+                await grid.boundingBox(),
+            ];
+            return Math.round(Math.abs(a.x - b.x));
+        })
+        .toBeLessThanOrEqual(1);
+    expect(
+        await thumb.evaluate((el) => getComputedStyle(el).transitionDuration),
+    ).toBe("0.25s");
+
+    // Hareket azaltmada animasyon yok
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(
+        await thumb.evaluate((el) => getComputedStyle(el).transitionDuration),
+    ).toBe("0s");
+});
+
 test.describe("telefon", () => {
     test.use({ viewport: { width: 375, height: 812 } });
 

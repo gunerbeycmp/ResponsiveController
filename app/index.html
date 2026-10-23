@@ -172,32 +172,6 @@
 
             <main class="stage" id="stage">
                 <div class="view-toolbar" id="view-toolbar" hidden>
-                    <div
-                        class="segmented"
-                        role="group"
-                        aria-labelledby="view-label"
-                    >
-                        <span
-                            class="visually-hidden"
-                            id="view-label"
-                            data-i18n="view.label"
-                            >Görünüm</span
-                        >
-                        <button
-                            type="button"
-                            data-view="single"
-                            data-i18n="view.single"
-                        >
-                            Tek cihaz
-                        </button>
-                        <button
-                            type="button"
-                            data-view="grid"
-                            data-i18n="view.grid"
-                        >
-                            Izgara
-                        </button>
-                    </div>
                     <button
                         class="rotate-all"
                         id="notes-open"
@@ -621,6 +595,39 @@
                             aria-controls="view-panel-body"
                         >
                             <span aria-hidden="true">»</span>
+                        </button>
+                    </div>
+                    <!-- Kaydırmalı geçiş: vurgulu zemin seçilen seçeneğe kayar -->
+                    <div
+                        class="view-switch"
+                        id="view-switch"
+                        role="group"
+                        aria-labelledby="view-label"
+                        data-active="single"
+                    >
+                        <span
+                            class="visually-hidden"
+                            id="view-label"
+                            data-i18n="view.label"
+                            >Görünüm</span
+                        >
+                        <span
+                            class="view-switch-thumb"
+                            aria-hidden="true"
+                        ></span>
+                        <button
+                            type="button"
+                            data-view="single"
+                            data-i18n="view.single"
+                        >
+                            Tek cihaz
+                        </button>
+                        <button
+                            type="button"
+                            data-view="grid"
+                            data-i18n="view.grid"
+                        >
+                            Izgara
                         </button>
                     </div>
                 </div>

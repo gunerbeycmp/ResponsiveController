@@ -569,12 +569,20 @@ function setGlobalScale(value) {
     renderView();
 }
 
-function renderToolbar(isGrid) {
-    for (const button of elements.viewButtons)
+// Görünüm panelindeki geçiş; site açılmadan önce pasif (Aşama 6 revizyonu)
+function renderViewSwitch(hasUrl) {
+    const mode = gridStore.getMode();
+    $("view-switch").dataset.active = mode;
+    for (const button of elements.viewButtons) {
         button.setAttribute(
             "aria-pressed",
-            String(button.dataset.view === gridStore.getMode()),
+            String(button.dataset.view === mode),
         );
+        button.disabled = !hasUrl;
+    }
+}
+
+function renderToolbar(isGrid) {
     elements.sizeGroup.hidden = !isGrid;
     elements.shotAll.hidden = !isGrid || gridStore.list().length === 0;
     for (const button of elements.sizeButtons)
@@ -632,6 +640,7 @@ function render() {
     elements.scaleToolbar.hidden = !hasUrl;
     elements.frame.hidden = !hasUrl || isGrid;
     elements.gridSection.hidden = !isGrid;
+    renderViewSwitch(hasUrl);
     renderToolbar(isGrid);
     placeShared(isGrid);
     sidebar.render();

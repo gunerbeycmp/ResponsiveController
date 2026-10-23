@@ -226,6 +226,68 @@ input {
     display: none;
 }
 
+/* Tek cihaz / Izgara: vurgulu zemin seçilen seçeneğin altına kayar
+   (Aşama 6 revizyonu, v0.6.7); animasyon yalnızca bu düğmelerde */
+.view-switch {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 3px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.view-switch-thumb {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    background: var(--accent);
+    border-radius: 999px;
+    transition: transform 0.25s ease;
+}
+
+.view-switch[data-active="grid"] .view-switch-thumb {
+    transform: translateX(100%);
+}
+
+.view-switch button {
+    position: relative;
+    min-height: 32px;
+    padding: 4px 8px;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.25s ease;
+}
+
+.view-switch button[aria-pressed="true"] {
+    color: var(--on-accent);
+    font-weight: 500;
+}
+
+.view-switch button:disabled {
+    cursor: not-allowed;
+}
+
+/* Site açılmadan önce pasif: zemin ve yazılar soluk */
+.view-switch:has(button:disabled) {
+    opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .view-switch-thumb,
+    .view-switch button {
+        transition: none;
+    }
+}
+
 .sidebar-panel {
     padding: 16px 12px;
 }

@@ -66,7 +66,7 @@ test("döndürme hatırlanır ve ızgarayla ortaktır", async ({ page }) => {
     await openPreview(page);
     await expectFrameSize(page, "874 × 402");
     await page
-        .locator(".view-toolbar")
+        .locator("#view-switch")
         .getByRole("button", { name: "Izgara", exact: true })
         .click();
     await expect(box(page, "iphone-17").locator(".box-size")).toHaveText(
@@ -112,7 +112,7 @@ test("ızgarada kutu ve toplu döndürme (FR-3.6)", async ({ page }) => {
 
     // Tek cihaz modunda toplu döndürme gösterilmez
     await page
-        .locator(".view-toolbar")
+        .locator("#view-switch")
         .getByRole("button", { name: "Tek cihaz", exact: true })
         .click();
     await expect(rotateAll).toBeHidden();
@@ -243,12 +243,24 @@ test("döndürülmüş ve ölçeklenmiş görünümde WCAG 2.1 AA ihlali yok", a
         scale: 1.5,
     });
     await expect(scaleValue(page)).toHaveText("%150");
+    // Görünüm geçişinin kayan zemini ve yazı rengi yerine otursun
+    await page.waitForFunction(() =>
+        document
+            .getAnimations()
+            .every((animation) => animation.playState !== "running"),
+    );
     const grid = await new AxeBuilder({ page }).withTags(WCAG_21_AA).analyze();
     expect(grid.violations).toEqual([]);
     await page
-        .locator(".view-toolbar")
+        .locator("#view-switch")
         .getByRole("button", { name: "Tek cihaz", exact: true })
         .click();
+    // Görünüm geçişinin kayan zemini ve yazı rengi yerine otursun
+    await page.waitForFunction(() =>
+        document
+            .getAnimations()
+            .every((animation) => animation.playState !== "running"),
+    );
     const single = await new AxeBuilder({ page })
         .withTags(WCAG_21_AA)
         .analyze();

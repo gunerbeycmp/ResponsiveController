@@ -197,7 +197,7 @@ test("silinen özel boyut ızgaradan kalkar, türetildiği cihaza dönülür", a
     await page.locator("#device-list .grid-toggle").click();
     await expect(page.locator("#device-grid > li")).toHaveCount(1);
     await page
-        .locator(".view-toolbar")
+        .locator("#view-switch")
         .getByRole("button", { name: "Tek cihaz", exact: true })
         .click();
 
@@ -209,7 +209,7 @@ test("silinen özel boyut ızgaradan kalkar, türetildiği cihaza dönülür", a
     await expect(width(page)).toHaveValue("402");
     await expect(page.locator("#device-list .search-empty")).toBeVisible();
     await page
-        .locator(".view-toolbar")
+        .locator("#view-switch")
         .getByRole("button", { name: "Izgara", exact: true })
         .click();
     await expect(

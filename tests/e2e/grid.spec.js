@@ -16,8 +16,9 @@ const plus = (page, id) =>
 const row = (page, id) =>
     page.locator(`#device-list [data-device-id="${id}"]`).first();
 const status = (page) => page.locator("#app-status");
+// Tek cihaz / Izgara geçişi Görünüm panelinde (Aşama 6 revizyonu, v0.6.7)
 const viewButton = (page, name) =>
-    page.locator(".view-toolbar").getByRole("button", { name, exact: true });
+    page.locator("#view-switch").getByRole("button", { name, exact: true });
 
 async function openPreview(page) {
     await page.goto(APP_URL);
@@ -40,7 +41,11 @@ test("araç çubuğu adres açılınca görünür, varsayılan tek cihaz", async
 }) => {
     await page.goto(APP_URL);
     await expect(page.locator("#view-toolbar")).toBeHidden();
+    // Görünüm panelindeki geçiş site açılmadan önce pasif
+    await expect(viewButton(page, "Tek cihaz")).toBeDisabled();
+    await expect(viewButton(page, "Izgara")).toBeDisabled();
     await openPreview(page);
+    await expect(viewButton(page, "Izgara")).toBeEnabled();
     await expect(viewButton(page, "Tek cihaz")).toHaveAttribute(
         "aria-pressed",
         "true",
