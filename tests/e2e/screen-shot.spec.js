@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { pickDevice } from "./menu.js";
 
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -115,10 +116,7 @@ test("ölçek %100 iken not gösterilmez", async ({ page }) => {
         scale: 1,
     });
     await page.getByRole("tab", { name: "Saat", exact: true }).click();
-    await page
-        .locator('#device-list [data-device-id="galaxy-watch"]')
-        .first()
-        .click();
+    await pickDevice(page, "galaxy-watch");
     await page
         .getByRole("button", { name: "Galaxy Watch ekran görüntüsünü al" })
         .click();

@@ -853,6 +853,7 @@ function applyHeaderSize() {
 }
 
 const sidebar = createSidebar({
+    storage: window.localStorage,
     search: $("device-search"),
     tabList: $("device-tabs"),
     panel: $("device-list"),

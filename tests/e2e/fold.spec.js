@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { pickDevice } from "./menu.js";
 
 const APP_URL = "http://localhost:5173/";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -24,11 +25,7 @@ async function openWith(page, deviceId, grid) {
     }
     await page.locator("#url-input").fill("localhost:5174");
     await page.getByRole("button", { name: "Aç", exact: true }).click();
-    if (deviceId)
-        await page
-            .locator(`#device-list [data-device-id="${deviceId}"]`)
-            .first()
-            .click();
+    if (deviceId) await pickDevice(page, deviceId);
 }
 
 test("tek cihazda Katla / Aç iki hâl arasında geçer (FR-3.5)", async ({
@@ -39,10 +36,7 @@ test("tek cihazda Katla / Aç iki hâl arasında geçer (FR-3.5)", async ({
     await expect(page.locator("#frame-fold")).toBeHidden();
     await expect(page.locator("#frame-side-by-side")).toBeHidden();
 
-    await page
-        .locator('#device-list [data-device-id="galaxy-z-fold-7-open"]')
-        .first()
-        .click();
+    await pickDevice(page, "galaxy-z-fold-7-open");
     const fold = page.getByRole("button", {
         name: "Galaxy Z Fold 7 cihazını katla",
     });
@@ -100,10 +94,7 @@ test("Yan yana göster mevcut ızgarayı korur, diğer hâli yanına ekler", asy
         mode: "single",
         size: "small",
     });
-    await page
-        .locator('#device-list [data-device-id="galaxy-z-fold-7-open"]')
-        .first()
-        .click();
+    await pickDevice(page, "galaxy-z-fold-7-open");
     await page.getByRole("button", { name: "Yan yana göster" }).click();
     expect(await boxIds(page)).toEqual([
         "iphone-17",

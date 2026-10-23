@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync, writeFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+import { pickDevice } from "./menu.js";
 import { strToU8, unzipSync, zipSync } from "fflate";
 
 const APP_URL = "http://localhost:5173/";
@@ -110,10 +111,7 @@ test("ızgarada her kutunun kendi düğmesi; seçim tek görünümle ortak (FR-3
     // Tek görünümde aynı cihaz çerçeveli
     await page.getByRole("button", { name: "Tek cihaz" }).click();
     await page.getByRole("tab", { name: "Saat" }).click();
-    await page
-        .locator('.device-button[data-device-id="apple-watch-44-mm"]')
-        .first()
-        .click();
+    await pickDevice(page, "apple-watch-44-mm");
     await expect(
         page.getByRole("button", {
             name: "Apple Watch (44 mm) için gerçekçi çerçeve",

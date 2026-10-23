@@ -1,5 +1,6 @@
 import Sortable from "sortablejs";
 import { DEVICES, deviceName } from "./devices.js";
+import { createGroupState, groupKey } from "./groups.js";
 import {
     TABS,
     buildFavorites,
@@ -24,7 +25,10 @@ export function createSidebar({
     getSelectedId,
     onSelect,
     onDeviceDrag,
+    storage,
 }) {
+    // Marka gruplarının açık / kapalı durumu (Aşama 6 revizyonu)
+    const groupState = createGroupState({ storage });
     const selected = DEVICES.find((d) => d.id === getSelectedId());
     let activeTab =
         favorites.list().length > 0
@@ -409,8 +413,50 @@ export function createSidebar({
             if (g.type === "generic")
                 return group(i18n.t("group.generic"), list(g.items));
             if (g.type === "resolutions") return resolutionList(g.rows);
-            return group(g.brand, list(g.items));
+            // Markası olmayan cihazlar (ör. TV) başlıksız tek grup
+            if (!g.brand) return group(g.brand, list(g.items));
+            return brandGroup(g);
         });
+    }
+
+    // Açılır-kapanır marka grubu; başlıkta ok, ad ve cihaz sayısı. Durum
+    // değişince yalnızca bu grup güncellenir, odak düğmede kalır
+    function brandGroup({ brand, items }) {
+        const key = groupKey(activeTab, brand);
+        const selectedHere = items.some((d) => d.id === getSelectedId());
+        const content = list(items);
+        content.id = `group-${activeTab}-${brand
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")}`;
+        const chevron = el("span", { className: "group-chevron" });
+        chevron.setAttribute("aria-hidden", "true");
+        const toggle = el(
+            "button",
+            { type: "button", className: "group-toggle" },
+            chevron,
+            el("span", { className: "group-name", textContent: brand }),
+            el("span", {
+                className: "group-count",
+                textContent: String(items.length),
+            }),
+        );
+        toggle.setAttribute("aria-controls", content.id);
+        const apply = (open) => {
+            toggle.setAttribute("aria-expanded", String(open));
+            content.hidden = !open;
+        };
+        apply(groupState.isOpen(key, selectedHere));
+        toggle.addEventListener("click", () => {
+            const open = toggle.getAttribute("aria-expanded") !== "true";
+            groupState.setOpen(key, open);
+            apply(open);
+        });
+        return el(
+            "section",
+            { className: "device-group brand-group" },
+            el("h3", { className: "group-title" }, toggle),
+            content,
+        );
     }
 
     // FR-3.11: Özel sekmesi; form, kaydedilmediği notu ve oturumdaki boyutlar

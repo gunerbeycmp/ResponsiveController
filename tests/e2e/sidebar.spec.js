@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { pickDevice } from "./menu.js";
 
 const expectFrameSize = async (page, text) => {
     const [width, height] = text.split(" × ");
@@ -34,12 +35,13 @@ test("sekmeler ve gruplar (FR-3.1, FR-3.3, FR-3.4)", async ({ page }) => {
         "Özel",
     ]);
     await expect(tab(page, "Telefon")).toHaveAttribute("aria-selected", "true");
+    // Marka başlıklarında cihaz sayısı (Aşama 6 revizyonu)
     await expect(groupTitles(page)).toHaveText([
         "Popüler",
-        "Apple",
-        "Samsung",
-        "Google",
-        "OnePlus",
+        "Apple23",
+        "Samsung18",
+        "Google11",
+        "OnePlus2",
         "Genel boyutlar",
     ]);
     // Popüler etiketi marka grubunda görünür, Popüler grubunda tekrar edilmez
@@ -123,7 +125,7 @@ test("bilgisayar sekmesinde çözünürlük satırı açılır ve cihaz seçilir
 test("Apple Watch sayfayı 320 px'te çizip küçültür", async ({ page }) => {
     await openPreview(page);
     await tab(page, "Saat").click();
-    await device(page, "apple-watch-44-mm").click();
+    await pickDevice(page, "apple-watch-44-mm");
     await expectFrameSize(page, "184 × 224");
     await expect(page.locator("#frame-note")).toBeVisible();
     const iframe = page.locator("#preview-iframe");
@@ -132,7 +134,7 @@ test("Apple Watch sayfayı 320 px'te çizip küçültür", async ({ page }) => {
     const box = await page.locator("#frame-viewport").boundingBox();
     expect(Math.round(box.width)).toBe(184 + 2);
 
-    await device(page, "galaxy-watch").click();
+    await pickDevice(page, "galaxy-watch");
     await expect(page.locator("#frame-note")).toBeHidden();
     await expect(iframe).toHaveCSS("width", "180px");
 });
@@ -164,3 +166,45 @@ for (const name of ["Telefon", "Bilgisayar"]) {
         expect(results.violations).toEqual([]);
     });
 }
+
+test("marka grupları açılır-kapanır; seçili cihazın markası açık, seçim hatırlanır (Aşama 6 revizyonu)", async ({
+    page,
+}) => {
+    await page.goto(APP_URL);
+    const toggle = (name) =>
+        page
+            .locator("#device-list .group-toggle")
+            .filter({ hasText: new RegExp(`^${name}\\d+$`) });
+    // Seçili cihaz (iPhone 17) Apple grubunda: yalnızca Apple açık
+    await expect(toggle("Apple")).toHaveAttribute("aria-expanded", "true");
+    await expect(toggle("Samsung")).toHaveAttribute("aria-expanded", "false");
+    const samsungList = page.locator(
+        `#${await toggle("Samsung").getAttribute("aria-controls")}`,
+    );
+    await expect(samsungList).toBeHidden();
+
+    // Klavyeyle açılır
+    await toggle("Samsung").focus();
+    await page.keyboard.press("Enter");
+    await expect(toggle("Samsung")).toHaveAttribute("aria-expanded", "true");
+    await expect(samsungList).toBeVisible();
+    await expect(toggle("Samsung")).toBeFocused();
+    await toggle("Apple").click();
+    await expect(toggle("Apple")).toHaveAttribute("aria-expanded", "false");
+
+    // Sayfa yenilense de kalır; diğer sekmeler bağımsız
+    await page.reload();
+    await expect(toggle("Apple")).toHaveAttribute("aria-expanded", "false");
+    await expect(toggle("Samsung")).toHaveAttribute("aria-expanded", "true");
+    await tab(page, "Tablet").click();
+    await expect(toggle("Apple")).toHaveAttribute("aria-expanded", "false");
+    await expect(
+        page.locator("#device-list .group-toggle").first(),
+    ).toHaveAttribute("aria-controls", /group-tablet-/);
+
+    const results = await new AxeBuilder({ page })
+        .include("#device-list")
+        .withTags(WCAG_21_AA)
+        .analyze();
+    expect(results.violations).toEqual([]);
+});
